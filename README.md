@@ -12,10 +12,12 @@ This assumes you are using an Arduino IDE with an ESP8266 chip.
 
 This is not an officially supported Google product.
 
+This example does not have SLA/SLO and should not be used in production.
+
 ## The JWT library
 
-The JWT library is contained in the JWT folder. To compile it run the following
-commands from this directory:
+The JWT library is contained in the `/jwt` folder. To generate it run the
+following commands from this directory:
 
 ```bash
 cd jwt
@@ -24,7 +26,8 @@ source compile.sh
 
 The above command will create a new directory `jwt/jwt` which is a working
 Arduino library. To install it copy it to the libraries folder of your Arduino
-installation (`~/Arduino/libraries` on linux).
+installation (`~/Arduino/libraries` on linux). When we publish the library,
+the output of that folder is placed into the `/src`.
 
 To clean the output run `source compile.sh clean`.
 
