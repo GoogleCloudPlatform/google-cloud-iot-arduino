@@ -33,7 +33,7 @@ To clean the output run `source compile.sh clean`.
 
 ## The example
 
-To run the example copy espgciot.ino into the Arduino editor and run the code on
+To run the example copy [`examples/Basic/Basic.ino`](examples/Basic/Basic.ino) into the Arduino editor and run the code on
 the ESP8266.
 
 ## License
