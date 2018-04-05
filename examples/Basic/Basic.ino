@@ -147,4 +147,48 @@ void setup() {
   }
 }
 
-void loop() {}
+
+void getConfig() {
+  String header = String("GET ") +
+      get_path(project_id, location, registry_id, device_id).c_str() +
+      String("/config?local_version=0 HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(getJwt().c_str());
+
+  // Connect via https.
+  client->println(header);
+  client->println("host: cloudiotdevice.googleapis.com");
+  client->println("method: get");
+  client->println("cache-control: no-cache");
+  client->println(authstring);
+  client->println();
+
+  while (client->connected()) {
+    String line = client->readStringUntil('\n');
+    if (line == "\r") {
+      Serial.println("headers received");
+      break;
+    }
+  }
+  while (client->available()) {
+    String line = client->readStringUntil('\n');
+    Serial.println(line);
+    if (line.indexOf("binaryData") > 0) {
+      String val =
+          line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
+      Serial.println(val);
+      Serial.println(rbase64.decode(val));
+      if (val == "MQ==") {
+        Serial.println("LED ON");
+        digitalWrite(LED_BUILTIN, LOW);
+      } else {
+        Serial.println("LED OFF");
+        digitalWrite(LED_BUILTIN, HIGH);
+      }
+    }
+  }
+}
+
+void loop() {
+  delay(2000);
+  getConfig();
+}
