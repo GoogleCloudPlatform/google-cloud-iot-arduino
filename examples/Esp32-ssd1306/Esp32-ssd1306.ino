@@ -266,10 +266,10 @@ void getConfig() {
       show_text("Config", rbase64.decode(val), val);
       if (val == "MQ==") {
         Serial.println("LED ON");
-        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(LED_BUILTIN, HIGH);
       } else {
         Serial.println("LED OFF");
-        digitalWrite(LED_BUILTIN, HIGH);
+        digitalWrite(LED_BUILTIN, LOW);
       }
     }
   }

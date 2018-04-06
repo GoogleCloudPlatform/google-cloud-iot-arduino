@@ -179,10 +179,10 @@ void getConfig() {
       Serial.println(rbase64.decode(val));
       if (val == "MQ==") {
         Serial.println("LED ON");
-        digitalWrite(LED_BUILTIN, LOW);
+        digitalWrite(LED_BUILTIN, HIGH);
       } else {
         Serial.println("LED OFF");
-        digitalWrite(LED_BUILTIN, HIGH);
+        digitalWrite(LED_BUILTIN, LOW);
       }
     }
   }
