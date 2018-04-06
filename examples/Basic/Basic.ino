@@ -149,6 +149,7 @@ void setup() {
 
 
 void getConfig() {
+  // TODO(class): Move to helper function, e.g. buildHeader(method, jwt)...
   String header = String("GET ") +
       get_path(project_id, location, registry_id, device_id).c_str() +
       String("/config?local_version=0 HTTP/1.1");
@@ -176,7 +177,6 @@ void getConfig() {
       String val =
           line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
       Serial.println(val);
-      Serial.println(rbase64.decode(val));
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);
