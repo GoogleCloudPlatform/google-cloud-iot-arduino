@@ -16,6 +16,7 @@
 #include <stdio.h>
 
 #include "jwt.h"
+#include "nn.c"
 #include "sha256.h"
 
 extern "C" {
@@ -23,14 +24,14 @@ extern "C" {
 }
 
 // base64_encode copied from https://github.com/ReneNyffenegger/cpp-base64
-static const std::string base64_chars =
+static const String base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/";
 
-std::string base64_encode(const unsigned char* bytes_to_encode,
+String base64_encode(const unsigned char* bytes_to_encode,
                           unsigned int in_len) {
-  std::string ret;
+  String ret;
   int i = 0;
   int j = 0;
   unsigned char char_array_3[3];
@@ -69,55 +70,55 @@ std::string base64_encode(const unsigned char* bytes_to_encode,
   return ret;
 }
 
-std::string base64_encode(std::string str) {
-  return base64_encode((const unsigned char*)str.c_str(), str.size());
+String base64_encode(String str) {
+  return base64_encode((const unsigned char*)str.c_str(), str.length());
 }
 
 // Get's sha256 of str.
-std::string get_sha(const std::string& str) {
+String get_sha(const String& str) {
   Sha256 sha256Instance;
 
-  sha256Instance.update((const unsigned char*)str.c_str(), str.size());
+  sha256Instance.update((const unsigned char*)str.c_str(), str.length());
 
   unsigned char sha256[SHA256_DIGEST_LENGTH];
 
   sha256Instance.final(sha256);
 
-  return std::string((const char*)sha256);
+  return String((const char*)sha256);
 }
 
 // Get base64 signature string from the signature_r and signature_s ecdsa
 // signature.
-std::string MakeBase64Signature(NN_DIGIT* signature_r, NN_DIGIT* signature_s) {
+String MakeBase64Signature(NN_DIGIT* signature_r, NN_DIGIT* signature_s) {
   unsigned char signature[64];
   NN_Encode(signature, (NUMWORDS - 1) * NN_DIGIT_LEN, signature_r,
-            (NUMWORDS - 1));
+            (NN_UINT)(NUMWORDS - 1));
   NN_Encode(signature + (NUMWORDS - 1) * NN_DIGIT_LEN,
-            (NUMWORDS - 1) * NN_DIGIT_LEN, signature_s, (NUMWORDS - 1));
+            (NUMWORDS - 1) * NN_DIGIT_LEN, signature_s, (NN_UINT)(NUMWORDS - 1));
 
   return base64_encode(signature, 64);
 }
 
 // Convert an integer to a string.
-std::string int_to_string(long long int x) {
+String int_to_string(long long int x) {
   char buf[20];
   snprintf(buf, 20, "%d", (int)x);
   return buf;
 }
 
-std::string CreateJwt(std::string project_id, long long int time,
-                      unsigned int* priv_key) {
+String CreateJwt(String project_id, long long int time,
+                      NN_DIGIT* priv_key) {
   ecc_init();
   // Making jwt token json
-  std::string header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
-  std::string payload = "{\"iat\":" + int_to_string(time) +
+  String header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
+  String payload = "{\"iat\":" + int_to_string(time) +
                         ",\"exp\":" + int_to_string(time + 3600) +
                         ",\"aud\":\"" + project_id + "\"}";
 
-  std::string header_payload_base64 =
+  String header_payload_base64 =
       base64_encode(header) + "." + base64_encode(payload);
 
-  std::string sha256 = get_sha(header_payload_base64);
+  String sha256 = get_sha(header_payload_base64);
 
   // Signing sha with ec key. Bellow is the ec private key.
   point_t pub_key;

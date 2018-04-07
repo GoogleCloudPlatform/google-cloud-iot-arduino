@@ -16,9 +16,10 @@
 #ifndef JWT_H_
 #define JWT_H_
 
-#include <string>
+#include <Arduino.h>
+#include "nn.h"
 
-std::string CreateJwt(std::string project_id, long long int time,
-                      unsigned int* priv_key);
+String CreateJwt(String project_id, long long int time,
+                      NN_DIGIT* priv_key);
 
 #endif  // JWT_H_

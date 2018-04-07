@@ -13,15 +13,22 @@
  * limitations under the License.
  *****************************************************************************/
 
-#include <ESP8266WiFi.h>
+#include <WiFi101.h>
+#include <WiFiSSLClient.h>
+
 #include <String.h>
-#include <WiFiClientSecure.h>
-#include <jwt.h>
+
+#include <rBase64.h>
 #include <time.h>
+
+#include <jwt.h>
 
 // Wifi newtork details.
 const char* ssid = "SSID";
 const char* password = "PASSWORD";
+
+// Initialize the WiFi SSL client library
+WiFiSSLClient* client;
 
 // Cloud iot details.
 const char* project_id = "project-id";
@@ -37,32 +44,20 @@ const char* private_key_str =
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
     "7d:ca";
 
-// TODO: Use root certificate to verify tls connection rather than using a
-// fingerprint.
-// To get the fingerprint run
-// openssl s_client -connect cloudiotdevice.googleapis.com:443 -cipher <cipher>
-// Copy the certificate (all lines between and including ---BEGIN CERTIFICATE---
-// and --END CERTIFICATE--) to a.cert. Then to get the fingerprint run
-// openssl x509 -noout -fingerprint -sha1 -inform pem -in a.cert
-// <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
-// try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
-const char* fingerprint =
-    "67 BB 57 B0 9A A7 BA AE 53 13 6E 73 E7 88 D9 1D 0C D3 8F 7F";
-
-unsigned int priv_key[8];
+// TODO: Install root certificate to verify tls connection as described
+//       in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
+NN_DIGIT priv_key[8];
 
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
-  ESP.wdtDisable();
   String jwt = CreateJwt(project_id, time(nullptr), priv_key);
-  ESP.wdtEnable(0);
   return jwt;
 }
 
 const char* host = "cloudiotdevice.googleapis.com";
 const int httpsPort = 443;
 
-WiFiClientSecure* client;
+
 String pwd;
 
 // Fills the priv_key global variable with private key str which is of the form
@@ -91,29 +86,20 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 
-  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(100);
   }
 
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Waiting on time sync...");
   while (time(nullptr) < 1510644967) {
     delay(10);
   }
 
-  client = new WiFiClientSecure;
+  client = new WiFiSSLClient;
   Serial.println("Connecting to mqtt.googleapis.com");
   client->connect(host, httpsPort);
-  Serial.println("Verifying certificate");
-  if (!client->verify(fingerprint, host)) {
-    Serial.println(
-        "Error: Certificate not verified! "
-        "Perhaps the fingerprint is outdated.");
-    // return;
-  }
 
   Serial.println("Getting jwt.");
   pwd = getJwt();
@@ -178,6 +164,7 @@ void getConfig() {
       String val =
           line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
       Serial.println(val);
+      Serial.println(rbase64.decode(val));
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);
