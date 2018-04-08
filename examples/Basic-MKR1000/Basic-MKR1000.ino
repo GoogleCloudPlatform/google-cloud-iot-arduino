@@ -19,22 +19,21 @@
 #include <String.h>
 
 #include <rBase64.h>
-#include <time.h>
 
 #include <jwt.h>
 
 // Wifi newtork details.
-const char* ssid = "SSID";
+-const char* ssid = "SSID";
 const char* password = "PASSWORD";
 
-// Initialize the WiFi SSL client library
+// Initialize the Genuino WiFi SSL client library / RTC
 WiFiSSLClient* client;
 
 // Cloud iot details.
-const char* project_id = "project-id";
+const char* project_id = "PROJECT-ID";
 const char* location = "us-central1";
-const char* registry_id = "my-registry";
-const char* device_id = "my-python-device";
+const char* registry_id = "REGISTRY-ID";
+const char* device_id = "DEVICE-ID";
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text
@@ -50,7 +49,7 @@ NN_DIGIT priv_key[8];
 
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
-  String jwt = CreateJwt(project_id, time(nullptr), priv_key);
+  String jwt = CreateJwt(project_id, WiFi.getTime(), priv_key);
   return jwt;
 }
 
@@ -84,7 +83,7 @@ void setup() {
   fill_priv_key(private_key_str);
 
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
@@ -93,7 +92,7 @@ void setup() {
   }
 
   Serial.println("Waiting on time sync...");
-  while (time(nullptr) < 1510644967) {
+  while (WiFi.getTime() < 1510644967) {
     delay(10);
   }
 
@@ -137,19 +136,24 @@ void setup() {
 
 void getConfig() {
   // TODO(class): Move to helper function, e.g. buildHeader(method, jwt)...
-  String header = String("GET ") +
-      get_path(project_id, location, registry_id, device_id).c_str() +
-      String("/config?local_version=0 HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(getJwt().c_str());
-
   // Connect via https.
-  client->println(header);
-  client->println("host: cloudiotdevice.googleapis.com");
-  client->println("method: get");
-  client->println("cache-control: no-cache");
-  client->println(authstring);
-  client->println();
+  String handshake =
+      "GET " + get_path(project_id, location, registry_id, device_id) +
+      "/config?local_version=1 HTTP/1.1\n"
+      "Host: cloudiotdevice.googleapis.com\n"
+      "cache-control: no-cache\n"
+      "authorization: Bearer " +
+      pwd +
+      "\n"
+      "\n";
+  Serial.println("Sending: '");
+  Serial.print(handshake.c_str());
+  Serial.println("'");
+  client->write((const uint8_t*)handshake.c_str(), (int)handshake.length());
+  client->flush();
 
+  int tries = 500;
+  while (!client->available() && (tries-- > 0)) delay(10);
   while (client->connected()) {
     String line = client->readStringUntil('\n');
     if (line == "\r") {
