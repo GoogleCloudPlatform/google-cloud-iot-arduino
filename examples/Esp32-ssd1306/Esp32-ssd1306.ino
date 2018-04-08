@@ -12,12 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+#include <CloudIoTCore.h>
 #include <WiFiClientSecure.h>
-#include "jwt.h"
+#include <rBase64.h>
 #include <time.h>
 #include "SSD1306.h"
-#include <rBase64.h>
-
 
 // Wifi newtork details.
 const char* ssid = "YOURSSID";
@@ -36,101 +35,56 @@ const char* private_key_str =
     "0d:fa:41:34:48:69:56:e5:4a:d0:a3:a5:a4:c8:4b:"
     "ca:69";
 
-unsigned int priv_key[8];
+const char* root_cert =
+    "-----BEGIN CERTIFICATE-----\n"
+    "MIIEXDCCA0SgAwIBAgINAeOpMBz8cgY4P5pTHTANBgkqhkiG9w0BAQsFADBMMSAw\n"
+    "HgYDVQQLExdHbG9iYWxTaWduIFJvb3QgQ0EgLSBSMjETMBEGA1UEChMKR2xvYmFs\n"
+    "U2lnbjETMBEGA1UEAxMKR2xvYmFsU2lnbjAeFw0xNzA2MTUwMDAwNDJaFw0yMTEy\n"
+    "MTUwMDAwNDJaMFQxCzAJBgNVBAYTAlVTMR4wHAYDVQQKExVHb29nbGUgVHJ1c3Qg\n"
+    "U2VydmljZXMxJTAjBgNVBAMTHEdvb2dsZSBJbnRlcm5ldCBBdXRob3JpdHkgRzMw\n"
+    "ggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDKUkvqHv/OJGuo2nIYaNVW\n"
+    "XQ5IWi01CXZaz6TIHLGp/lOJ+600/4hbn7vn6AAB3DVzdQOts7G5pH0rJnnOFUAK\n"
+    "71G4nzKMfHCGUksW/mona+Y2emJQ2N+aicwJKetPKRSIgAuPOB6Aahh8Hb2XO3h9\n"
+    "RUk2T0HNouB2VzxoMXlkyW7XUR5mw6JkLHnA52XDVoRTWkNty5oCINLvGmnRsJ1z\n"
+    "ouAqYGVQMc/7sy+/EYhALrVJEA8KbtyX+r8snwU5C1hUrwaW6MWOARa8qBpNQcWT\n"
+    "kaIeoYvy/sGIJEmjR0vFEwHdp1cSaWIr6/4g72n7OqXwfinu7ZYW97EfoOSQJeAz\n"
+    "AgMBAAGjggEzMIIBLzAOBgNVHQ8BAf8EBAMCAYYwHQYDVR0lBBYwFAYIKwYBBQUH\n"
+    "AwEGCCsGAQUFBwMCMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFHfCuFCa\n"
+    "Z3Z2sS3ChtCDoH6mfrpLMB8GA1UdIwQYMBaAFJviB1dnHB7AagbeWbSaLd/cGYYu\n"
+    "MDUGCCsGAQUFBwEBBCkwJzAlBggrBgEFBQcwAYYZaHR0cDovL29jc3AucGtpLmdv\n"
+    "b2cvZ3NyMjAyBgNVHR8EKzApMCegJaAjhiFodHRwOi8vY3JsLnBraS5nb29nL2dz\n"
+    "cjIvZ3NyMi5jcmwwPwYDVR0gBDgwNjA0BgZngQwBAgIwKjAoBggrBgEFBQcCARYc\n"
+    "aHR0cHM6Ly9wa2kuZ29vZy9yZXBvc2l0b3J5LzANBgkqhkiG9w0BAQsFAAOCAQEA\n"
+    "HLeJluRT7bvs26gyAZ8so81trUISd7O45skDUmAge1cnxhG1P2cNmSxbWsoiCt2e\n"
+    "ux9LSD+PAj2LIYRFHW31/6xoic1k4tbWXkDCjir37xTTNqRAMPUyFRWSdvt+nlPq\n"
+    "wnb8Oa2I/maSJukcxDjNSfpDh/Bd1lZNgdd/8cLdsE3+wypufJ9uXO1iQpnh9zbu\n"
+    "FIwsIONGl1p3A8CgxkqI/UAih3JaGOqcpcdaCIzkBaR9uYQ1X4k2Vg5APRLouzVy\n"
+    "7a8IVk6wuy6pm+T7HT4LY8ibS5FEZlfAFLSW8NwsVz9SBK2Vqn1N0PIMn5xA6NZV\n"
+    "c7o835DLAFshEWfC7TIe3g==\n"
+    "-----END CERTIFICATE-----\n";
 
 // Clout IoT configuration that you don't need to change
-const char* host = "cloudiotdevice.googleapis.com";
-const int httpsPort = 443;
+const char* host = CLOUD_IOT_CORE_HTTP_HOST;
+const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
+WiFiClientSecure* client;
+CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
+                          private_key_str);
 
-SSD1306* display; // Display - Wemos is (0x3c, 4, 5), others on SDA/SCL
-WiFiClientSecure* client; // For WiFi + TLS
+std::string jwt;
 
-// TLS configuration
-// TODO: Use root certificate to verify tls connection rather than using a
-// fingerprint.
-// To get the fingerprint run
-// openssl s_client -connect cloudiotdevice.googleapis.com:443 -cipher <cipher>
-// Copy the certificate (all lines between and including ---BEGIN CERTIFICATE---
-// and --END CERTIFICATE--) to a.cert. Then to get the fingerprint run
-// openssl x509 -noout -fingerprint -sha1 -inform pem -in a.cert
-// <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
-// try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
-//const char* fingerprint =
-//    "66:AD:B8:C9:93:C1:58:B0:B8:E5:21:B3:6B:B0:16:8C:58:B0:EF:51";
-//
-/*
-const char* root_ca= \
-     "-----BEGIN CERTIFICATE-----\n" \
-     "IIE3zCCA8egAwIBAgIIdeZhOZwKoewwDQYJKoZIhvcNAQELBQAwVDELMAkGA1UE\n" \
-     "hMCVVMxHjAcBgNVBAoTFUdvb2dsZSBUcnVzdCBTZXJ2aWNlczElMCMGA1UEAxMc\n" \
-     "29vZ2xlIEludGVybmV0IEF1dGhvcml0eSBHMzAeFw0xODAyMjgyMzI0NTZaFw0x\n" \
-     "DA1MjMyMjEwMDBaMGoxCzAJBgNVBAYTAlVTMRMwEQYDVQQIDApDYWxpZm9ybmlh\n" \
-     "RYwFAYDVQQHDA1Nb3VudGFpbiBWaWV3MRMwEQYDVQQKDApHb29nbGUgSW5jMRkw\n" \
-     "wYDVQQDDBAqLmdvb2dsZWFwaXMuY29tMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A\n" \
-     "IIBCgKCAQEAqniIhIgsIXVnJgE9QNf3NSbKrGkz92h1rfr/70jMZRrFwAgooDHa\n" \
-     "/3HfKohm56EN5c0htGKeTCdP+YYoy0+fkI8T0xk80hnJw0r84pooX2qtYZFTS0T\n" \
-     "lYkpLSL+B/aDWQJ/jKHEFLpFSzR1s1L2pCR6/cND8ETk4xEFSNRosUTC7+kw2KY\n" \
-     "sCxOeaNHvOk1S5aWj1YSYNiNThPaplXvk/8G4t3ArncGNYXmIonwFm6DXGJ7DjN\n" \
-     "1/fJmCk5y7AvIXRlT0uIMc/fPT61PXfGXU1vodfKwB300tCJpvWH5Ef88qqyQ9Q\n" \
-     "OPim94IcpH0kJk3Fhd89mWpIi1qoZJozwIDAQABo4IBnTCCAZkwEwYDVR0lBAww\n" \
-     "gYIKwYBBQUHAwEwdAYDVR0RBG0wa4IQKi5nb29nbGVhcGlzLmNvbYIVKi5jbGll\n" \
-     "nRzNi5nb29nbGUuY29tghgqLmNsb3VkZW5kcG9pbnRzYXBpcy5jb22CFmNsb3Vk\n" \
-     "W5kcG9pbnRzYXBpcy5jb22CDmdvb2dsZWFwaXMuY29tMGgGCCsGAQUFBwEBBFww\n" \
-     "jAtBggrBgEFBQcwAoYhaHR0cDovL3BraS5nb29nL2dzcjIvR1RTR0lBRzMuY3J0\n" \
-     "CkGCCsGAQUFBzABhh1odHRwOi8vb2NzcC5wa2kuZ29vZy9HVFNHSUFHMzAdBgNV\n" \
-     "Q4EFgQU12VrPwdtSbezCPl5TXlVIgB1XDQwDAYDVR0TAQH/BAIwADAfBgNVHSME\n" \
-     "DAWgBR3wrhQmmd2drEtwobQg6B+pn66SzAhBgNVHSAEGjAYMAwGCisGAQQB1nkC\n" \
-     "QMwCAYGZ4EMAQICMDEGA1UdHwQqMCgwJqAkoCKGIGh0dHA6Ly9jcmwucGtpLmdv\n" \
-     "2cvR1RTR0lBRzMuY3JsMA0GCSqGSIb3DQEBCwUAA4IBAQC+eZjfRbKDDcJ9vXKJ\n" \
-     "cIwpU+mw3EsT435B7Z48O60Rm2GXfoGOP0cGeBBtqDnCIMQteL+m9SQsF0YKHih\n" \
-     "lwwPm5+IDxzOWSV0GVoXNhmYjWdzcx3mfDJF1OnM7q2dInGnMIru3G2XGnmWaOs\n" \
-     "2Rz3Tq+ZKjT7v6fyCPj8gdkNj2sf4he31VoKLdNKb0vlzV8qy1BcgcNBSfJtOZU\n" \
-     "AWw9Bokd2APHe477wzEZOPNGuOGnmT1Piyj10rh9kNj7Qg3tdtOZK26FMa0NauI\n" \
-     "9mIYTmphKGDqdXh00/DbxN6qTtz9AuaOToxJufrngE6fqFkhvBTQABUTIAdxufj\n" \
-     "SrJ\n" \
-     "-----END CERTIFICATE-----\n";*/
-
+// SSD1306 display configuration
+SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
 
 // Button / Potentiometer configuration
-int sensorPin = 12;    // select the input pin for the potentiometer
+int sensorPin = 12;  // select the input pin for the potentiometer
 int buttonPin = 16;
-void buttonPoll() {
-  // read the value from the sensor:
-  int sensorValue = analogRead(sensorPin);
-  Serial.println(digitalRead(buttonPin));
-  Serial.println(sensorValue);
-  show_text("Input", String(digitalRead(buttonPin)), String(sensorValue));
-  delay(100);
-}
 
-
-String getJwt() {
-  jwt = CreateJwt(project_id, time(nullptr), priv_key);
+std::string getJwt() {
+  jwt = device.createJWT(time(nullptr));
   return jwt;
 }
 
-// Fills the priv_key global variable with private key str which is of the form
-// aa:bb:cc:dd:ee:...
-void fill_priv_key(const char* priv_key_str) {
-  priv_key[8] = 0;
-  for (int i = 7; i >= 0; i--) {
-    priv_key[i] = 0;
-    for (int byte_num = 0; byte_num < 4; byte_num++) {
-      priv_key[i] = (priv_key[i] << 8) + strtoul(priv_key_str, NULL, 16);
-      priv_key_str += 3;
-    }
-  }
-}
-
-// Gets the google cloud iot http endpoint path.
-String get_path(const char* project_id, const char* location,
-                     const char* registry_id, const char* device_id) {
-  return String("/v1/projects/") + project_id + "/locations/" + location +
-         "/registries/" + registry_id + "/devices/" + device_id;
-}
-
-
-void show_text(String top, String mid, String bot){
+void show_text(String top, String mid, String bot) {
   display->clear();
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->setFont(ArialMT_Plain_24);
@@ -141,17 +95,23 @@ void show_text(String top, String mid, String bot){
   display->drawString(0, 44, bot);
   display->display();
 }
-void show_text(String val){
-  show_text(val, val, val);
-}
+void show_text(String val) { show_text(val, val, val); }
 
+// Start helper functions
+void buttonPoll() {
+  // read the value from the sensor:
+  int sensorValue = analogRead(sensorPin);
+  Serial.println(digitalRead(buttonPin));
+  Serial.println(sensorValue);
+  show_text("Input", String(digitalRead(buttonPin)), String(sensorValue));
+  delay(100);
+}
 
 // IoT functions
 void getConfig() {
   // TODO(class): Move to common section
-  String header = String("GET ") +
-      get_path(project_id, location, registry_id, device_id).c_str() +
-      String("/config?local_version=0 HTTP/1.1");
+  String header =
+      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   // Connect via https.
@@ -173,10 +133,10 @@ void getConfig() {
     String line = client->readStringUntil('\n');
     Serial.println(line);
     if (line.indexOf("binaryData") > 0) {
-      String val =
-          line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
+      String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
-      show_text("Config", rbase64.decode(val), val);
+      size_t len = rbase64.decode(val);
+      show_text("Config", String(len), val);
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);
@@ -188,14 +148,13 @@ void getConfig() {
   }
 }
 
-
 void sendTelemetry(String data) {
-  String postdata = String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
+  String postdata =
+      String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
 
   // TODO(class): Move to common helper
-  String header = String("POST  ") +
-      get_path(project_id, location, registry_id, device_id).c_str() +
-      String(":publishEvent HTTP/1.1");
+  String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
+                  String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   Serial.println("Sending telemetry");
@@ -206,13 +165,14 @@ void sendTelemetry(String data) {
   client->println("cache-control: no-cache");
   client->println(authstring);
   client->println("content-type: application/json");
-  client->print("content-length:"); client->println(postdata.length());
+  client->print("content-length:");
+  client->println(postdata.length());
   client->println();
   client->println(postdata);
   client->println();
   client->println();
 
-  while(!client->available()){
+  while (!client->available()) {
     delay(100);
     Serial.print('.');
   }
@@ -230,18 +190,11 @@ void sendTelemetry(String data) {
   Serial.println("Complete.");
 }
 
-
 // Arduino functions
 void setup() {
   Serial.begin(115200);
 
   display = new SSD1306(0x3c, 5, 4);
-
-  // To get the private key run (where private-key.pem is the ec private key
-  // used to create the certificate uploaded to google cloud iot):
-  // openssl ec -in <private-key.pem> -noout -text
-  // and copy priv: part.
-  fill_priv_key(private_key_str);
 
   display->init();
   display->flipScreenVertically();
@@ -265,10 +218,9 @@ void setup() {
   }
 
   // FIXME: Avoid MITM, validate the server.
-  //client->setCACert(root_ca);
-  //client.setCertificate(test_client_key); // for client verification
-  //client.setPrivateKey(test_client_cert); // for client verification
-
+  client->setCACert(root_cert);
+  // client.setCertificate(test_client_key); // for client verification
+  // client.setPrivateKey(test_client_cert); // for client verification
 
   Serial.println("Connecting to : " + String(host));
   delay(100);
@@ -280,12 +232,13 @@ void setup() {
     Serial.println("Getting JWT: ");
     getJwt();
     getConfig();
-    //sendTelemetry(String("Device:") + String(device_id) + String("> connected"));
+    // sendTelemetry(String("Device:") + String(device_id) + String(">
+    // connected"));
   }
 }
 
 void loop() {
   delay(2000);
   getConfig();
-  //buttonPoll();
+  // buttonPoll();
 }
