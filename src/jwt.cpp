@@ -15,12 +15,12 @@
 
 #include <stdio.h>
 
+#include "crypto/nn.c"
+#include "crypto/sha256.h"
 #include "jwt.h"
-#include "nn.c"
-#include "sha256.h"
 
 extern "C" {
-#include "ecdsa.h"
+#include "crypto/ecdsa.h"
 }
 
 // base64_encode copied from https://github.com/ReneNyffenegger/cpp-base64
@@ -30,7 +30,7 @@ static const String base64_chars =
     "0123456789+/";
 
 String base64_encode(const unsigned char* bytes_to_encode,
-                          unsigned int in_len) {
+                     unsigned int in_len) {
   String ret;
   int i = 0;
   int j = 0;
@@ -94,7 +94,8 @@ String MakeBase64Signature(NN_DIGIT* signature_r, NN_DIGIT* signature_s) {
   NN_Encode(signature, (NUMWORDS - 1) * NN_DIGIT_LEN, signature_r,
             (NN_UINT)(NUMWORDS - 1));
   NN_Encode(signature + (NUMWORDS - 1) * NN_DIGIT_LEN,
-            (NUMWORDS - 1) * NN_DIGIT_LEN, signature_s, (NN_UINT)(NUMWORDS - 1));
+            (NUMWORDS - 1) * NN_DIGIT_LEN, signature_s,
+            (NN_UINT)(NUMWORDS - 1));
 
   return base64_encode(signature, 64);
 }
@@ -106,14 +107,13 @@ String int_to_string(long long int x) {
   return buf;
 }
 
-String CreateJwt(String project_id, long long int time,
-                      NN_DIGIT* priv_key) {
+String CreateJwt(String project_id, long long int time, NN_DIGIT* priv_key) {
   ecc_init();
   // Making jwt token json
   String header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
   String payload = "{\"iat\":" + int_to_string(time) +
-                        ",\"exp\":" + int_to_string(time + 3600) +
-                        ",\"aud\":\"" + project_id + "\"}";
+                   ",\"exp\":" + int_to_string(time + 3600) + ",\"aud\":\"" +
+                   project_id + "\"}";
 
   String header_payload_base64 =
       base64_encode(header) + "." + base64_encode(payload);
@@ -132,4 +132,3 @@ String CreateJwt(String project_id, long long int time,
   return header_payload_base64 + "." +
          MakeBase64Signature(signature_r, signature_s);
 }
-
