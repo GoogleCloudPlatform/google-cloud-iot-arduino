@@ -27,7 +27,7 @@ const char* password = "PASSWORD";
 const char* project_id = "project-id";
 const char* location = "us-central1";
 const char* registry_id = "my-registry";
-const char* device_id = "my-python-device";
+const char* device_id = "my-device";
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text
@@ -47,7 +47,7 @@ const char* private_key_str =
 // <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
 // try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
 const char* fingerprint =
-    "67 BB 57 B0 9A A7 BA AE 53 13 6E 73 E7 88 D9 1D 0C D3 8F 7F";
+    "AD:19:13:E1:1B:AB:43:E7:8D:4D:B0:A9:20:A0:CC:FD:24:C4:55:DF";
 
 unsigned int priv_key[8];
 
@@ -113,6 +113,8 @@ void setup() {
         "Error: Certificate not verified! "
         "Perhaps the fingerprint is outdated.");
     // return;
+  } else {
+    Serial.println("Fingerprint verified!");
   }
 
   Serial.println("Getting jwt.");

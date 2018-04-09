@@ -13,10 +13,9 @@
  * limitations under the License.
  *****************************************************************************/
 
+#include <String.h>
 #include <WiFi101.h>
 #include <WiFiSSLClient.h>
-
-#include <String.h>
 
 #include <rBase64.h>
 
@@ -43,8 +42,8 @@ const char* private_key_str =
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
     "7d:ca";
 
-// TODO: Install root certificate to verify tls connection as described
-//       in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
+// TODO(you): Install root certificate to verify tls connection as described
+// in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
 NN_DIGIT priv_key[8];
 
 String getJwt() {
@@ -53,10 +52,9 @@ String getJwt() {
   return jwt;
 }
 
+// Connection parameters
 const char* host = "cloudiotdevice.googleapis.com";
 const int httpsPort = 443;
-
-
 String pwd;
 
 // Fills the priv_key global variable with private key str which is of the form
@@ -78,6 +76,7 @@ String get_path(const char* project_id, const char* location,
   return String("/v1/projects/") + project_id + "/locations/" + location +
          "/registries/" + registry_id + "/devices/" + device_id;
 }
+
 
 void setup() {
   fill_priv_key(private_key_str);
