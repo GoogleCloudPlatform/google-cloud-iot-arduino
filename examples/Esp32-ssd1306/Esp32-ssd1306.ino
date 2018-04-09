@@ -270,7 +270,7 @@ void setup() {
   //client.setPrivateKey(test_client_cert); // for client verification
 
 
-  Serial.println("Connecting to mqtt.googleapis.com");
+  Serial.println("Connecting to : " + String(host));
   delay(100);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.println("...");
