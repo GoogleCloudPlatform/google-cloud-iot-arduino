@@ -1,5 +1,5 @@
 // Also know as prime256v1 aka NIST P-256
-#include <string.h>
+#include <String.h>
 #include "ecc.h"
 
 #define TRUE 1

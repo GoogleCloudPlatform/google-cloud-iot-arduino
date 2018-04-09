@@ -13,21 +13,26 @@
  * limitations under the License.
  *****************************************************************************/
 
-#include <ESP8266WiFi.h>
 #include <String.h>
-#include <WiFiClientSecure.h>
+#include <WiFi101.h>
+#include <WiFiSSLClient.h>
+
+#include <rBase64.h>
+
 #include <jwt.h>
-#include <time.h>
 
 // Wifi newtork details.
-const char* ssid = "SSID";
+-const char* ssid = "SSID";
 const char* password = "PASSWORD";
 
+// Initialize the Genuino WiFi SSL client library / RTC
+WiFiSSLClient* client;
+
 // Cloud iot details.
-const char* project_id = "project-id";
+const char* project_id = "PROJECT-ID";
 const char* location = "us-central1";
-const char* registry_id = "my-registry";
-const char* device_id = "my-device";
+const char* registry_id = "REGISTRY-ID";
+const char* device_id = "DEVICE-ID";
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text
@@ -37,32 +42,19 @@ const char* private_key_str =
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
     "7d:ca";
 
-// TODO: Use root certificate to verify tls connection rather than using a
-// fingerprint.
-// To get the fingerprint run
-// openssl s_client -connect cloudiotdevice.googleapis.com:443 -cipher <cipher>
-// Copy the certificate (all lines between and including ---BEGIN CERTIFICATE---
-// and --END CERTIFICATE--) to a.cert. Then to get the fingerprint run
-// openssl x509 -noout -fingerprint -sha1 -inform pem -in a.cert
-// <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
-// try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
-const char* fingerprint =
-    "AD:19:13:E1:1B:AB:43:E7:8D:4D:B0:A9:20:A0:CC:FD:24:C4:55:DF";
-
-unsigned int priv_key[8];
+// TODO(you): Install root certificate to verify tls connection as described
+// in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
+NN_DIGIT priv_key[8];
 
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
-  ESP.wdtDisable();
-  String jwt = CreateJwt(project_id, time(nullptr), priv_key);
-  ESP.wdtEnable(0);
+  String jwt = CreateJwt(project_id, WiFi.getTime(), priv_key);
   return jwt;
 }
 
+// Connection parameters
 const char* host = "cloudiotdevice.googleapis.com";
 const int httpsPort = 443;
-
-WiFiClientSecure* client;
 String pwd;
 
 // Fills the priv_key global variable with private key str which is of the form
@@ -85,37 +77,27 @@ String get_path(const char* project_id, const char* location,
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
+
 void setup() {
   fill_priv_key(private_key_str);
 
   // put your setup code here, to run once:
-  Serial.begin(115200);
+  Serial.begin(9600);
 
-  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
     delay(100);
   }
 
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Waiting on time sync...");
-  while (time(nullptr) < 1510644967) {
+  while (WiFi.getTime() < 1510644967) {
     delay(10);
   }
 
-  client = new WiFiClientSecure;
+  client = new WiFiSSLClient;
   Serial.println("Connecting to mqtt.googleapis.com");
   client->connect(host, httpsPort);
-  Serial.println("Verifying certificate");
-  if (!client->verify(fingerprint, host)) {
-    Serial.println(
-        "Error: Certificate not verified! "
-        "Perhaps the fingerprint is outdated.");
-    // return;
-  } else {
-    Serial.println("Fingerprint verified!");
-  }
 
   Serial.println("Getting jwt.");
   pwd = getJwt();
@@ -153,19 +135,24 @@ void setup() {
 
 void getConfig() {
   // TODO(class): Move to helper function, e.g. buildHeader(method, jwt)...
-  String header = String("GET ") +
-      get_path(project_id, location, registry_id, device_id).c_str() +
-      String("/config?local_version=0 HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(getJwt().c_str());
-
   // Connect via https.
-  client->println(header);
-  client->println("host: cloudiotdevice.googleapis.com");
-  client->println("method: get");
-  client->println("cache-control: no-cache");
-  client->println(authstring);
-  client->println();
+  String handshake =
+      "GET " + get_path(project_id, location, registry_id, device_id) +
+      "/config?local_version=1 HTTP/1.1\n"
+      "Host: cloudiotdevice.googleapis.com\n"
+      "cache-control: no-cache\n"
+      "authorization: Bearer " +
+      pwd +
+      "\n"
+      "\n";
+  Serial.println("Sending: '");
+  Serial.print(handshake.c_str());
+  Serial.println("'");
+  client->write((const uint8_t*)handshake.c_str(), (int)handshake.length());
+  client->flush();
 
+  int tries = 500;
+  while (!client->available() && (tries-- > 0)) delay(10);
   while (client->connected()) {
     String line = client->readStringUntil('\n');
     if (line == "\r") {
@@ -180,6 +167,7 @@ void getConfig() {
       String val =
           line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
       Serial.println(val);
+      Serial.println(rbase64.decode(val));
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);

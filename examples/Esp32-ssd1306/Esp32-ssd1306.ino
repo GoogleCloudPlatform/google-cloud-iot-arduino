@@ -13,40 +13,39 @@
  * limitations under the License.
  *****************************************************************************/
 #include <WiFiClientSecure.h>
-#define NO8266
 #include "jwt.h"
 #include <time.h>
 #include "SSD1306.h"
 #include <rBase64.h>
 
-// Wifi configuration
-const char* ssid = "your_ssid";
-const char* password = "your_ssid_password";
-WiFiClientSecure* client;
 
+// Wifi newtork details.
+const char* ssid = "YOURSSID";
+const char* password = "YOURPASS";
 
 // Cloud IoT configuration that you must change
 const char* project_id = "your-projectid-1234";
 const char* location = "us-central1";
 const char* registry_id = "your-registry-id";
 const char* device_id = "your-device-id";
-std::string jwt;
+String jwt;
+
 // From openssl ec -in certificate.pem -noout --text
 const char* private_key_str =
     "e0:14:62:40:1c:d5:0b:78:cb:5e:7b:f9:ba:a7:08:"
     "0d:fa:41:34:48:69:56:e5:4a:d0:a3:a5:a4:c8:4b:"
     "ca:69";
+
 unsigned int priv_key[8];
 
 // Clout IoT configuration that you don't need to change
 const char* host = "cloudiotdevice.googleapis.com";
 const int httpsPort = 443;
 
-// SSD1306 display configuration
-SSD1306* display; // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
+SSD1306* display; // Display - Wemos is (0x3c, 4, 5), others on SDA/SCL
+WiFiClientSecure* client; // For WiFi + TLS
 
 // TLS configuration
-
 // TODO: Use root certificate to verify tls connection rather than using a
 // fingerprint.
 // To get the fingerprint run
@@ -91,12 +90,10 @@ const char* root_ca= \
      "SrJ\n" \
      "-----END CERTIFICATE-----\n";*/
 
+
 // Button / Potentiometer configuration
 int sensorPin = 12;    // select the input pin for the potentiometer
 int buttonPin = 16;
-
-
-// Start helper functions
 void buttonPoll() {
   // read the value from the sensor:
   int sensorValue = analogRead(sensorPin);
@@ -107,11 +104,10 @@ void buttonPoll() {
 }
 
 
-std::string getJwt() {
+String getJwt() {
   jwt = CreateJwt(project_id, time(nullptr), priv_key);
   return jwt;
 }
-
 
 // Fills the priv_key global variable with private key str which is of the form
 // aa:bb:cc:dd:ee:...
@@ -126,11 +122,10 @@ void fill_priv_key(const char* priv_key_str) {
   }
 }
 
-
 // Gets the google cloud iot http endpoint path.
-std::string get_path(const char* project_id, const char* location,
+String get_path(const char* project_id, const char* location,
                      const char* registry_id, const char* device_id) {
-  return std::string("/v1/projects/") + project_id + "/locations/" + location +
+  return String("/v1/projects/") + project_id + "/locations/" + location +
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
@@ -275,7 +270,7 @@ void setup() {
   //client.setPrivateKey(test_client_cert); // for client verification
 
 
-  Serial.println("Connecting to mqtt.googleapis.com");
+  Serial.println("Connecting to : " + String(host));
   delay(100);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.println("...");
@@ -288,7 +283,6 @@ void setup() {
     //sendTelemetry(String("Device:") + String(device_id) + String("> connected"));
   }
 }
-
 
 void loop() {
   delay(2000);
