@@ -18,38 +18,34 @@
 #include "SSD1306.h"
 #include <rBase64.h>
 
-// Xmit device con
-int sensorPin = 12;    // select the input pin for the potentiometer
-int buttonPin = 16;
-
-void buttonPoll() {
-
-  // read the value from the sensor:
-  int sensorValue = analogRead(sensorPin);
-  Serial.println(digitalRead(buttonPin));
-  Serial.println(sensorValue);
-  show_text("Input", String(digitalRead(buttonPin)), String(sensorValue));
-  delay(100);               
-
-}
 
 // Wifi newtork details.
-const char* ssid = "gmesh";
-const char* password = "classicpet";
+const char* ssid = "YOURSSID";
+const char* password = "YOURPASS";
 
-// Cloud iot details.
-const char* project_id = "glassy-nectar-370";
+// Cloud IoT configuration that you must change
+const char* project_id = "your-projectid-1234";
 const char* location = "us-central1";
-const char* registry_id = "iot-home";
-const char* device_id = "testduino";
-std::string jwt;
+const char* registry_id = "your-registry-id";
+const char* device_id = "your-device-id";
+String jwt;
 
-// openssl ec -in certificate.pem -noout --text
+// From openssl ec -in certificate.pem -noout --text
 const char* private_key_str =
     "e0:14:62:40:1c:d5:0b:78:cb:5e:7b:f9:ba:a7:08:"
     "0d:fa:41:34:48:69:56:e5:4a:d0:a3:a5:a4:c8:4b:"
     "ca:69";
 
+unsigned int priv_key[8];
+
+// Clout IoT configuration that you don't need to change
+const char* host = "cloudiotdevice.googleapis.com";
+const int httpsPort = 443;
+
+SSD1306* display; // Display - Wemos is (0x3c, 4, 5), others on SDA/SCL
+WiFiClientSecure* client; // For WiFi + TLS
+
+// TLS configuration
 // TODO: Use root certificate to verify tls connection rather than using a
 // fingerprint.
 // To get the fingerprint run
@@ -94,20 +90,24 @@ const char* root_ca= \
      "SrJ\n" \
      "-----END CERTIFICATE-----\n";*/
 
-unsigned int priv_key[8];
 
-std::string getJwt() {
+// Button / Potentiometer configuration
+int sensorPin = 12;    // select the input pin for the potentiometer
+int buttonPin = 16;
+void buttonPoll() {
+  // read the value from the sensor:
+  int sensorValue = analogRead(sensorPin);
+  Serial.println(digitalRead(buttonPin));
+  Serial.println(sensorValue);
+  show_text("Input", String(digitalRead(buttonPin)), String(sensorValue));
+  delay(100);
+}
+
+
+String getJwt() {
   jwt = CreateJwt(project_id, time(nullptr), priv_key);
   return jwt;
 }
-
-// For Wemos Lonlin32
-SSD1306* display; // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
-
-const char* host = "cloudiotdevice.googleapis.com";
-const int httpsPort = 443;
-
-WiFiClientSecure* client;
 
 // Fills the priv_key global variable with private key str which is of the form
 // aa:bb:cc:dd:ee:...
@@ -123,16 +123,17 @@ void fill_priv_key(const char* priv_key_str) {
 }
 
 // Gets the google cloud iot http endpoint path.
-std::string get_path(const char* project_id, const char* location,
+String get_path(const char* project_id, const char* location,
                      const char* registry_id, const char* device_id) {
-  return std::string("/v1/projects/") + project_id + "/locations/" + location +
+  return String("/v1/projects/") + project_id + "/locations/" + location +
          "/registries/" + registry_id + "/devices/" + device_id;
 }
+
 
 void show_text(String top, String mid, String bot){
   display->clear();
   display->setTextAlignment(TEXT_ALIGN_LEFT);
-  display->setFont(ArialMT_Plain_24);        
+  display->setFont(ArialMT_Plain_24);
   display->drawString(0, 0, top);
   display->setFont(ArialMT_Plain_16);
   display->drawString(0, 26, mid);
@@ -144,62 +145,55 @@ void show_text(String val){
   show_text(val, val, val);
 }
 
-void setup() {
-  Serial.begin(115200);  
 
-  display = new SSD1306(0x3c, 5, 4);
-  
-  // To get the private key run (where private-key.pem is the ec private key
-  // used to create the certificate uploaded to google cloud iot):
-  // openssl ec -in <private-key.pem> -noout -text
-  // and copy priv: part.
-  fill_priv_key(private_key_str);
+// IoT functions
+void getConfig() {
+  // TODO(class): Move to common section
+  String header = String("GET ") +
+      get_path(project_id, location, registry_id, device_id).c_str() +
+      String("/config?local_version=0 HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(jwt.c_str());
 
-  display->init();
-  display->flipScreenVertically();
-  display->setFont(ArialMT_Plain_10);
+  // Connect via https.
+  client->println(header);
+  client->println("host: cloudiotdevice.googleapis.com");
+  client->println("method: get");
+  client->println("cache-control: no-cache");
+  client->println(authstring);
+  client->println();
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting to WiFi");
-  show_text("Wifi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
+  while (client->connected()) {
+    String line = client->readStringUntil('\n');
+    if (line == "\r") {
+      Serial.println("headers received");
+      break;
+    }
   }
-
-  client = new WiFiClientSecure();
-
-  show_text("Time");
-  configTime(0, 0, "time.google.com", "time.nist.gov");
-  Serial.println("Waiting on time sync...");
-  while (time(nullptr) < 1510644967) {
-    delay(10);
+  while (client->available()) {
+    String line = client->readStringUntil('\n');
+    Serial.println(line);
+    if (line.indexOf("binaryData") > 0) {
+      String val =
+          line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
+      Serial.println(val);
+      show_text("Config", rbase64.decode(val), val);
+      if (val == "MQ==") {
+        Serial.println("LED ON");
+        digitalWrite(LED_BUILTIN, HIGH);
+      } else {
+        Serial.println("LED OFF");
+        digitalWrite(LED_BUILTIN, LOW);
+      }
+    }
   }
-  
-  // FIXME: Avoid MITM, validate the server.
-  //client->setCACert(root_ca);
-  //client.setCertificate(test_client_key); // for client verification
-  //client.setPrivateKey(test_client_cert); // for client verification
-
-  
-  Serial.println("Connecting to mqtt.googleapis.com");
-  delay(100);
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.println("...");
-  if (!client->connect(host, httpsPort)) {
-    Serial.println("Connection failed!");
-  } else {    
-    Serial.println("Getting JWT: ");
-    getJwt();
-    getConfig();
-    //sendTelemetry(String("Device:") + String(device_id) + String("> connected"));
-  }  
 }
+
 
 void sendTelemetry(String data) {
   String postdata = String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
-  
-  String header = String("POST  ") + 
+
+  // TODO(class): Move to common helper
+  String header = String("POST  ") +
       get_path(project_id, location, registry_id, device_id).c_str() +
       String(":publishEvent HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
@@ -236,48 +230,62 @@ void sendTelemetry(String data) {
   Serial.println("Complete.");
 }
 
-void getConfig() {
-  String header = String("GET ") + 
-      get_path(project_id, location, registry_id, device_id).c_str() +
-      String("/config?local_version=0 HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(jwt.c_str());
 
-  // Connect via https.
-  client->println(header);
-  client->println("host: cloudiotdevice.googleapis.com");
-  client->println("method: get");
-  client->println("cache-control: no-cache");
-  client->println(authstring);
-  client->println();
+// Arduino functions
+void setup() {
+  Serial.begin(115200);
 
-  while (client->connected()) {
-    String line = client->readStringUntil('\n');
-    if (line == "\r") {
-      Serial.println("headers received");
-      break;
-    }
+  display = new SSD1306(0x3c, 5, 4);
+
+  // To get the private key run (where private-key.pem is the ec private key
+  // used to create the certificate uploaded to google cloud iot):
+  // openssl ec -in <private-key.pem> -noout -text
+  // and copy priv: part.
+  fill_priv_key(private_key_str);
+
+  display->init();
+  display->flipScreenVertically();
+  display->setFont(ArialMT_Plain_10);
+
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting to WiFi");
+  show_text("Wifi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
   }
-  while (client->available()) {
-    String line = client->readStringUntil('\n');
-    Serial.println(line);
-    if (line.indexOf("binaryData") > 0) {
-      String val = 
-          line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
-      Serial.println(val);            
-      show_text("Config", rbase64.decode(val), val);      
-      if (val == "MQ==") {
-        Serial.println("LED ON");
-        digitalWrite(LED_BUILTIN, LOW);
-      } else {
-        Serial.println("LED OFF");
-        digitalWrite(LED_BUILTIN, HIGH);
-      }
-    }
+
+  client = new WiFiClientSecure();
+
+  show_text("Time");
+  configTime(0, 0, "time.google.com", "time.nist.gov");
+  Serial.println("Waiting on time sync...");
+  while (time(nullptr) < 1510644967) {
+    delay(10);
+  }
+
+  // FIXME: Avoid MITM, validate the server.
+  //client->setCACert(root_ca);
+  //client.setCertificate(test_client_key); // for client verification
+  //client.setPrivateKey(test_client_cert); // for client verification
+
+
+  Serial.println("Connecting to mqtt.googleapis.com");
+  delay(100);
+  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.println("...");
+  if (!client->connect(host, httpsPort)) {
+    Serial.println("Connection failed!");
+  } else {
+    Serial.println("Getting JWT: ");
+    getJwt();
+    getConfig();
+    //sendTelemetry(String("Device:") + String(device_id) + String("> connected"));
   }
 }
 
-void loop() {  
+void loop() {
   delay(2000);
-  //getConfig();
-  buttonPoll();
+  getConfig();
+  //buttonPoll();
 }
