@@ -14,105 +14,91 @@
  *****************************************************************************/
 
 #include "CloudIoTCoreDevice.h"
-#include "Arduino.h"
 #include "jwt.h"
 
-CloudIoTCoreDevice::CloudIoTCoreDevice()
-{
+CloudIoTCoreDevice::CloudIoTCoreDevice() {}
+
+CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
+                                       const char *location,
+                                       const char *registry_id,
+                                       const char *device_id) {
+  setProjectId(project_id);
+  setLocation(location);
+  setRegistryId(registry_id);
+  setDeviceId(device_id);
 }
 
-CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id, const char *location, const char *registry_id, const char *device_id)
-{
-    setProjectId(project_id);
-    setLocation(location);
-    setRegistryId(registry_id);
-    setDeviceId(device_id);
+CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
+                                       const char *location,
+                                       const char *registry_id,
+                                       const char *device_id,
+                                       const char *private_key) {
+  setProjectId(project_id);
+  setLocation(location);
+  setRegistryId(registry_id);
+  setDeviceId(device_id);
+  setPrivateKey(private_key);
 }
 
-CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id, const char *location, const char *registry_id, const char *device_id, const char *private_key)
-{
-    setProjectId(project_id);
-    setLocation(location);
-    setRegistryId(registry_id);
-    setDeviceId(device_id);
-    setPrivateKey(private_key);
+String CloudIoTCoreDevice::createJWT(long long int current_time) {
+  jwt = CreateJwt(project_id, current_time, priv_key);
+  return jwt;
 }
 
-std::string CloudIoTCoreDevice::createJWT(long long int current_time)
-{
-    jwt = CreateJwt(project_id, current_time, priv_key);
-    return jwt;
+String CloudIoTCoreDevice::getJWT() { return jwt; }
+
+String CloudIoTCoreDevice::getBasePath() {
+  return String("/v1/projects/") + project_id + "/locations/" + location +
+         "/registries/" + registry_id + "/devices/" + device_id;
 }
 
-std::string CloudIoTCoreDevice::getJWT()
-{
-    return jwt;
+String CloudIoTCoreDevice::getConfigPath(int version) {
+  char buf[8] = {0};
+  itoa(version, buf, 10);
+  return this->getBasePath() + "/config?local_version=" + buf;
 }
 
-std::string CloudIoTCoreDevice::getBasePath()
-{
-    return std::string("/v1/projects/") + project_id + "/locations/" + location +
-           "/registries/" + registry_id + "/devices/" + device_id;
+String CloudIoTCoreDevice::getLastConfigPath() {
+  return this->getConfigPath(0);
 }
 
-std::string CloudIoTCoreDevice::getConfigPath(int version)
-{
-    char buf[8] = {0};
-    itoa(version, buf, 10);
-    return this->getBasePath() + "/config?local_version=" + buf;
+String CloudIoTCoreDevice::getSendTelemetryPath() {
+  return this->getBasePath() + ":publishEvent";
 }
 
-std::string CloudIoTCoreDevice::getLastConfigPath()
-{
-    return this->getConfigPath(0);
-}
-
-std::string CloudIoTCoreDevice::getSendTelemetryPath()
-{
-    return this->getBasePath() + ":publishEvent";
-}
-
-void CloudIoTCoreDevice::fillPrivateKey()
-{
-    priv_key[8] = 0;
-    for (int i = 7; i >= 0; i--)
-    {
-        priv_key[i] = 0;
-        for (int byte_num = 0; byte_num < 4; byte_num++)
-        {
-            priv_key[i] = (priv_key[i] << 8) + strtoul(private_key, NULL, 16);
-            private_key += 3;
-        }
+void CloudIoTCoreDevice::fillPrivateKey() {
+  priv_key[8] = 0;
+  for (int i = 7; i >= 0; i--) {
+    priv_key[i] = 0;
+    for (int byte_num = 0; byte_num < 4; byte_num++) {
+      priv_key[i] = (priv_key[i] << 8) + strtoul(private_key, NULL, 16);
+      private_key += 3;
     }
+  }
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id)
-{
-    this->project_id = project_id;
-    return *this;
+CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id) {
+  this->project_id = project_id;
+  return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setLocation(const char *location)
-{
-    this->location = location;
-    return *this;
+CloudIoTCoreDevice &CloudIoTCoreDevice::setLocation(const char *location) {
+  this->location = location;
+  return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setRegistryId(const char *registry_id)
-{
-    this->registry_id = registry_id;
-    return *this;
+CloudIoTCoreDevice &CloudIoTCoreDevice::setRegistryId(const char *registry_id) {
+  this->registry_id = registry_id;
+  return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id)
-{
-    this->device_id = device_id;
-    return *this;
+CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
+  this->device_id = device_id;
+  return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key)
-{
-    this->private_key = private_key;
-    fillPrivateKey();
-    return *this;
+CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
+  this->private_key = private_key;
+  fillPrivateKey();
+  return *this;
 }

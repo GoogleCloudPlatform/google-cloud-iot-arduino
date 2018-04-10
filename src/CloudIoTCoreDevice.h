@@ -16,27 +16,29 @@
 #ifndef CloudIoTCoreDevice_h
 #define CloudIoTCoreDevice_h
 
-#include <string>
+#include <Arduino.h>
 
-class CloudIoTCoreDevice
-{
-private:
+class CloudIoTCoreDevice {
+ private:
   const char *project_id;
   const char *location;
   const char *registry_id;
   const char *device_id;
   const char *private_key;
 
-  unsigned int priv_key[8];
-  std::string jwt;
+  NN_DIGIT priv_key[8];
+  String jwt;
 
   void fillPrivateKey();
-  std::string getBasePath();
+  String getBasePath();
 
-public:
+ public:
   CloudIoTCoreDevice();
-  CloudIoTCoreDevice(const char *project_id, const char *location, const char *registry_id, const char *device_id);
-  CloudIoTCoreDevice(const char *project_id, const char *location, const char *registry_id, const char *device_id, const char *private_key);
+  CloudIoTCoreDevice(const char *project_id, const char *location,
+                     const char *registry_id, const char *device_id);
+  CloudIoTCoreDevice(const char *project_id, const char *location,
+                     const char *registry_id, const char *device_id,
+                     const char *private_key);
 
   CloudIoTCoreDevice &setProjectId(const char *project_id);
   CloudIoTCoreDevice &setLocation(const char *location);
@@ -44,12 +46,12 @@ public:
   CloudIoTCoreDevice &setDeviceId(const char *device_id);
   CloudIoTCoreDevice &setPrivateKey(const char *private_key);
 
-  std::string createJWT(long long int time);
-  std::string getJWT();
+  String createJWT(long long int time);
+  String getJWT();
 
   /* HTTP methods path */
-  std::string getConfigPath(int version);
-  std::string getLastConfigPath();
-  std::string getSendTelemetryPath();
+  String getConfigPath(int version);
+  String getLastConfigPath();
+  String getSendTelemetryPath();
 };
-#endif // CloudIoTCoreDevice_h
+#endif  // CloudIoTCoreDevice_h
