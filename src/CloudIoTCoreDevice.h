@@ -17,6 +17,7 @@
 #define CloudIoTCoreDevice_h
 
 #include <Arduino.h>
+#include "jwt.h"
 
 class CloudIoTCoreDevice {
  private:
