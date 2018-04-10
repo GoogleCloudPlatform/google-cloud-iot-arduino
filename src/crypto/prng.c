@@ -17,13 +17,13 @@
 
 #include <stddef.h>
 
-#ifdef NO8266
-#include "esp8266_peri.h" // TODO: can use RANDOM_REG32
+#if defined(ESP8266)
+#include "esp8266_peri.h"  // TODO: can use RANDOM_REG32
 #endif
 
-
 int prng(unsigned char *buf, size_t len) {
-  while (len--)
-    *buf++ = 0xCC; // TOOD: Portable random
+  while (len--) {
+    *buf++ = 0xCC;  // TOOD: Portable random
+  }
   return 1;
 }
