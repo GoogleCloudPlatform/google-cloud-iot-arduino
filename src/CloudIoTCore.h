@@ -13,12 +13,25 @@
  * limitations under the License.
  *****************************************************************************/
 
-#ifndef JWT_H_
-#define JWT_H_
+#ifndef CloudIoTCore_h
+#define CloudIoTCore_h
 
-#include <Arduino.h>
-#include "crypto/nn.h"
+#include "CloudIoTCoreDevice.h"
 
-String CreateJwt(String project_id, long long int time, NN_DIGIT* priv_key);
+#ifndef CLOUD_IOT_CORE_HTTP_HOST
+#define CLOUD_IOT_CORE_HTTP_HOST "cloudiotdevice.googleapis.com"
+#endif
 
-#endif  // JWT_H_
+#ifndef CLOUD_IOT_CORE_HTTP_PORT
+#define CLOUD_IOT_CORE_HTTP_PORT 443
+#endif
+
+#ifndef CLOUD_IOT_CORE_MQTT_HOST
+#define CLOUD_IOT_CORE_MQTT_HOST "mqtt.googleapis.com"
+#endif
+
+#ifndef CLOUD_IOT_CORE_MQTT_PORT
+#define CLOUD_IOT_CORE_MQTT_PORT 443
+#endif
+
+#endif // CloudIoTCore_h
