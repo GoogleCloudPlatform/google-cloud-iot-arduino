@@ -22,8 +22,13 @@
 #endif
 
 int prng(unsigned char *buf, size_t len) {
+  srand (time(NULL));
   while (len--) {
-    *buf++ = 0xCC;  // TOOD: Portable random
+    #if defined(ESP8266)
+    *buf++ = RANDOM_REG32 % 255;
+    break;
+    #endif
+    *buf++ = rand() % 255;
   }
   return 1;
 }
