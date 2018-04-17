@@ -22,7 +22,7 @@
 #include <jwt.h>
 
 // Wifi newtork details.
--const char* ssid = "SSID";
+const char* ssid = "SSID";
 const char* password = "PASSWORD";
 
 // Initialize the Genuino WiFi SSL client library / RTC

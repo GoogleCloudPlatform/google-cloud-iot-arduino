@@ -15,20 +15,19 @@
 
 #include "prng.h"
 
-#include <stddef.h>
+#include <Arduino.h>
 
 #if defined(ESP8266)
-#include "esp8266_peri.h"  // TODO: can use RANDOM_REG32
+#include "esp8266_peri.h"  // Can use RANDOM_REG32
 #endif
 
 int prng(unsigned char *buf, size_t len) {
-  srand (time(NULL));
   while (len--) {
     #if defined(ESP8266)
     *buf++ = RANDOM_REG32 % 255;
     break;
     #endif
-    *buf++ = rand() % 255;
+    *buf++ = random(0, 255);
   }
   return 1;
 }
