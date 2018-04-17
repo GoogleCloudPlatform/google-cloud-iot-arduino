@@ -133,8 +133,6 @@ void getConfig() {
     if (line.indexOf("binaryData") > 0) {
       String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
-      size_t len = rbase64.decode(val);
-      show_text("Config", String(len), val);
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);
