@@ -15,15 +15,17 @@
 
 #include "prng.h"
 
-#include <stddef.h>
-
 #if defined(ESP8266)
-#include "esp8266_peri.h"  // TODO: can use RANDOM_REG32
+#include "esp8266_peri.h"  // Can use RANDOM_REG32
 #endif
 
 int prng(unsigned char *buf, size_t len) {
   while (len--) {
-    *buf++ = 0xCC;  // TOOD: Portable random
+    #if defined(ESP8266)
+    *buf++ = RANDOM_REG32 % 255;
+    break;
+    #endif
+    *buf++ = random(0, 255);
   }
   return 1;
 }

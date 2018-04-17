@@ -16,7 +16,7 @@
 #ifndef _PRNG_H_
 #define _PRNG_H_
 
-#include <stdlib.h>
+#include <Arduino.h>
 
 // Fills buf with random chars.
 int prng(unsigned char *buf, size_t len);

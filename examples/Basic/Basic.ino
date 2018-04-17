@@ -91,6 +91,8 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
 
+  pinMode(LED_BUILTIN, OUTPUT);
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");

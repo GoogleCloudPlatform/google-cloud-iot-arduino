@@ -70,8 +70,6 @@ WiFiClientSecure* client;
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 
-std::string jwt;
-
 // SSD1306 display configuration
 SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
 
@@ -79,7 +77,7 @@ SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
 int sensorPin = 12;  // select the input pin for the potentiometer
 int buttonPin = 16;
 
-std::string getJwt() {
+String getJwt() {
   jwt = device.createJWT(time(nullptr));
   return jwt;
 }
@@ -135,8 +133,6 @@ void getConfig() {
     if (line.indexOf("binaryData") > 0) {
       String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
-      size_t len = rbase64.decode(val);
-      show_text("Config", String(len), val);
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);

@@ -15,13 +15,11 @@
 
 #include <stdio.h>
 
-#include "crypto/nn.c"
+#include "crypto/ecdsa.h"
+#include "crypto/nn.h"
 #include "crypto/sha256.h"
 #include "jwt.h"
 
-extern "C" {
-#include "crypto/ecdsa.h"
-}
 
 // base64_encode copied from https://github.com/ReneNyffenegger/cpp-base64
 static const String base64_chars =
