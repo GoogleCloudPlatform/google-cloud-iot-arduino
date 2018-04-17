@@ -15,8 +15,6 @@
 
 #include "prng.h"
 
-#include <Arduino.h>
-
 #if defined(ESP8266)
 #include "esp8266_peri.h"  // Can use RANDOM_REG32
 #endif

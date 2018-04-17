@@ -70,8 +70,6 @@ WiFiClientSecure* client;
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 
-String jwt;
-
 // SSD1306 display configuration
 SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
 
