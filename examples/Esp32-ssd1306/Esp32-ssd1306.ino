@@ -18,6 +18,7 @@
 #include <time.h>
 #include "SSD1306.h"
 
+#include "ciotc_config.h"
 String jwt;
 
 // Clout IoT configuration that you don't need to change

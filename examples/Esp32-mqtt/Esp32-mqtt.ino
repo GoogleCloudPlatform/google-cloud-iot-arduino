@@ -15,7 +15,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-#define NO8266
 #include <time.h>
 #include "jwt.h"
 
