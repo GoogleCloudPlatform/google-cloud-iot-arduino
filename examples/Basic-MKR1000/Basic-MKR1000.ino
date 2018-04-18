@@ -21,26 +21,10 @@
 
 #include <jwt.h>
 
-// Wifi newtork details.
-const char* ssid = "SSID";
-const char* password = "PASSWORD";
+#include "ciotc_config.h" // Update this file with your configuration
 
 // Initialize the Genuino WiFi SSL client library / RTC
 WiFiSSLClient* client;
-
-// Cloud iot details.
-const char* project_id = "PROJECT-ID";
-const char* location = "us-central1";
-const char* registry_id = "REGISTRY-ID";
-const char* device_id = "DEVICE-ID";
-// To get the private key run (where private-key.pem is the ec private key
-// used to create the certificate uploaded to google cloud iot):
-// openssl ec -in <private-key.pem> -noout -text
-// and copy priv: part.
-const char* private_key_str =
-    "5a:2e:06:b5:c1:f2:9c:b3:77:b2:89:f5:29:29:93:"
-    "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
-    "7d:ca";
 
 // TODO(you): Install root certificate to verify tls connection as described
 // in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
