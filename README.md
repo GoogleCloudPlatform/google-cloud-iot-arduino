@@ -7,20 +7,18 @@ This contains two parts: a library to make a JWT (json web token) which is used
 to authenticate with Google Cloud IOT, and Arduino sketches that demonstrate
 how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
 
-This is not an officially supported Google product.
-
 This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.
 
 ## Quickstart
 
-First, install the library using the Arduinol Library Manager.
+First, install the library using the Arduino Library Manager.
 * Open Arduino and select the **Sketch > Include Library > Library Manager**
 menu item.
 * In the filter box, search for "Google Cloud IoT JWT".
 * Install the library
 
-Next, enable the Cloud IoT Core API by opening the [Google Cloud IoT Core console](https:://console.cloud.google.com/iot/).
+Next, enable the Cloud IoT Core API by opening the [Google Cloud IoT Core console](https://console.cloud.google.com/iot/).
 
 Next, create your device registry as described in [the Quickstart](https://cloud.google.com/iot/docs/quickstart)
 or by using the [Google Cloud SDK](https://cloud.google.com/sdk).
@@ -52,7 +50,8 @@ Register the device using the keys you generated:
 At this point, your registry is created and your device has been added to the
 registry so you're ready to connect it.
 
-Open one of the samples and find the configuration section.
+Select one of the available samples from the **File > Examples > Google Cloud IoT Core JWT**
+menu and find the configuration section (ciotc_config.h in newer examples).
 
 Find and replace the following values first:
 * Project ID (get from console or `gcloud list config`)
