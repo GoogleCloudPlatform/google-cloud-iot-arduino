@@ -28,6 +28,10 @@ const char* device_id = "DEVICE-ID";
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text
 // and copy priv: part.
+// The key length should be exactly the same as the key length bellow (32 pairs
+// of hex digits). If it's bigger and it starts with "00:" delete the "00:". If
+// it's smaller add "00:" to the start. If it's too big or too small something
+// is probably wrong with your key.
 const char* private_key_str =
     "5a:2e:06:b5:c1:f2:9c:b3:77:b2:89:f5:29:29:93:"
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
