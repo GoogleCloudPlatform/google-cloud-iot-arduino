@@ -25,6 +25,10 @@ const char* registry_id = "your-registry-id";
 const char* device_id = "your-device-id";
 
 // From openssl ec -in certificate.pem -noout --text
+// The key length should be exactly the same as the key length bellow (32 pairs
+// of hex digits). If it's bigger and it starts with "00:" delete the "00:". If
+// it's smaller add "00:" to the start. If it's too big or too small something
+// is probably wrong with your key.
 const char* private_key_str =
     "e0:14:62:40:1c:d5:0b:78:cb:5e:7b:f9:ba:a7:08:"
     "0d:fa:41:34:48:69:56:e5:4a:d0:a3:a5:a4:c8:4b:"
