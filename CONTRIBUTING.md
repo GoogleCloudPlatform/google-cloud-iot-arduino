@@ -3,6 +3,14 @@
 We'd love to accept your patches and contributions to this project. There are
 just a few small guidelines you need to follow.
 
+## Editing files in src/crypto
+
+The files in src/crypto are pulled from external git repositories. They are not
+submoduled so that this repo can be exported as an Arduino library. If you want
+to modify prng.*, modify it directly in this repo. If you want to modify other
+file either modify them using pull_crypto.sh, or modify them in the repos they
+are pulled from.
+
 ## Contributor License Agreement
 
 Contributions to this project must be accompanied by a Contributor License
