@@ -12,9 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#include <CloudIoTCore.h>
-#include <String.h>
-
 #include "backoff.h"
 #include "esp8266_wifi.h"
 #include "cli.h"
@@ -27,9 +24,10 @@ void setup() {
 }
 
 void loop() {
-  if (backoff()) {    
+  if (backoff()) {
     // Log signal strength
     sendTelemetry();
+    delay(1000);
     getConfig();
   }
 

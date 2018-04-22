@@ -21,6 +21,7 @@
 #include <WiFiClientSecure.h>
 #include <time.h>
 #include <rBase64.h>
+#include <CloudIoTCore.h>
 
 #include "ciotc_config.h" // Wifi configuration here
 
