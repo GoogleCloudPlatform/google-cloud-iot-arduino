@@ -17,13 +17,17 @@
 #define __BACKOFF_H__
 
 int backOffCount = 0;
-long minBackoff = 5000;
+long minBackoff = 5000; // 1000 if you don't mind sending lots of data
 long maxBackoff = 60000;
 long minJitter = 50;
 long maxJitter = 1000;
 
 long currDelay = minBackoff;
 long lastRequestTime = millis();
+
+void resetBackoff() {
+  backOffCount = 0;
+}
 
 // Returns true if the backoff duration has passed
 bool backoff() {
@@ -35,6 +39,7 @@ bool backoff() {
     }
     Serial.printf("Waiting: %ld\n", currDelay);
     delay(500); // FIXME remove
+    lastRequestTime = millis();
     return true;
   }
   return false;

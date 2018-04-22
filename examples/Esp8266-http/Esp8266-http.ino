@@ -30,7 +30,7 @@ void loop() {
   if (backoff()) {    
     // Log signal strength
     sendTelemetry();
-    //getConfig();
+    getConfig();
   }
 
   delay(10); // too fast

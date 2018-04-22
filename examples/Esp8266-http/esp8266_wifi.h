@@ -13,6 +13,7 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi
+// TODO: abstract to interface / template?
 
 #ifndef __ESP8266_WIFI_H__
 #define __ESP8266_WIFI_H__
@@ -89,7 +90,7 @@ void doRequest(WiFiClientSecure* client, boolean isGet, String postData) {
     authstring + "\n";
     
   if (isGet) {
-    request = request + String("\n\n");
+    request = request + String("\n");
   } else {
     request = request + 
         "method: post\n" + 
@@ -135,7 +136,11 @@ void sendTelemetry(String data) {
   Serial.println();
 
   while (client.connected()) {
-    String line = client.readStringUntil('\n');    
+    String line = client.readStringUntil('\n');
+    if (line.startsWith("HTTP/1.1 200 OK")) {
+      // reset backoff
+      resetBackoff();
+    }
     Serial.println(line);
     if (line == "\r") {
       break;
@@ -171,7 +176,7 @@ void getConfig() {
     Serial.println(line);
     if (line.indexOf("binaryData") > 0) {
       // Reset backoff
-      backOffCount = 0;
+      resetBackoff();
       String val =
           line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
       if (val == "MQ==") {
