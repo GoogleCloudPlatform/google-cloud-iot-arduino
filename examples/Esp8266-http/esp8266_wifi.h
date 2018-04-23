@@ -44,7 +44,7 @@ String getJwt() {
   if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
     // Disable software watchdog as these operations can take a while.
     ESP.wdtDisable();
-    Serial.println("Refrehsing JWT");
+    Serial.println("Refreshing JWT");
     iss = time(nullptr);
     jwt = device->createJWT(iss);
     ESP.wdtEnable(0);
