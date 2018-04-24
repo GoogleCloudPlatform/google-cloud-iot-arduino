@@ -46,4 +46,4 @@ const char* private_key_str =
 // <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
 // try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
 const char* fingerprint =
-    "AD:19:13:E1:1B:AB:43:E7:8D:4D:B0:A9:20:A0:CC:FD:24:C4:55:DF";
+    "7C:D4:99:11:FE:FC:0D:78:C0:A9:C1:18:52:1D:3F:0B:8B:38:C9:90";
