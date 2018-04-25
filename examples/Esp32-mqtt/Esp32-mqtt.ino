@@ -14,23 +14,14 @@
  *****************************************************************************/
 #include <Arduino.h>
 #include <CloudIoTCore.h>
+#include <CloudIoTCoreMQTTClient.h>
 #include <WiFi.h>
-#include <WiFiClientSecure.h>
+#include <ciotc_config.h>  // Configure with your settings
 #include <time.h>
-#include <ciotc_config.h> // Configure with your settings
 
-#define MQTT_MAX_PACKET_SIZE 512
-#include <PubSubClient.h>
-
-const char *host = "mqtt.googleapis.com";
-const int httpsPort = 8883;
-
-WiFiClientSecure client;
-PubSubClient mqttClient(client);
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
-String pwd;
-String jwt;
+CloudIoTCoreMQTTClient client(device);
 
 long lastMsg = 0;
 char msg[20];
@@ -38,15 +29,7 @@ int counter = 0;
 
 const int LED_PIN = 5;
 
-String getJwt() {
-  jwt = device.createJWT(time(nullptr));
-  return jwt;
-}
-
-void callback(char *topic, uint8_t *payload, unsigned int length) {
-  Serial.print("Message received: ");
-  Serial.println(topic);
-
+void callback(uint8_t *payload, unsigned int length) {
   Serial.print("payload: ");
   char val[length];
   for (int i = 0; i < length; i++) {
@@ -72,34 +55,9 @@ void callback(char *topic, uint8_t *payload, unsigned int length) {
   }
 }
 
-void mqtt_connect() {
-  /* Loop until reconnected */
-  while (!client.connected()) {
-    Serial.println("MQTT connecting ...");
-    String pass = getJwt();
-    Serial.println(pass.c_str());
-    const char *user = "unused";
-    String clientId = device.getClientId();
-    Serial.println(clientId.c_str());
-    if (mqttClient.connect(clientId.c_str(), user, pass.c_str())) {
-      Serial.println("connected");
-      String configTopic = device.getConfigTopic();
-      Serial.println(configTopic.c_str());
-      mqttClient.setCallback(callback);
-      mqttClient.subscribe(configTopic.c_str(), 0);
-    } else {
-      Serial.print("failed, status code =");
-      Serial.print(mqttClient.state());
-      Serial.println(" try again in 5 seconds");
-      /* Wait 5 seconds before retrying */
-      delay(5000);
-    }
-  }
-}
-
 void setup() {
   pinMode(LED_PIN, OUTPUT);
-  
+
   // put your setup code here, to run once:
   Serial.begin(115200);
 
@@ -117,17 +75,12 @@ void setup() {
   }
 
   Serial.println("Connecting to mqtt.googleapis.com");
-  client.setCACert(root_cert);
-  mqttClient.setServer(host, httpsPort);
-  mqttClient.setCallback(callback);
+  client.connectSecure(root_cert);
+  client.setConfigCallback(callback);
 }
 
 void loop() {
-  if (!mqttClient.connected()) {
-    mqtt_connect();
-  }
-
-  mqttClient.loop();
+  client.loop();
 
   long now = millis();
   if (now - lastMsg > 3000) {
@@ -135,14 +88,11 @@ void loop() {
     if (counter < 1000) {
       counter++;
       snprintf(msg, 20, "%d", counter);
+      Serial.println("Publish message");
       /* publish the message */
-      String eventsTopic = device.getEventsTopic();
-      mqttClient.publish(eventsTopic.c_str(), msg);
+      client.publishTelemetry(msg);
     } else {
       counter = 0;
     }
   }
-
-  // I had some issues on the PubSubClient without some delay
-  delay(10);
 }
