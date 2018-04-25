@@ -52,6 +52,11 @@ String CloudIoTCoreDevice::getBasePath() {
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
+String CloudIoTCoreDevice::getClientId(){
+  return String("projects/") + project_id + "/locations/" + location +
+         "/registries/" + registry_id + "/devices/" + device_id;
+}
+
 String CloudIoTCoreDevice::getConfigPath(int version) {
   char buf[8] = {0};
   itoa(version, buf, 10);

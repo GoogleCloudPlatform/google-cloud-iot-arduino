@@ -13,23 +13,22 @@
  * limitations under the License.
  *****************************************************************************/
 #include <Arduino.h>
+#include <CloudIoTCore.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 #include <time.h>
-#include "jwt.h"
-
-#include "ciotc_config.h" // Configure with your settings
+#include <ciotc_config.h> // Configure with your settings
 
 #define MQTT_MAX_PACKET_SIZE 512
 #include <PubSubClient.h>
 
-NN_DIGIT priv_key[8];
 const char *host = "mqtt.googleapis.com";
 const int httpsPort = 8883;
-// const int httpsPort = 443;
 
 WiFiClientSecure client;
 PubSubClient mqttClient(client);
+CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
+                          private_key_str);
 String pwd;
 String jwt;
 
@@ -40,28 +39,8 @@ int counter = 0;
 const int LED_PIN = 5;
 
 String getJwt() {
-  jwt = CreateJwt(project_id, time(nullptr), priv_key);
+  jwt = device.createJWT(time(nullptr));
   return jwt;
-}
-
-// Fills the priv_key global variable with private key str which is of the form
-// aa:bb:cc:dd:ee:...
-void fill_priv_key(const char *priv_key_str) {
-  priv_key[8] = 0;
-  for (int i = 7; i >= 0; i--) {
-    priv_key[i] = 0;
-    for (int byte_num = 0; byte_num < 4; byte_num++) {
-      priv_key[i] = (priv_key[i] << 8) + strtoul(priv_key_str, NULL, 16);
-      priv_key_str += 3;
-    }
-  }
-}
-
-// Gets the google cloud iot http endpoint path.
-String get_path(const char *project_id, const char *location,
-                const char *registry_id, const char *device_id) {
-  return String("projects/") + project_id + "/locations/" + location +
-         "/registries/" + registry_id + "/devices/" + device_id;
 }
 
 String get_config_topic(const char *device_id) {
@@ -74,10 +53,6 @@ String get_events_topic(const char *device_id) {
 
 String get_state_topic(const char *device_id) {
   return String("/devices/") + device_id + "/state";
-}
-
-String get_client_id() {
-  return get_path(project_id, location, registry_id, device_id);
 }
 
 void callback(char *topic, uint8_t *payload, unsigned int length) {
@@ -116,7 +91,7 @@ void mqtt_connect() {
     String pass = getJwt();
     Serial.println(pass.c_str());
     const char *user = "unused";
-    String clientId = get_client_id();
+    String clientId = device.getClientId();
     Serial.println(clientId.c_str());
     if (mqttClient.connect(clientId.c_str(), user, pass.c_str())) {
       Serial.println("connected");
@@ -136,9 +111,7 @@ void mqtt_connect() {
 
 void setup() {
   pinMode(LED_PIN, OUTPUT);
-
-  fill_priv_key(private_key_str);
-
+  
   // put your setup code here, to run once:
   Serial.begin(115200);
 
