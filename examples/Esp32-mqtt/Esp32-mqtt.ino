@@ -43,18 +43,6 @@ String getJwt() {
   return jwt;
 }
 
-String get_config_topic(const char *device_id) {
-  return String("/devices/") + device_id + "/config";
-}
-
-String get_events_topic(const char *device_id) {
-  return String("/devices/") + device_id + "/events";
-}
-
-String get_state_topic(const char *device_id) {
-  return String("/devices/") + device_id + "/state";
-}
-
 void callback(char *topic, uint8_t *payload, unsigned int length) {
   Serial.print("Message received: ");
   Serial.println(topic);
@@ -95,7 +83,7 @@ void mqtt_connect() {
     Serial.println(clientId.c_str());
     if (mqttClient.connect(clientId.c_str(), user, pass.c_str())) {
       Serial.println("connected");
-      String configTopic = get_config_topic(device_id);
+      String configTopic = device.getConfigTopic();
       Serial.println(configTopic.c_str());
       mqttClient.setCallback(callback);
       mqttClient.subscribe(configTopic.c_str(), 0);
@@ -148,7 +136,7 @@ void loop() {
       counter++;
       snprintf(msg, 20, "%d", counter);
       /* publish the message */
-      String eventsTopic = get_events_topic(device_id);
+      String eventsTopic = device.getEventsTopic();
       mqttClient.publish(eventsTopic.c_str(), msg);
     } else {
       counter = 0;

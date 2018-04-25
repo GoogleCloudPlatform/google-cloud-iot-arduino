@@ -57,6 +57,18 @@ String CloudIoTCoreDevice::getClientId(){
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
+String CloudIoTCoreDevice::getConfigTopic(){
+  return String("/devices/") + device_id + "/config";
+}
+
+String CloudIoTCoreDevice::getEventsTopic(){
+  return String("/devices/") + device_id + "/events";
+}
+
+String CloudIoTCoreDevice::getStateTopic(){
+  return String("/devices/") + device_id + "/state";
+}
+
 String CloudIoTCoreDevice::getConfigPath(int version) {
   char buf[8] = {0};
   itoa(version, buf, 10);
