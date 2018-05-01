@@ -16,7 +16,7 @@
 #include <CloudIoTCore.h>
 #include <CloudIoTCoreMQTTClient.h>
 #include <WiFi.h>
-#include <ciotc_config.h>  // Configure with your settings
+#include "ciotc_config.h"  // Configure with your settings
 #include <time.h>
 
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
