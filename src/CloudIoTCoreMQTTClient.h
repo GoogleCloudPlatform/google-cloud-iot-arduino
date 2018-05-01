@@ -50,6 +50,7 @@ class CloudIoTCoreMQTTClient {
   WiFiClientSecure client;
   PubSubClient mqttClient;
   String jwt;
+  unsigned long iss;
 
   void mqttConnect();
   String getJWT();

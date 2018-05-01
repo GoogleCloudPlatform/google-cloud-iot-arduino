@@ -55,7 +55,10 @@ void CloudIoTCoreMQTTClient::connectSecure(const char *root_cert) {
 #endif
 
 String CloudIoTCoreMQTTClient::getJWT() {
-  jwt = device.createJWT(time(nullptr));
+  if (iss == 0 || time(nullptr) - iss > 3600) {
+    iss = time(nullptr);
+    jwt = device.createJWT(iss);
+  }
   return jwt;
 }
 
