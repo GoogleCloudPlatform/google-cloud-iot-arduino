@@ -63,8 +63,9 @@ class CloudIoTCoreMQTTClient {
   void loop();
 
   void connect();
+#ifndef ESP8266
   void connectSecure(const char *root_cert);
-
+#endif
   /* MQTT methods */
   void publishTelemetry(String binaryData);
   void publishTelemetry(const char *binaryData);

@@ -47,10 +47,12 @@ void CloudIoTCoreMQTTClient::connect() {
   mqttClient.setCallback(callback);
 }
 
+#ifndef ESP8266
 void CloudIoTCoreMQTTClient::connectSecure(const char *root_cert) {
   client.setCACert(root_cert);
   this->connect();
 }
+#endif
 
 String CloudIoTCoreMQTTClient::getJWT() {
   jwt = device.createJWT(time(nullptr));
