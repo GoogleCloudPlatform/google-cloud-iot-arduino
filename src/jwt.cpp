@@ -14,6 +14,8 @@
  *****************************************************************************/
 
 #include <stdio.h>
+#include <string>
+#include <Arduino.h>
 
 #include "crypto/ecdsa.h"
 #include "crypto/nn.h"
@@ -22,14 +24,14 @@
 
 
 // base64_encode copied from https://github.com/ReneNyffenegger/cpp-base64
-static const String base64_chars =
+static const char* base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789+/";
 
-String base64_encode(const unsigned char *bytes_to_encode,
+char* base64_encode(const unsigned char *bytes_to_encode,
                      unsigned int in_len) {
-  String ret;
+  char* ret = new char(4);
   int i = 0;
   int j = 0;
   unsigned char char_array_3[3];
@@ -76,26 +78,26 @@ String base64_encode(const unsigned char *bytes_to_encode,
   return ret;
 }
 
-String base64_encode(String str) {
+std::string base64_encode(std::string str) {
   return base64_encode((const unsigned char *)str.c_str(), str.length());
 }
 
 // Get's sha256 of str.
-String get_sha(const String &str) {
+char* get_sha(const char* str) {
   Sha256 sha256Instance;
 
-  sha256Instance.update((const unsigned char *)str.c_str(), str.length());
+  sha256Instance.update((const unsigned char *)str, strlen(str));
 
-  unsigned char sha256[SHA256_DIGEST_LENGTH];
+  unsigned char* sha256 = new unsigned char(SHA256_DIGEST_LENGTH);
 
   sha256Instance.final(sha256);
 
-  return String((const char *)sha256);
+  return (char *)sha256;
 }
 
 // Get base64 signature string from the signature_r and signature_s ecdsa
 // signature.
-String MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
+char* MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
   unsigned char signature[64];
   NN_Encode(signature, (NUMWORDS - 1) * NN_DIGIT_LEN, signature_r,
             (NN_UINT)(NUMWORDS - 1));
@@ -107,24 +109,30 @@ String MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
 }
 
 // Convert an integer to a string.
-String int_to_string(long long int x) {
-  char buf[20];
+// Caller must free
+char* int_to_string(long long int x) {
+  char* buf = new char(20);
   snprintf(buf, 20, "%d", (int)x);
   return buf;
 }
 
+// Arduino wrapper
 String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key) {
+    return CreateJwt(project_id, time, priv_key);
+}
+
+const char* CreateJwt(char* project_id, long long int time, NN_DIGIT *priv_key) {
   ecc_init();
   // Making jwt token json
-  String header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
-  String payload = "{\"iat\":" + int_to_string(time) +
-                   ",\"exp\":" + int_to_string(time + 3600) + ",\"aud\":\"" +
+  std::string header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
+  std::string payload = "{\"iat\":" + std::string(int_to_string(time)) +
+                   ",\"exp\":" + std::string(int_to_string(time + 3600)) + ",\"aud\":\"" +
                    project_id + "\"}";
 
-  String header_payload_base64 =
+  std::string header_payload_base64 =
       base64_encode(header) + "." + base64_encode(payload);
 
-  String sha256 = get_sha(header_payload_base64);
+  std::string sha256 = get_sha(header_payload_base64.c_str());
 
   // Signing sha with ec key. Bellow is the ec private key.
   point_t pub_key;
@@ -135,6 +143,6 @@ String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key) {
   NN_DIGIT signature_r[NUMWORDS], signature_s[NUMWORDS];
   ecdsa_sign((uint8_t *)sha256.c_str(), signature_r, signature_s, priv_key);
 
-  return header_payload_base64 + "." +
-         MakeBase64Signature(signature_r, signature_s);
+  return (header_payload_base64 + "." +
+         MakeBase64Signature(signature_r, signature_s)).c_str();
 }

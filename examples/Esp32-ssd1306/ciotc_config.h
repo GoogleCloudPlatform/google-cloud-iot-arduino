@@ -13,6 +13,9 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains your configuration used to connect to Cloud IoT Core
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 16
+#endif
 
 // Wifi network details.
 const char* ssid = "YOURSSID";
