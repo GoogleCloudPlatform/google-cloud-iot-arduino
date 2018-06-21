@@ -17,13 +17,13 @@
 #define __BACKOFF_H__
 
 int backOffCount = 0;
-long minBackoff = 5000; // 1000 if you don't mind sending lots of data
-long maxBackoff = 60000;
-long minJitter = 50;
-long maxJitter = 1000;
+unsigned long minBackoff = 5000; // 1000 if you don't mind sending lots of data
+unsigned long maxBackoff = 60000;
+unsigned long minJitter = 50;
+unsigned long maxJitter = 1000;
 
-long currDelay = minBackoff;
-long lastRequestTime = millis();
+unsigned long currDelay = minBackoff;
+unsigned long lastRequestTime = millis();
 
 void resetBackoff() {
   backOffCount = 0;
