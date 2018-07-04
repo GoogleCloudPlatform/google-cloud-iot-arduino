@@ -23,7 +23,7 @@
 #define MQTT_MAX_PACKET_SIZE 512
 #include <PubSubClient.h>
 
-NN_DIGIT priv_key[8];
+NN_DIGIT priv_key[9];
 const char *host = "mqtt.googleapis.com";
 const int httpsPort = 8883;
 // const int httpsPort = 443;
