@@ -47,7 +47,6 @@ String getJwt() {
 // Fills the priv_key global variable with private key str which is of the form
 // aa:bb:cc:dd:ee:...
 void fill_priv_key(const char *priv_key_str) {
-  priv_key[8] = 0;
   for (int i = 7; i >= 0; i--) {
     priv_key[i] = 0;
     for (int byte_num = 0; byte_num < 4; byte_num++) {
