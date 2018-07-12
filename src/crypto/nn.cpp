@@ -245,7 +245,7 @@ NN_Div(NN_DIGIT *a, NN_DIGIT *b, NN_DIGIT *c, NN_UINT c_digits, NN_DIGIT *d, NN_
   NN_LShift (dd, d, shift, dd_digits);
   t = dd[dd_digits - 1];
 
-  if(a != NULL) {
+  if(a) {
     NN_AssignZero (a, c_digits);
   }
 
@@ -263,7 +263,7 @@ NN_Div(NN_DIGIT *a, NN_DIGIT *b, NN_DIGIT *c, NN_UINT c_digits, NN_DIGIT *d, NN_
       ai++;
       cc[i+dd_digits] -= NN_Sub (&cc[i], &cc[i], dd, dd_digits);
     }
-    if(a != NULL) {
+    if(a) {
       a[i] = ai;
     }
   }
@@ -301,7 +301,7 @@ NN_Sqr(NN_DIGIT *a, NN_DIGIT *b, NN_UINT digits)
 void
 NN_Mod(NN_DIGIT *a, NN_DIGIT *b, NN_UINT b_digits, NN_DIGIT *c, NN_UINT c_digits)
 {
-  NN_Div(NULL, a, b, b_digits, c, c_digits);
+  NN_Div(0, a, b, b_digits, c, c_digits);
 }
 /*---------------------------------------------------------------------------*/
 void
