@@ -1,4 +1,4 @@
-# Google Cloud IOT JWT
+# Google Cloud IoT JWT
 
 This is an example of how to generate JSON Web Token (JWT) credentials for
 connecting to Google Cloud IoT Core.
