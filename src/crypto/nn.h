@@ -20,7 +20,7 @@
 #define __NN_H__
 
 #include <stdint.h>
-
+#include <cstring>
 /**
  * A n-bit natural number are represented by an array of w-bit integers. The size
  * of array is n/w
