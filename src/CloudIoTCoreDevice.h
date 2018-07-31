@@ -50,16 +50,9 @@ class CloudIoTCoreDevice {
   String createJWT(long long int time);
   String getJWT();
 
-
   /* HTTP methods path */
   String getConfigPath(int version);
   String getLastConfigPath();
   String getSendTelemetryPath();
-  
-  /* MQTT methods */
-  String getClientId();
-  String getConfigTopic();
-  String getEventsTopic();
-  String getStateTopic();
 };
 #endif  // CloudIoTCoreDevice_h
