@@ -124,8 +124,9 @@ void doRequest(WiFiClientSecure* client, boolean isGet, String postData) {
 }
 
 void sendTelemetry(String data) {
+  rbase64.encode(data);
   String postdata =
-      String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
+      String("{\"binary_data\": \"") + rbase64.result() + String("\"}");
 
   WiFiClientSecure client;
   doRequest(&client, false, postdata);
