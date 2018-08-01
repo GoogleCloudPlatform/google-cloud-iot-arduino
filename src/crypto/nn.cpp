@@ -6,6 +6,7 @@
  */
 
 #include "nn.h"
+#include <String.h>
 #if !defined(WITH_CONTIKI) && defined(HAVE_ASSERT_H)
 #include <assert.h>
 #else

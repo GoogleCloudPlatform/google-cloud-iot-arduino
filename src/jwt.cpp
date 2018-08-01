@@ -14,8 +14,6 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include <string>
-#include <Arduino.h>
 
 #include "crypto/ecdsa.h"
 #include "crypto/nn.h"
@@ -88,7 +86,7 @@ String get_sha(const String& str) {
 
   sha256Instance.update((const unsigned char *)str.c_str(), str.length());
 
-  unsigned char* sha256 = new unsigned char(SHA256_DIGEST_LENGTH);
+  unsigned char sha256[SHA256_DIGEST_LENGTH];
 
   sha256Instance.final(sha256);
 
@@ -109,7 +107,6 @@ String MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
 }
 
 // Convert an integer to a string.
-// Caller must free
 String int_to_string(long long int x) {
   char* buf = new char(20);
   snprintf(buf, 20, "%d", (int)x);
@@ -120,18 +117,13 @@ String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key) {
   ecc_init();
   // Making jwt token json
   String header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
-  String payload = String("{\"iat\":");
-  payload = payload + String(int_to_string(time));
-  payload = payload + ",\"exp\":";
-  payload = payload + String(int_to_string(time + 3600));
-  payload = payload + ",\"aud\":\"";
-  payload = payload + project_id;
-  payload = payload + "\"}";
-
+  String payload = "{\"iat\":" + int_to_string(time) +
+                   ",\"exp\":" + int_to_string(time + 3600) + ",\"aud\":\"" +
+                   project_id + "\"}";
   String header_payload_base64 =
       base64_encode(header) + "." + base64_encode(payload);
 
-  String sha256 = get_sha(header_payload_base64.c_str());
+  String sha256 = get_sha(header_payload_base64);
 
   // Signing sha with ec key. Bellow is the ec private key.
   point_t pub_key;
