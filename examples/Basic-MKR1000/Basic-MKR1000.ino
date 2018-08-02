@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-
 #include <String.h>
 #include <WiFi101.h>
 #include <WiFiSSLClient.h>
