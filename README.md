@@ -70,6 +70,13 @@ When you run the sample, the device will connect and receive configuration
 from Cloud IoT Core. When you change the configuration in the Cloud IoT Core
 console, that configuration will be reflrected on the device.
 
+## Dependencies
+Some examples use specific dependencies that need to be installed via the Arduino Library manager.
+
+* [rBase64](https://github.com/boseji/rBASE64) - Used in Esp8266
+* [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
+* [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
+
 ## Known issues
 
 ### HTTP Examples
