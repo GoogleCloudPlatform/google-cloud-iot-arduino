@@ -29,7 +29,14 @@ CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 
 // SSD1306 display configuration
+// #define DISPLAY // ENABLE ssd1306
+#ifdef DISPLAY
 SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
+#endif
+
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 16
+#endif
 
 // Button / Potentiometer configuration
 int sensorPin = 12;  // select the input pin for the potentiometer
@@ -41,6 +48,7 @@ String getJwt() {
 }
 
 void show_text(String top, String mid, String bot) {
+  #ifdef DISPLAY
   display->clear();
   display->setTextAlignment(TEXT_ALIGN_LEFT);
   display->setFont(ArialMT_Plain_24);
@@ -50,6 +58,7 @@ void show_text(String top, String mid, String bot) {
   display->setFont(ArialMT_Plain_10);
   display->drawString(0, 44, bot);
   display->display();
+  #endif
 }
 void show_text(String val) { show_text(val, val, val); }
 
@@ -57,8 +66,6 @@ void show_text(String val) { show_text(val, val, val); }
 void buttonPoll() {
   // read the value from the sensor:
   int sensorValue = analogRead(sensorPin);
-  Serial.println(digitalRead(buttonPin));
-  Serial.println(sensorValue);
   show_text("Input", String(digitalRead(buttonPin)), String(sensorValue));
   delay(100);
 }
@@ -71,11 +78,11 @@ void getConfig() {
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   // Connect via https.
-  client->println(header);
+  client->println(header.c_str());
+  client->println(authstring.c_str());
   client->println("host: cloudiotdevice.googleapis.com");
   client->println("method: get");
   client->println("cache-control: no-cache");
-  client->println(authstring);
   client->println();
 
   while (client->connected()) {
@@ -87,7 +94,6 @@ void getConfig() {
   }
   while (client->available()) {
     String line = client->readStringUntil('\n');
-    Serial.println(line);
     if (line.indexOf("binaryData") > 0) {
       String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
@@ -109,15 +115,15 @@ void sendTelemetry(String data) {
   // TODO(class): Move to common helper
   String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
                   String(" HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(jwt.c_str());
+  String authstring = "authorization: Bearer " + String(jwt.c_str()); 
 
   Serial.println("Sending telemetry");
 
-  client->println(header);
+  client->println(header.c_str());
   client->println("host: cloudiotdevice.googleapis.com");
   client->println("method: post");
   client->println("cache-control: no-cache");
-  client->println(authstring);
+  client->println(authstring.c_str());
   client->println("content-type: application/json");
   client->print("content-length:");
   client->println(postdata.length());
@@ -148,19 +154,24 @@ void sendTelemetry(String data) {
 void setup() {
   Serial.begin(115200);
 
+  #ifdef DISPLAY
   display = new SSD1306(0x3c, 5, 4);
-
   display->init();
   display->flipScreenVertically();
   display->setFont(ArialMT_Plain_10);
+  #endif
+
+  delay(150);
 
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
   show_text("Wifi");
   while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
+    delay(250);
+    Serial.print(".");
   }
+  Serial.println();
 
   client = new WiFiClientSecure();
 
@@ -184,7 +195,7 @@ void setup() {
     Serial.println("Connection failed!");
   } else {
     Serial.println("Getting JWT: ");
-    getJwt();
+    Serial.println(getJwt());
     getConfig();
     // sendTelemetry(String("Device:") + String(device_id) + String(">
     // connected"));

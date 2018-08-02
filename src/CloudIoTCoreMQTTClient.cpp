@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-
+#ifdef ESP32 // Prevent compilation on Genuino for now
 #include "CloudIoTCoreMQTTClient.h"
 #include <time.h>
 
@@ -124,3 +124,4 @@ void CloudIoTCoreMQTTClient::setConfigCallback(
     CONFIG_CALLBACK_SIGNATURE_PARAM) {
   configCallback = configCallbackParam;
 }
+#endif
