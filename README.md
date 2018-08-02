@@ -70,23 +70,6 @@ When you run the sample, the device will connect and receive configuration
 from Cloud IoT Core. When you change the configuration in the Cloud IoT Core
 console, that configuration will be reflrected on the device.
 
-## The JWT library
-
-The JWT library is contained in the `/jwt` folder. To generate the library run
-the following commands from the `jwt` directory:
-
-```bash
-cd jwt
-source compile.sh
-```
-
-The above command will create a new directory `jwt/jwt` which is a working
-Arduino library. To install it copy it to the libraries folder of your Arduino
-installation (`~/Arduino/libraries` on linux). When we publish the library,
-the output of that folder is placed into the `/src`.
-
-To clean the output run `source compile.sh clean`.
-
 ## Known issues
 
 ### HTTP Examples
