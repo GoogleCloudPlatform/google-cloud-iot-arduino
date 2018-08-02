@@ -108,7 +108,7 @@ String MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
 
 // Convert an integer to a string.
 String int_to_string(long long int x) {
-  char* buf = new char(20);
+  char buf[20];
   snprintf(buf, 20, "%d", (int)x);
   return String(buf);
 }

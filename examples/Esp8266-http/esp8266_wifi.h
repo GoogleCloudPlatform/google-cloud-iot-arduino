@@ -19,21 +19,25 @@
 #define __ESP8266_WIFI_H__
 #include <ESP8266WiFi.h>
 #include <WiFiClientSecure.h>
+#include "FS.h"
 #include <time.h>
 #include <rBase64.h>
 #include <CloudIoTCore.h>
+#include "backoff.h"
 
 #include "ciotc_config.h" // Wifi configuration here
 
 // Clout IoT configuration that you don't need to change
 const char* host = CLOUD_IOT_CORE_HTTP_HOST;
 const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
-CloudIoTCoreDevice* device;
+CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
+                          private_key_str);
 
 unsigned int priv_key[8];
 unsigned long iss = 0;
 String jwt;
 boolean wasErr;
+WiFiClientSecure client;
 
 // Helpers for this board
 String getDefaultSensor() {
@@ -45,8 +49,7 @@ String getJwt() {
     // Disable software watchdog as these operations can take a while.
     ESP.wdtDisable();
     Serial.println("Refreshing JWT");
-    iss = time(nullptr);
-    jwt = device->createJWT(iss);
+    jwt = device.createJWT(time(nullptr));
     ESP.wdtEnable(0);
   }
   return jwt;
@@ -66,71 +69,106 @@ void setupWifi() {
     delay(10);
   }
 
-  device = new CloudIoTCoreDevice(
-    project_id, location, registry_id, device_id, private_key_str);
-
   // Device/Time OK, refresh JWT
   Serial.println(getJwt());
+
+  // Set CA cert on wifi client
+  //client.setCACert(root_cert);
+
+  if (!SPIFFS.begin()) {
+    Serial.println("Failed to mount file system");
+    return;
+  }
+
+  File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
+  if (!ca) {
+    Serial.println("Failed to open ca file");
+  } else {
+    Serial.println("Success to open ca file");
+  }
+
+  if(client.loadCertificate(ca)) {
+    Serial.println("loaded");
+  } else {
+    Serial.println("not loaded");
+  }
 }
 
-void doRequest(WiFiClientSecure* client, boolean isGet, String postData) {
+
+// IoT functions
+void getConfig() {
+  // TODO(class): Move to common section
   String header =
-      String("POST  ") +
-      device->getSendTelemetryPath().c_str() +
-      String(" HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(getJwt().c_str());
+      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(jwt.c_str());
 
-  if (isGet) {
-    header = String("GET ") + device->getLastConfigPath() + " HTTP/1.1";
-    authstring = "authorization: Bearer " + getJwt();
-  }
-
-  String request = header + "\n" +
-    "host: cloudiotdevice.googleapis.com\n" +
-    "cache-control: no-cache\n" +
-    authstring + "\n";
-    
-  if (isGet) {
-    request = request + String("\n");
-  } else {
-    request = request + 
-        "method: post\n" + 
-        "content-type: application/json\n" + 
-        "content-length:" + String(postData.length()) +
-        "\n\n" + postData + "\n\n";
-  }
-
-  Serial.println("Connecting to " + String(host));
-  client->connect(host, httpsPort);
-  Serial.println("Verifying certificate");
-  if (!client->verify(fingerprint, host)) {
-    Serial.println(
-        "Error: Certificate not verified! "
-        "Perhaps the fingerprint is outdated.");
-    // return;
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("connection failed");
+    return;
   }
 
   // Connect via https.
-  Serial.println(request);
-  client->print(request);
+  client.println(header.c_str());
+  client.println(authstring.c_str());
+  client.println("host: cloudiotdevice.googleapis.com");
+  client.println("method: get");
+  client.println("cache-control: no-cache");
+  client.println();
 
-  unsigned long timeout = millis();
-  while (client->available() == 0) {
-    if (millis() - timeout > 5000) {
-      Serial.println(">>> Client Timeout !");
-      delay(10000);
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    if (line == "\r") {
+      Serial.println("headers received");
+      break;
     }
   }
+  while (client.available()) {
+    String line = client.readStringUntil('\n');
+    if (line.indexOf("binaryData") > 0) {
+      String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
+      Serial.println(val);
+      if (val == "MQ==") {
+        Serial.println("LED ON");
+        digitalWrite(LED_BUILTIN, HIGH);
+      } else {
+        Serial.println("LED OFF");
+        digitalWrite(LED_BUILTIN, LOW);
+      }
+      resetBackoff();
+    }
+  }
+  client.stop();
 }
 
 void sendTelemetry(String data) {
-  rbase64.encode(data);
-  String postdata =
-      String("{\"binary_data\": \"") + rbase64.result() + String("\"}");
-
-  WiFiClientSecure client;
-  doRequest(&client, false, postdata);
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("connection failed");
+    return;
+  }
   
+  String postdata =
+      String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
+
+  // TODO(class): Move to common helper
+  String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
+                  String(" HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(jwt.c_str()); 
+
+  Serial.println("Sending telemetry");
+
+  client.println(header.c_str());
+  client.println("host: cloudiotdevice.googleapis.com");
+  client.println("method: post");
+  client.println("cache-control: no-cache");
+  client.println(authstring.c_str());
+  client.println("content-type: application/json");
+  client.print("content-length:");
+  client.println(postdata.length());
+  client.println();
+  client.println(postdata);
+  client.println();
+  client.println();
+
   while (!client.available()) {
     delay(100);
     Serial.print('.');
@@ -143,55 +181,20 @@ void sendTelemetry(String data) {
       // reset backoff
       resetBackoff();
     }
-    Serial.println(line);
     if (line == "\r") {
       break;
     }
   }
   while (client.available()) {
     String line = client.readStringUntil('\n');
-    Serial.println(line);
   }
   Serial.println("Complete.");
+  client.stop();
 }
+
 // Helper that just sends default sensor
 void sendTelemetry() {
   sendTelemetry(getDefaultSensor());
-}
-
-void getConfig() {
-  WiFiClientSecure client;
-  doRequest(&client, true, "");
-
-  // Handle headers here
-  while (client.connected()) {
-    String line = client.readStringUntil('\n');
-    Serial.println(line);
-    if (line == "\r") {
-      Serial.println("--");
-      break;
-    }
-  }
-  // Handle respone body here
-  while (client.available()) {
-    String line = client.readStringUntil('\n');
-    Serial.println(line);
-    if (line.indexOf("binaryData") > 0) {
-      // Reset backoff
-      resetBackoff();
-      String val =
-          line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
-      if (val == "MQ==") {
-        Serial.println("LED ON");
-        digitalWrite(LED_BUILTIN, HIGH);
-      } else {
-        Serial.println("LED OFF");
-        digitalWrite(LED_BUILTIN, LOW);
-      }
-    }
-  }
-
-  client.stop();
 }
 
 #endif //__ESP8266_WIFI_
