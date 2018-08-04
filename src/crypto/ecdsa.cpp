@@ -16,8 +16,6 @@
 #include "prng.h"
 #include <stdlib.h>
 
-#include <String.h>
-
 #define TRUE 1
 #define FALSE 0
 
