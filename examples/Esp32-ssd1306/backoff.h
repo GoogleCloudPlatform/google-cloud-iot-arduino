@@ -33,12 +33,11 @@ void resetBackoff() {
 bool backoff() {
   if ((millis() - lastRequestTime) > currDelay) {
     backOffCount++;
-    currDelay = (backOffCount * backOffCount * minBackoff) + random(minJitter,maxJitter);      
+    currDelay = (backOffCount * backOffCount * minBackoff) + random(minJitter,maxJitter);
     if (currDelay > maxBackoff) {
       currDelay = maxBackoff;
     }
     Serial.printf("Waiting: %ld\n", currDelay);
-    delay(500); // FIXME remove
     lastRequestTime = millis();
     return true;
   }
