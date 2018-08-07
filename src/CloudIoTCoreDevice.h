@@ -55,7 +55,8 @@ class CloudIoTCoreDevice {
   String getConfigPath(int version);
   String getLastConfigPath();
   String getSendTelemetryPath();
-  
+  String getSetStatePath();
+
   /* MQTT methods */
   String getClientId();
   String getConfigTopic();

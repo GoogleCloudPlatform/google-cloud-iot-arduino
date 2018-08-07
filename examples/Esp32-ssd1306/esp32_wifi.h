@@ -14,19 +14,17 @@
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi
 // TODO: abstract to interface / template?
-
-#ifndef __ESP8266_WIFI_H__
-#define __ESP8266_WIFI_H__
-#include <ESP8266WiFi.h>
+#ifndef __ESP32_WIFI_H__
+#define __ESP32_WIFI_H__
 #include <WiFiClientSecure.h>
-#include "FS.h"
 #include <time.h>
 #include <rBase64.h>
+
 #include <CloudIoTCore.h>
 #include "backoff.h"
-
 #include "ciotc_config.h" // Wifi configuration here
 
+String jwt;
 // Clout IoT configuration that you don't need to change
 const char* host = CLOUD_IOT_CORE_HTTP_HOST;
 const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
@@ -34,27 +32,32 @@ CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 
 unsigned int priv_key[8];
-unsigned long iss = 0;
-String jwt;
 boolean wasErr;
 WiFiClientSecure client;
+
+// Configuration / constants
+const int maxTelemRetries = 25;
+#define NETDEBUG  // Uncomment to enable network debugging
+
 
 // Helpers for this board
 String getDefaultSensor() {
   return  "Wifi: " + String(WiFi.RSSI()) + "db";
 }
 
+// Helpers for WiFi on this board
+unsigned long iss = 0;
 String getJwt() {
   if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
-    // Disable software watchdog as these operations can take a while.
-    ESP.wdtDisable();
     iss = time(nullptr);
     Serial.println("Refreshing JWT");
     jwt = device.createJWT(iss);
-    ESP.wdtEnable(0);
+  } else {
+    Serial.println("Reusing still-valid JWT");
   }
   return jwt;
 }
+
 
 void setupWifi() {
   WiFi.mode(WIFI_STA);
@@ -64,6 +67,11 @@ void setupWifi() {
     delay(100);
   }
 
+  // FIXME: Avoid MITM, validate the server.
+  client.setCACert(root_cert);
+  // client.setCertificate(test_client_key); // for client verification
+  // client.setPrivateKey(test_client_cert); // for client verification
+
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Waiting on time sync...");
   while (time(nullptr) < 1510644967) {
@@ -72,41 +80,22 @@ void setupWifi() {
 
   // Device/Time OK, refresh JWT
   Serial.println(getJwt());
-
-  // Set CA cert on wifi client
-  //client.setCACert(root_cert);
-
-  if (!SPIFFS.begin()) {
-    Serial.println("Failed to mount file system");
-    return;
-  }
-
-  File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
-  if (!ca) {
-    Serial.println("Failed to open ca file");
-  } else {
-    Serial.println("Success to open ca file");
-  }
-
-  if(client.loadCertificate(ca)) {
-    Serial.println("loaded");
-  } else {
-    Serial.println("not loaded");
-  }
 }
 
 
 // IoT functions
 void getConfig() {
-  // TODO(class): Move to library
-  String header =
-      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(jwt.c_str());
-
   if (!client.connect(host, httpsPort)) {
     Serial.println("connection failed");
     return;
   }
+
+  getJwt();
+
+  // TODO: Move to library
+  String header =
+      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   // Connect via https.
   client.println(header.c_str());
@@ -118,6 +107,9 @@ void getConfig() {
 
   while (client.connected()) {
     String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+      Serial.println(line);
+    #endif
     if (line == "\r") {
       Serial.println("headers received");
       break;
@@ -125,6 +117,9 @@ void getConfig() {
   }
   while (client.available()) {
     String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+      Serial.println(line);
+    #endif
     if (line.indexOf("binaryData") > 0) {
       String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
@@ -137,6 +132,84 @@ void getConfig() {
       }
       resetBackoff();
     }
+  }
+  client.stop();
+}
+
+void setState(String data) {
+  delay(50);
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("Connection failed!");
+    return;
+  }
+  getJwt();
+
+  rbase64.encode(data);
+  String postdata =
+      String("{\"state\": {\"binary_data\": \"") + rbase64.result() +
+      String("\"}}");
+
+  // TODO(class): Move to common helper
+  String header = String("POST  ") + device.getSetStatePath() +
+    String(" HTTP/1.1");
+  String authstring = "authorization: Bearer " + String(jwt.c_str());
+  String extraHeaders =
+    "host: cloudiotdevice.googleapis.com\n"
+    "method: post\n"
+    "cache-control: no-cache\n"
+    "content-type: application/json\n"
+    "Accept: application/json\n";
+
+  Serial.println("Setting state");
+
+  client.println(header);
+  client.println(authstring);
+  client.print(extraHeaders);
+
+  client.print("content-length:");
+  client.println(postdata.length());
+  client.println();
+  client.println(postdata);
+  client.println();
+  client.println();
+
+  #ifdef NETDEBUG
+  Serial.println(header);
+  Serial.println(authstring);
+  Serial.print(extraHeaders);
+  Serial.print("content-length:");
+  Serial.println(postdata.length());
+  Serial.println();
+  Serial.println(postdata);
+  Serial.println();
+  Serial.println();
+  #endif
+
+  int unavailCount = 0;
+  while (!client.available() && unavailCount < 50) {
+    delay(100);
+    Serial.print('.');
+    unavailCount++;
+  }
+  Serial.println();
+
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+    Serial.println(line);
+    #endif
+    if (line.startsWith("HTTP/1.1 200 OK")) {
+      resetBackoff();
+    }
+    if (line == "\r") {
+      break;
+    }
+  }
+  while (client.available()) {
+    String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+    Serial.println(line);
+    #endif
   }
   client.stop();
 }
@@ -171,9 +244,11 @@ void sendTelemetry(String data) {
   client.println();
   client.println();
 
-  while (!client.available()) {
+  int retryCount = 0;
+  while (!client.available() && retryCount < maxTelemRetries) {
     delay(100);
     Serial.print('.');
+    retryCount++;
   }
   Serial.println();
 
@@ -199,4 +274,4 @@ void sendTelemetry() {
   sendTelemetry(getDefaultSensor());
 }
 
-#endif //__ESP8266_WIFI_
+#endif //__ESP32_WIFI_
