@@ -17,9 +17,7 @@
 #include <WiFiSSLClient.h>
 
 #include <rBase64.h>
-
-#include <jwt.h>
-
+#include <CloudIoTCore.h>
 #include "ciotc_config.h" // Update this file with your configuration
 
 // Initialize the Genuino WiFi SSL client library / RTC
@@ -29,21 +27,29 @@ WiFiSSLClient* client;
 // in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
 NN_DIGIT priv_key[8];
 
+// Clout IoT configuration that you don't need to change
+const char* host = CLOUD_IOT_CORE_HTTP_HOST;
+const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
+CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
+                          private_key_str);
+
+unsigned long iss = 0;
+String jwt;
+
 String getJwt() {
-  // Disable software watchdog as these operations can take a while.
-  String jwt = CreateJwt(project_id, WiFi.getTime(), priv_key);
+  if (iss == 0 || WiFi.getTime() - iss > 3600) {  // TODO: exp in device
+    // Disable software watchdog as these operations can take a while.
+    Serial.println("Refreshing JWT");
+    iss = WiFi.getTime();
+    jwt = device.createJWT(iss);
+  }
   return jwt;
 }
-
-// Connection parameters
-const char* host = "cloudiotdevice.googleapis.com";
-const int httpsPort = 443;
-String pwd;
 
 // Fills the priv_key global variable with private key str which is of the form
 // aa:bb:cc:dd:ee:...
 void fill_priv_key(const char* priv_key_str) {
-  priv_key[8] = 0;
+  priv_key[7] = 0;
   for (int i = 7; i >= 0; i--) {
     priv_key[i] = 0;
     for (int byte_num = 0; byte_num < 4; byte_num++) {
@@ -66,6 +72,8 @@ void setup() {
 
   // put your setup code here, to run once:
   Serial.begin(9600);
+  delay(500);
+  Serial.println("Starting wifi");
 
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
@@ -79,58 +87,27 @@ void setup() {
   }
 
   client = new WiFiSSLClient;
-  Serial.println("Connecting to mqtt.googleapis.com");
+  Serial.println("Connecting to: " + String(host));
   client->connect(host, httpsPort);
 
   Serial.println("Getting jwt.");
-  pwd = getJwt();
-  Serial.println(pwd.c_str());
+  Serial.println(getJwt());
 
-  // Connect via https.
-  String handshake =
-      "GET " + get_path(project_id, location, registry_id, device_id) +
-      "/config?local_version=1 HTTP/1.1\n"
-      "Host: cloudiotdevice.googleapis.com\n"
-      "cache-control: no-cache\n"
-      "authorization: Bearer " +
-      pwd +
-      "\n"
-      "\n";
-  Serial.println("Sending: '");
-  Serial.print(handshake.c_str());
-  Serial.println("'");
-  client->write((const uint8_t*)handshake.c_str(), (int)handshake.length());
-  client->flush();
-
-  int tries = 500;
-  while (!client->available() && (tries-- > 0)) delay(10);
-
-  if (client->available()) {
-    char rdBuf[1000];
-    int bread = client->read((uint8_t*)rdBuf, 1000);
-    Serial.println("Response: ");
-    Serial.write(rdBuf, bread);
-  } else {
-    Serial.println("No response, something went wrong.");
-  }
+  // Update configuration.
+  getConfig();
 }
 
 
 void getConfig() {
-  // TODO(class): Move to helper function, e.g. buildHeader(method, jwt)...
+  getJwt();
+
   // Connect via https.
   String handshake =
-      "GET " + get_path(project_id, location, registry_id, device_id) +
-      "/config?local_version=1 HTTP/1.1\n"
-      "Host: cloudiotdevice.googleapis.com\n"
-      "cache-control: no-cache\n"
-      "authorization: Bearer " +
-      pwd +
-      "\n"
-      "\n";
-  Serial.println("Sending: '");
-  Serial.print(handshake.c_str());
-  Serial.println("'");
+      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1\n") +
+      "authorization: Bearer " + String(jwt.c_str()) + "\n"+
+      "Host: cloudiotdevice.googleapis.com\n" +
+      "cache-control: no-cache\n" + "\n\n";
+
   client->write((const uint8_t*)handshake.c_str(), (int)handshake.length());
   client->flush();
 
@@ -139,18 +116,22 @@ void getConfig() {
   while (client->connected()) {
     String line = client->readStringUntil('\n');
     if (line == "\r") {
-      Serial.println("headers received");
+      //Serial.println("headers received");
       break;
     }
   }
   while (client->available()) {
     String line = client->readStringUntil('\n');
-    Serial.println(line);
+    // DEBUG
+    //Serial.println(line);
     if (line.indexOf("binaryData") > 0) {
       String val =
           line.substring(line.indexOf(": ") + 3,line.indexOf("\","));
+
       Serial.println(val);
-      Serial.println(rbase64.decode(val));
+      rbase64.decode(val);
+      Serial.println(rbase64.result());
+
       if (val == "MQ==") {
         Serial.println("LED ON");
         digitalWrite(LED_BUILTIN, HIGH);
