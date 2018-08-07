@@ -83,6 +83,10 @@ String CloudIoTCoreDevice::getSendTelemetryPath() {
   return this->getBasePath() + ":publishEvent";
 }
 
+String CloudIoTCoreDevice::getSendStatePath() {
+  return this->getBasePath() + ":setState";
+}
+
 void CloudIoTCoreDevice::fillPrivateKey() {
   priv_key[8] = 0;
   for (int i = 7; i >= 0; i--) {

@@ -19,11 +19,13 @@
 #include <WiFi.h>
 #include "ciotc_config.h"  // Configure with your settings
 #include <time.h>
+#include <rBase64.h> // If using binary messages
 
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 CloudIoTCoreMQTTClient client(device);
 
+boolean encodePayload = true; // set to true if using binary data
 long lastMsg = 0;
 char msg[20];
 int counter = 0;
@@ -39,7 +41,6 @@ void callback(uint8_t *payload, unsigned int length) {
   }
   Serial.println();
 
-  // int ret = rbase64.decode(val);
   int ret = 0;
   if (ret == 0) {
     // we got '1' -> on
@@ -90,8 +91,17 @@ void loop() {
       counter++;
       snprintf(msg, 20, "%d", counter);
       Serial.println("Publish message");
-      /* publish the message */
-      client.publishTelemetry(msg);
+
+      String payload = String("{\"Uptime\":\"") + msg +
+          String("\",\"Sig:\"") + WiFi.RSSI() +
+          String("\"}");
+      if (encodePayload) {
+        rbase64.encode(payload);
+        rbase64.result();
+        client.publishTelemetry(rbase64.result());
+      } else {
+        client.publishTelemetry(payload);
+      }
     } else {
       counter = 0;
     }

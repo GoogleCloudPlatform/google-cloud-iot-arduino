@@ -48,8 +48,9 @@ String getJwt() {
   if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
     // Disable software watchdog as these operations can take a while.
     ESP.wdtDisable();
+    iss = time(nullptr);
     Serial.println("Refreshing JWT");
-    jwt = device.createJWT(time(nullptr));
+    jwt = device.createJWT(iss);
     ESP.wdtEnable(0);
   }
   return jwt;
@@ -97,7 +98,7 @@ void setupWifi() {
 
 // IoT functions
 void getConfig() {
-  // TODO(class): Move to common section
+  // TODO(class): Move to library
   String header =
       String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
@@ -145,14 +146,15 @@ void sendTelemetry(String data) {
     Serial.println("connection failed");
     return;
   }
-  
+
+  rbase64.encode(data);
   String postdata =
-      String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
+      String("{\"binary_data\": \"") + rbase64.result() + String("\"}");
 
   // TODO(class): Move to common helper
   String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
                   String(" HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(jwt.c_str()); 
+  String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   Serial.println("Sending telemetry");
 

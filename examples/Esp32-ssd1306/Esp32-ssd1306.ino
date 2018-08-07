@@ -17,14 +17,17 @@
 #include <rBase64.h>
 #include <time.h>
 #include "SSD1306.h"
+#include "backoff.h"
 
 #include "ciotc_config.h"
 String jwt;
 
+//#define NETDEBUG  // Uncomment to enable network debugging
+
 // Clout IoT configuration that you don't need to change
 const char* host = CLOUD_IOT_CORE_HTTP_HOST;
 const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
-WiFiClientSecure* client;
+WiFiClientSecure client;
 CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
                           private_key_str);
 
@@ -42,8 +45,15 @@ SSD1306* display;  // Wemos is (0x3c, 4, 5), feather is on SDA/SCL
 int sensorPin = 12;  // select the input pin for the potentiometer
 int buttonPin = 16;
 
+unsigned long iss = 0;
 String getJwt() {
-  jwt = device.createJWT(time(nullptr));
+  if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
+    iss = time(nullptr);
+    Serial.println("Refreshing JWT");
+    jwt = device.createJWT(iss);
+  } else {
+    Serial.println("Reusing still-valid JWT");
+  }
   return jwt;
 }
 
@@ -62,6 +72,10 @@ void show_text(String top, String mid, String bot) {
 }
 void show_text(String val) { show_text(val, val, val); }
 
+String getDefaultSensor() {
+  return  "Wifi: " + String(WiFi.RSSI()) + "db";
+}
+
 // Start helper functions
 void buttonPoll() {
   // read the value from the sensor:
@@ -72,28 +86,41 @@ void buttonPoll() {
 
 // IoT functions
 void getConfig() {
-  // TODO(class): Move to common section
+  getJwt();
+
+  // TODO: Move to library
   String header =
       String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
-  // Connect via https.
-  client->println(header.c_str());
-  client->println(authstring.c_str());
-  client->println("host: cloudiotdevice.googleapis.com");
-  client->println("method: get");
-  client->println("cache-control: no-cache");
-  client->println();
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("connection failed");
+    return;
+  }
 
-  while (client->connected()) {
-    String line = client->readStringUntil('\n');
+  // Connect via https.
+  client.println(header.c_str());
+  client.println(authstring.c_str());
+  client.println("host: cloudiotdevice.googleapis.com");
+  client.println("method: get");
+  client.println("cache-control: no-cache");
+  client.println();
+
+  while (client.connected()) {
+    String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+      Serial.println(line);
+    #endif
     if (line == "\r") {
       Serial.println("headers received");
       break;
     }
   }
-  while (client->available()) {
-    String line = client->readStringUntil('\n');
+  while (client.available()) {
+    String line = client.readStringUntil('\n');
+    #ifdef NETDEBUG
+      Serial.println(line);
+    #endif
     if (line.indexOf("binaryData") > 0) {
       String val = line.substring(line.indexOf(": ") + 3, line.indexOf("\","));
       Serial.println(val);
@@ -104,51 +131,90 @@ void getConfig() {
         Serial.println("LED OFF");
         digitalWrite(LED_BUILTIN, LOW);
       }
+      resetBackoff();
     }
+  }
+  client.stop();
+}
+
+void sendState(String data) {
+  client.stop();
+  delay(50);
+  if (!client.connect(host, httpsPort)) {
+    Serial.println("Connection failed!");
+  } else {
+    getJwt();
+
+    rbase64.encode(data);
+    String postdata =
+        String("{\"state\": {\"binary_data\": \"") + rbase64.result() + 
+        String("\"}}");
+
+    // TODO(class): Move to common helper
+    String header = String("POST  ") + device.getSendStatePath() +
+      String(" HTTP/1.1");
+    String authstring = "authorization: Bearer " + String(jwt.c_str());
+    String extraHeaders =
+      "host: cloudiotdevice.googleapis.com\n"
+      "method: post\n"
+      "cache-control: no-cache\n"
+      "content-type: application/json\n"
+      "Accept: application/json\n";
+
+    Serial.println("Setting state");
+
+    client.println(header);
+    client.println(authstring);
+    client.print(extraHeaders);
+
+    client.print("content-length:");
+    client.println(postdata.length());
+    client.println();
+    client.println(postdata);
+    client.println();
+    client.println();
+
+    #ifdef NETDEBUG
+      Serial.println(header);
+      Serial.println(authstring);
+      Serial.print(extraHeaders);
+      Serial.print("content-length:");
+      Serial.println(postdata.length());
+      Serial.println();
+      Serial.println(postdata);
+      Serial.println();
+      Serial.println();
+    #endif
+
+
+
+    int unavailCount = 0;
+    while (!client.available() && unavailCount < 50) {
+      delay(100);
+      Serial.print('.');
+      unavailCount++;
+    }
+    Serial.println();
+
+    while (client.connected()) {
+      String line = client.readStringUntil('\n');
+      #ifdef NETDEBUG
+        Serial.println(line);
+      #endif
+      if (line == "\r") {
+        break;
+      }
+    }
+    while (client.available()) {
+      String line = client.readStringUntil('\n');
+      #ifdef NETDEBUG
+          Serial.println(line);
+      #endif
+    }
+    client.stop();
   }
 }
 
-void sendTelemetry(String data) {
-  String postdata =
-      String("{\"binary_data\": \"") + rbase64.encode(data) + String("\"}");
-
-  // TODO(class): Move to common helper
-  String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
-                  String(" HTTP/1.1");
-  String authstring = "authorization: Bearer " + String(jwt.c_str()); 
-
-  Serial.println("Sending telemetry");
-
-  client->println(header.c_str());
-  client->println("host: cloudiotdevice.googleapis.com");
-  client->println("method: post");
-  client->println("cache-control: no-cache");
-  client->println(authstring.c_str());
-  client->println("content-type: application/json");
-  client->print("content-length:");
-  client->println(postdata.length());
-  client->println();
-  client->println(postdata);
-  client->println();
-  client->println();
-
-  while (!client->available()) {
-    delay(100);
-    Serial.print('.');
-  }
-  Serial.println();
-
-  while (client->connected()) {
-    String line = client->readStringUntil('\n');
-    if (line == "\r") {
-      break;
-    }
-  }
-  while (client->available()) {
-    String line = client->readStringUntil('\n');
-  }
-  Serial.println("Complete.");
-}
 
 // Arduino functions
 void setup() {
@@ -173,8 +239,6 @@ void setup() {
   }
   Serial.println();
 
-  client = new WiFiClientSecure();
-
   show_text("Time");
   configTime(0, 0, "time.google.com", "time.nist.gov");
   Serial.println("Waiting on time sync...");
@@ -183,27 +247,27 @@ void setup() {
   }
 
   // FIXME: Avoid MITM, validate the server.
-  client->setCACert(root_cert);
+  client.setCACert(root_cert);
   // client.setCertificate(test_client_key); // for client verification
   // client.setPrivateKey(test_client_cert); // for client verification
 
   Serial.println("Connecting to : " + String(host));
   delay(100);
   pinMode(LED_BUILTIN, OUTPUT);
-  Serial.println("...");
-  if (!client->connect(host, httpsPort)) {
-    Serial.println("Connection failed!");
-  } else {
-    Serial.println("Getting JWT: ");
-    Serial.println(getJwt());
-    getConfig();
-    // sendTelemetry(String("Device:") + String(device_id) + String(">
-    // connected"));
-  }
+
+  Serial.println("Getting JWT: ");
+  Serial.println(getJwt());
+
+  Serial.println("Getting Config / Sending Telem: ");
+  getConfig();
+  sendState(String("Device:") + String(device_id) +
+      String(">connected"));
 }
 
 void loop() {
-  delay(2000);
+  delay(10000);
+  //backoff();
   getConfig();
+  sendState(getDefaultSensor());
   // buttonPoll();
 }
