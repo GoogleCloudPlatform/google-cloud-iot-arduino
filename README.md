@@ -73,7 +73,7 @@ console, that configuration will be reflrected on the device.
 ## Dependencies
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
-* [rBase64](https://github.com/boseji/rBASE64) - Used in Esp8266
+* [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
 * [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
 * [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
 
@@ -83,6 +83,9 @@ Some examples use specific dependencies that need to be installed via the Arduin
 * We occasionally encounter 403 errors on these samples, not sure of the cause.
   In some cases, it seems this is occurring due to invalid / bad iss / exp fields
   in the JWT.
+* Transmitting telemetry seems less reliable than setting state and getting
+  device configuration.
+
 
 ### ESP32-MQTT
 * If you don't comment out line 266 of the MQTT PubSub client, PubSubClient.cpp,
