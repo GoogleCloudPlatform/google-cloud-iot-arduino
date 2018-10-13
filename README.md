@@ -54,7 +54,7 @@ Select one of the available samples from the **File > Examples > Google Cloud Io
 menu and find the configuration section (ciotc_config.h in newer examples).
 
 Find and replace the following values first:
-* Project ID (get from console or `gcloud list config`)
+* Project ID (get from console or `gcloud config list`)
 * Location (default is `us-central1`)
 * Registry ID (created in previous steps, e.g. `atest-reg`)
 * Device ID (created in previous steps, e.g. `atest-device`)
