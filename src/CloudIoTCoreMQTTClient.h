@@ -48,11 +48,12 @@
 class CloudIoTCoreMQTTClient {
  private:
   bool debugLog = false;
+  bool skipReInit = false;
   CloudIoTCoreDevice *device;
   WiFiClientSecure *client;
   PubSubClient *mqttClient;
   String jwt;
-  unsigned long mqtt_iss;
+  unsigned long mqttIss;
   LoopbackStream buffer;
 
   int backOffCount = 0;
@@ -60,9 +61,11 @@ class CloudIoTCoreMQTTClient {
   long maxBackoff = 60000;
   long minJitter = 50;
   long maxJitter = 1000;
-  int jwt_exp_secs = 3600;
+  int jwtExpSeconds = 3600;
+  const char* lastRootCert;
+  int lastState = 0;
 
-  void mqttConnect();
+  int mqttConnect();
   String getJWT();
 
  public:
@@ -73,6 +76,7 @@ class CloudIoTCoreMQTTClient {
   CloudIoTCoreMQTTClient(const char *project_id, const char *location,
                          const char *registry_id, const char *device_id,
                          const char *private_key);
+  int backoff(bool shouldDelay);
   bool connected();
   void connect();
   #ifndef ESP8266
@@ -80,12 +84,14 @@ class CloudIoTCoreMQTTClient {
   #endif
   void debugEnable(bool isEnable);
   /* MQTT methods */
-  void loop();
+  PubSubClient* getMqttClient();
+  int loop();
   void publishTelemetry(String binaryData);
   void publishTelemetry(const char *binaryData);
   void publishState(String binaryData);
   void publishState(const char *binaryData);
   void setConfigCallback(CONFIG_CALLBACK_SIGNATURE);
   void setJwtExpSecs(int secs);
+  void setSkipReinit(bool isSkip);
 };
 #endif  // CloudIoTCoreMQTTClient_h

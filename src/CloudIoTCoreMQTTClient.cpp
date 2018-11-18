@@ -19,9 +19,6 @@
 CONFIG_CALLBACK_SIGNATURE = NULL;
 
 void callback(char *topic, uint8_t *payload, unsigned int length) {
-  #ifdef CIOTC_DEBUG
-  Serial.println(String("Message received on ") + String(topic));
-  #endif
   if (configCallback != NULL) {
     configCallback(payload, length);
   }
@@ -65,29 +62,59 @@ void CloudIoTCoreMQTTClient::connect() {
 
 #ifndef ESP8266
 void CloudIoTCoreMQTTClient::connectSecure(const char *root_cert) {
+  this->lastRootCert = root_cert; // For reinitializing WiFiClient later
   client->setCACert(root_cert);
   this->connect();
 }
 #endif
 
 void CloudIoTCoreMQTTClient::setJwtExpSecs(int jwt_in_secs) {
-  this->jwt_exp_secs = jwt_in_secs;
+  this->jwtExpSeconds = jwt_in_secs;
 }
 
 String CloudIoTCoreMQTTClient::getJWT() {
   // Refresh credential if it's expired.
-  if (this->mqtt_iss == 0 || ((time(nullptr) - this->mqtt_iss) > this->jwt_exp_secs)) {
-    this->mqtt_iss = time(nullptr);
-    jwt = device->createJWT(this->mqtt_iss, this->jwt_exp_secs);
+  if (this->mqttIss == 0 || ((time(nullptr) - this->mqttIss) > this->jwtExpSeconds)) {
+    this->mqttIss = time(nullptr);
+    jwt = device->createJWT(this->mqttIss, this->jwtExpSeconds);
+    if(this->debugLog)
+      Serial.println(String("JWT now:\n") + String(jwt));
   }
   return jwt;
 }
 
-void CloudIoTCoreMQTTClient::mqttConnect() {
-  /* Loop until reconnected */
-  while (!client->connected()) {
-    if(debugLog)
-      Serial.println("MQTT connecting ...");
+int CloudIoTCoreMQTTClient::backoff(bool shouldDelay) {
+  backOffCount++;
+  int currDelay = (backOffCount * backOffCount * minBackoff) +
+      random(minJitter,maxJitter);
+  if (currDelay > maxBackoff) {
+    currDelay = maxBackoff;
+  }
+  if (debugLog)
+    Serial.printf("Waiting: %ld\n", currDelay);
+  if (shouldDelay){
+    delay(currDelay);
+  }
+  return currDelay;
+}
+
+bool CloudIoTCoreMQTTClient::connected() {
+  return this->mqttClient->connected();
+}
+
+void CloudIoTCoreMQTTClient::setSkipReinit(bool isSkip){
+  this->skipReInit = isSkip;
+}
+
+PubSubClient* CloudIoTCoreMQTTClient::getMqttClient(){
+  return this->mqttClient;
+}
+
+int CloudIoTCoreMQTTClient::mqttConnect() {
+  // For now, will not loop here until connected so that
+  // caller can have control back.
+  if (!client->connected()) {
+    if (debugLog) { Serial.println("MQTT connecting ..."); }
     String pass = this->getJWT();
 
     const char *user = "unused";
@@ -99,48 +126,36 @@ void CloudIoTCoreMQTTClient::mqttConnect() {
     }
 
     if (mqttClient->connect(clientId.c_str(), user, pass.c_str())) {
-      if (debugLog)
-        Serial.println("connected");
+      if (debugLog) { Serial.println("connected"); }
       backOffCount = 0;
+      lastState = 0;
       if (configCallback != NULL) {
         String configTopic = device->getConfigTopic();
-        if (debugLog)
-          Serial.println(configTopic.c_str());
         mqttClient->setCallback(callback);
         mqttClient->setStream(buffer);
         mqttClient->subscribe(configTopic.c_str(), 0);
       }
+      return 0; // STATE_CONNECTED for client
     } else {
-      Serial.print("failed, status code =");
-      Serial.print(mqttClient->state());
-
-      backOffCount++;
-      int currDelay = (backOffCount * backOffCount * minBackoff) +
-          random(minJitter,maxJitter);
-      if (currDelay > maxBackoff) {
-        currDelay = maxBackoff;
-      }
-      if (debugLog)
-        Serial.printf("Waiting: %ld\n", currDelay);
-      delay(currDelay);
-
-      // If you don't set the server, does not reconnect
-      mqttClient->setServer(GOOGLE_APIS_MQTT_HOST, GOOGLE_APIS_MQTT_PORT);
+      // In case we want to encapsulate destroying client
+      // if (!this->skipReInit) { }
+      backoff(true);
+      lastState = mqttClient->state();
+      return mqttClient->state();
     }
   }
 }
 
-bool CloudIoTCoreMQTTClient::connected() {
-  return this->mqttClient->connected();
-}
-
-void CloudIoTCoreMQTTClient::loop() {
+int CloudIoTCoreMQTTClient::loop() {
   if (!this->connected()) {
     this->mqttConnect();
   }
 
+  // TODO: if (lastState == 0)
   this->mqttClient->loop();
   delay(10);
+
+  return lastState;
 }
 
 void CloudIoTCoreMQTTClient::debugEnable(bool isEnable) {
