@@ -27,7 +27,7 @@ class CloudIoTCoreDevice {
   const char *device_id;
   const char *private_key;
 
-  NN_DIGIT priv_key[8];
+  NN_DIGIT priv_key[9];
   String jwt;
   unsigned long iss = 0;
   int jwt_exp_secs = 3600;
