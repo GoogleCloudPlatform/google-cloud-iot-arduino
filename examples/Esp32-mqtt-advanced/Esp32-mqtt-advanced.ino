@@ -20,15 +20,19 @@
 #include "ciotc_config.h"  // Configure with your settings
 #include <time.h>
 #include <rBase64.h> // If using binary messages
+#include <WiFiClientSecure.h>
 
-CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
-                          private_key_str);
-CloudIoTCoreMQTTClient client(&device);
+CloudIoTCoreDevice *device;
+CloudIoTCoreMQTTClient *client;
+WiFiClientSecure *netClient;
+PubSubClient *mqttClient;
 
 boolean encodePayload = true; // set to true if using binary data
 long lastMsg = 0;
+long lastDisconnect = 0;
 char msg[20];
 int counter = 0;
+int forceJwtExpSecs = 3600; // One hour is typical, up to 24 hours.
 
 const int LED_PIN = 5;
 
@@ -57,6 +61,32 @@ void callback(uint8_t *payload, unsigned int length) {
   }
 }
 
+void reinitClients() {
+  delete(mqttClient);
+  delete(netClient);
+  delete(device);
+  delete(client);
+  initClients();
+}
+
+void initClients() {
+  device = new CloudIoTCoreDevice(project_id, location, registry_id,
+                                  device_id, private_key_str);
+  mqttClient = new PubSubClient();
+  netClient = new WiFiClientSecure();
+  client = new CloudIoTCoreMQTTClient(device, netClient, mqttClient);
+
+  // NOTE: In practice, can expire in as many as 3600*24 seconds.
+  client->debugEnable(true);
+  client->setJwtExpSecs(forceJwtExpSecs);
+
+  Serial.println("Connecting to mqtt.googleapis.com");
+  client->connectSecure(root_cert);
+  client->setConfigCallback(callback);
+
+  lastDisconnect = millis();
+}
+
 void setup() {
   pinMode(LED_PIN, OUTPUT);
 
@@ -76,20 +106,14 @@ void setup() {
     delay(10);
   }
 
-  Serial.println("Connecting to mqtt.googleapis.com");
-  client.connectSecure(root_cert);
-  client.setConfigCallback(callback);
+  initClients();
 }
 
 void loop() {
-  int lastState = client.loop();
-
-  if (lastState != 0) {
-    Serial.println("Error, client state: " + String(lastState));
-  }
+  int lastState = client->loop();
 
   long now = millis();
-  if (now - lastMsg > 3000) {
+  if (now - lastMsg > 10000) {
     lastMsg = now;
     if (counter < 1000) {
       counter++;
@@ -102,12 +126,23 @@ void loop() {
       if (encodePayload) {
         rbase64.encode(payload);
         rbase64.result();
-        client.publishTelemetry(rbase64.result());
+        client->publishTelemetry(rbase64.result());
       } else {
-        client.publishTelemetry(payload);
+        client->publishTelemetry(payload);
       }
     } else {
       counter = 0;
     }
+
+    // Advanced behavior: force client to disconnect when JWT expires
+    // to reconnect outside of clock drift bounds.
+    if (now - lastDisconnect > (forceJwtExpSecs * 1000)) {
+      lastDisconnect = now;
+      mqttClient->disconnect();
+    }
+  }
+
+  if (lastState != 0) {
+    reinitClients();
   }
 }

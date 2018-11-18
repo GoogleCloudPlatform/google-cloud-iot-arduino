@@ -41,11 +41,18 @@ CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
 }
 
 String CloudIoTCoreDevice::createJWT(long long int current_time) {
-  jwt = CreateJwt(project_id, current_time, priv_key);
+  jwt = CreateJwt(project_id, current_time, priv_key, this->jwt_exp_secs);
   return jwt;
 }
 
-String CloudIoTCoreDevice::getJWT() { return jwt; }
+String CloudIoTCoreDevice::createJWT(long long int current_time, int exp_in_secs) {
+  jwt = CreateJwt(project_id, current_time, priv_key, exp_in_secs);
+  return jwt;
+}
+
+String CloudIoTCoreDevice::getJWT() {
+  return jwt;
+}
 
 String CloudIoTCoreDevice::getBasePath() {
   return String("/v1/projects/") + project_id + "/locations/" + location +
@@ -88,7 +95,6 @@ String CloudIoTCoreDevice::getSetStatePath() {
 }
 
 void CloudIoTCoreDevice::fillPrivateKey() {
-  priv_key[8] = 0;
   for (int i = 7; i >= 0; i--) {
     priv_key[i] = 0;
     for (int byte_num = 0; byte_num < 4; byte_num++) {
@@ -96,6 +102,10 @@ void CloudIoTCoreDevice::fillPrivateKey() {
       private_key += 3;
     }
   }
+}
+
+void CloudIoTCoreDevice::setJwtExpSecs(int exp_in_secs) {
+  this->jwt_exp_secs = exp_in_secs;
 }
 
 CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id) {
@@ -120,6 +130,10 @@ CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
 
 CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
   this->private_key = private_key;
+  if ( strlen(private_key) != (95) ) {
+    Serial.println("Warning: expected private key to be 95, was: " + 
+        String(strlen(private_key)));
+  }
   fillPrivateKey();
   return *this;
 }

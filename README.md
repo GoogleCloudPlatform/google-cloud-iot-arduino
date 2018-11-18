@@ -74,6 +74,7 @@ console, that configuration will be reflrected on the device.
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
 * [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
+* [Buffered Streams](https://github.com/paulo-raca/ArduinoBufferedStreams) - Buffer for MQTT
 * [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
 * [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
 
@@ -85,12 +86,6 @@ Some examples use specific dependencies that need to be installed via the Arduin
   in the JWT.
 * Transmitting telemetry seems less reliable than setting state and getting
   device configuration.
-
-
-### ESP32-MQTT
-* If you don't comment out line 266 of the MQTT PubSub client, PubSubClient.cpp,
-the sample will crash when a non-empty payload is transmitted to the device.
-
 
 ## License
 

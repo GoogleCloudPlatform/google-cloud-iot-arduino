@@ -30,8 +30,7 @@
 // Clout IoT configuration that you don't need to change
 const char* host = CLOUD_IOT_CORE_HTTP_HOST;
 const int httpsPort = CLOUD_IOT_CORE_HTTP_PORT;
-CloudIoTCoreDevice device(project_id, location, registry_id, device_id,
-                          private_key_str);
+CloudIoTCoreDevice *device;
 
 unsigned int priv_key[8];
 unsigned long iss = 0;
@@ -50,7 +49,7 @@ String getJwt() {
     ESP.wdtDisable();
     iss = time(nullptr);
     Serial.println("Refreshing JWT");
-    jwt = device.createJWT(iss);
+    jwt = device->createJWT(iss);
     ESP.wdtEnable(0);
   }
   return jwt;
@@ -63,6 +62,9 @@ void setupWifi() {
   while (WiFi.status() != WL_CONNECTED) {
     delay(100);
   }
+
+  device = new CloudIoTCoreDevice(project_id, location, registry_id, device_id,
+                          private_key_str);
 
   configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Waiting on time sync...");
@@ -100,7 +102,7 @@ void setupWifi() {
 void getConfig() {
   // TODO(class): Move to library
   String header =
-      String("GET ") + device.getLastConfigPath().c_str() + String(" HTTP/1.1");
+      String("GET ") + device->getLastConfigPath().c_str() + String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
   if (!client.connect(host, httpsPort)) {
@@ -152,7 +154,7 @@ void sendTelemetry(String data) {
       String("{\"binary_data\": \"") + rbase64.result() + String("\"}");
 
   // TODO(class): Move to common helper
-  String header = String("POST  ") + device.getSendTelemetryPath().c_str() +
+  String header = String("POST  ") + device->getSendTelemetryPath().c_str() +
                   String(" HTTP/1.1");
   String authstring = "authorization: Bearer " + String(jwt.c_str());
 
