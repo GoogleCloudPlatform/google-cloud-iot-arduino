@@ -41,11 +41,18 @@ CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
 }
 
 String CloudIoTCoreDevice::createJWT(long long int current_time) {
-  jwt = CreateJwt(project_id, current_time, priv_key);
+  jwt = CreateJwt(project_id, current_time, priv_key, this->jwt_exp_secs);
   return jwt;
 }
 
-String CloudIoTCoreDevice::getJWT() { return jwt; }
+String CloudIoTCoreDevice::createJWT(long long int current_time, int exp_in_secs) {
+  jwt = CreateJwt(project_id, current_time, priv_key, exp_in_secs);
+  return jwt;
+}
+
+String CloudIoTCoreDevice::getJWT() {
+  return jwt;
+}
 
 String CloudIoTCoreDevice::getBasePath() {
   return String("/v1/projects/") + project_id + "/locations/" + location +
@@ -96,6 +103,10 @@ void CloudIoTCoreDevice::fillPrivateKey() {
       private_key += 3;
     }
   }
+}
+
+void CloudIoTCoreDevice::setJwtExpSecs(int exp_in_secs) {
+  this->jwt_exp_secs = exp_in_secs;
 }
 
 CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id) {

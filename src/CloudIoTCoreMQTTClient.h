@@ -16,10 +16,11 @@
 #ifndef CloudIoTCoreMQTTClient_h
 #define CloudIoTCoreMQTTClient_h
 
-#include <Arduino.h>
-#include <WiFiClientSecure.h>
 #define MQTT_MAX_PACKET_SIZE 512
+#include <Arduino.h>
+#include <LoopbackStream.h>
 #include <PubSubClient.h>
+#include <WiFiClientSecure.h>
 
 #include <CloudIoTCoreDevice.h>
 
@@ -46,32 +47,45 @@
 
 class CloudIoTCoreMQTTClient {
  private:
-  CloudIoTCoreDevice device;
-  WiFiClientSecure client;
-  PubSubClient mqttClient;
+  bool debugLog = false;
+  CloudIoTCoreDevice *device;
+  WiFiClientSecure *client;
+  PubSubClient *mqttClient;
   String jwt;
-  unsigned long iss;
+  unsigned long mqtt_iss;
+  LoopbackStream buffer;
+
+  int backOffCount = 0;
+  long minBackoff = 5000; // 1000 if you don't mind sending lots of data
+  long maxBackoff = 60000;
+  long minJitter = 50;
+  long maxJitter = 1000;
+  int jwt_exp_secs = 3600;
 
   void mqttConnect();
   String getJWT();
 
  public:
-  CloudIoTCoreMQTTClient(CloudIoTCoreDevice &device);
+  CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device);
+  CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
+                         WiFiClientSecure *_client,
+                         PubSubClient *_mqttClient);
   CloudIoTCoreMQTTClient(const char *project_id, const char *location,
                          const char *registry_id, const char *device_id,
                          const char *private_key);
   bool connected();
-  void loop();
-
   void connect();
-#ifndef ESP8266
+  #ifndef ESP8266
   void connectSecure(const char *root_cert);
-#endif
+  #endif
+  void debugEnable(bool isEnable);
   /* MQTT methods */
+  void loop();
   void publishTelemetry(String binaryData);
   void publishTelemetry(const char *binaryData);
   void publishState(String binaryData);
   void publishState(const char *binaryData);
   void setConfigCallback(CONFIG_CALLBACK_SIGNATURE);
+  void setJwtExpSecs(int secs);
 };
 #endif  // CloudIoTCoreMQTTClient_h
