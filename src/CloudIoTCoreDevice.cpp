@@ -131,6 +131,10 @@ CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
 
 CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
   this->private_key = private_key;
+  if ( strlen(private_key) != (95) ) {
+    Serial.println("Warning: expected private key to be 95, was: " + 
+        String(strlen(private_key)));
+  }
   fillPrivateKey();
   return *this;
 }
