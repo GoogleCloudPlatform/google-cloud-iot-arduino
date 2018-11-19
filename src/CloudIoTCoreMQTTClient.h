@@ -50,7 +50,11 @@ class CloudIoTCoreMQTTClient {
   bool debugLog = false;
   bool skipReInit = false;
   CloudIoTCoreDevice *device;
+  #ifdef ESP8266
+  BearSSL::WiFiClientSecure *client;
+  #else
   WiFiClientSecure *client;
+  #endif
   PubSubClient *mqttClient;
   String jwt;
   unsigned long mqttIss;
@@ -70,18 +74,22 @@ class CloudIoTCoreMQTTClient {
 
  public:
   CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device);
+  #ifdef ESP8266
+  CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
+                         BearSSL::WiFiClientSecure *_client,
+                         PubSubClient *_mqttClient);
+  #else
   CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
                          WiFiClientSecure *_client,
                          PubSubClient *_mqttClient);
+  #endif
   CloudIoTCoreMQTTClient(const char *project_id, const char *location,
                          const char *registry_id, const char *device_id,
                          const char *private_key);
   int backoff(bool shouldDelay);
   bool connected();
   void connect();
-  #ifndef ESP8266
-  void connectSecure(const char *root_cert);
-  #endif
+  void connectSecure(const char *digicert);
   void debugEnable(bool isEnable);
   /* MQTT methods */
   PubSubClient* getMqttClient();

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#ifdef ESP32 // Prevent compilation on Genuino for now
+#if defined(ESP32) or defined(ESP8266) // Prevent compilation on Genuino for now
 #include "CloudIoTCoreMQTTClient.h"
 #include <time.h>
 
@@ -23,7 +23,16 @@ void callback(char *topic, uint8_t *payload, unsigned int length) {
     configCallback(payload, length);
   }
 }
-
+#ifdef ESP8266
+CloudIoTCoreMQTTClient::CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
+    BearSSL::WiFiClientSecure *_client, PubSubClient *_mqttClient) {
+  this->device = _device;
+  this->client = _client;
+  this->mqttClient = _mqttClient;
+  this->mqttClient->setClient(*(this->client));
+  this->mqttClient->setStream(buffer);
+}
+#else
 CloudIoTCoreMQTTClient::CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
     WiFiClientSecure *_client, PubSubClient *_mqttClient) {
   this->device = _device;
@@ -31,11 +40,16 @@ CloudIoTCoreMQTTClient::CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device,
   this->mqttClient = _mqttClient;
   this->mqttClient->setClient(*(this->client));
   this->mqttClient->setStream(buffer);
-}
+
+#endif
 
 CloudIoTCoreMQTTClient::CloudIoTCoreMQTTClient(CloudIoTCoreDevice *_device) {
   this->device = _device;
+  #ifdef ESP8266
+  this->client = new BearSSL::WiFiClientSecure();
+  #else
   this->client = new WiFiClientSecure();
+  #endif
   this->mqttClient = new PubSubClient();
   this->mqttClient->setClient(*(this->client));
   this->mqttClient->setStream(buffer);
@@ -48,7 +62,11 @@ CloudIoTCoreMQTTClient::CloudIoTCoreMQTTClient(const char *project_id,
                                                const char *private_key) {
   this->device = new CloudIoTCoreDevice(
       project_id, location, registry_id, device_id, private_key);
+  #ifdef ESP8266
+  this->client = new BearSSL::WiFiClientSecure();
+  #else
   this->client = new WiFiClientSecure();
+  #endif
   this->mqttClient = new PubSubClient();
   this->mqttClient->setClient(*(this->client));
   this->mqttClient->setStream(buffer);
@@ -59,11 +77,17 @@ void CloudIoTCoreMQTTClient::connect() {
   mqttClient->setCallback(callback);
   this->mqttClient->setStream(buffer);
 }
-
 #ifndef ESP8266
 void CloudIoTCoreMQTTClient::connectSecure(const char *root_cert) {
   this->lastRootCert = root_cert; // For reinitializing WiFiClient later
   client->setCACert(root_cert);
+  this->connect();
+}
+#else
+void CloudIoTCoreMQTTClient::connectSecure(const char* digicert) {
+  //this->lastRootCert = root_cert; // For reinitializing WiFiClient later
+  BearSSL::X509List cert(digicert);
+  client->setTrustAnchors(&cert);
   this->connect();
 }
 #endif
