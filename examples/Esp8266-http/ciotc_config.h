@@ -41,13 +41,3 @@ const char* private_key_str =
 //
 // To do this, install the Esp8266 Data Upload tool and uplaod the cert from
 // the data folder by selecting Tools > ESP8266 Data Upload.
-//
-// To get the fingerprint run
-// openssl s_client -connect cloudiotdevice.googleapis.com:443 -cipher <cipher>
-// Copy the certificate (all lines between and including ---BEGIN CERTIFICATE---
-// and --END CERTIFICATE--) to a.cert. Then to get the fingerprint run
-// openssl x509 -noout -fingerprint -sha1 -inform pem -in a.cert
-// <cipher> is probably ECDHE-RSA-AES128-GCM-SHA256, but if that doesn't work
-// try it with other ciphers obtained by sslscan cloudiotdevice.googleapis.com.
-const char* fingerprint =
-    "7C:D4:99:11:FE:FC:0D:78:C0:A9:C1:18:52:1D:3F:0B:8B:38:C9:90";
