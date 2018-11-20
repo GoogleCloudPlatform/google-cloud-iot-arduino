@@ -79,6 +79,11 @@ void setupWifi() {
     return;
   }
 
+  // Set CA cert on wifi client
+  // If using a static (binary) cert:
+  // client.setCACert_P(ca_crt, ca_crt_len);
+
+  // Set CA cert from SPIFFS
   File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
   if (!ca) {
     Serial.println("Failed to open ca file");

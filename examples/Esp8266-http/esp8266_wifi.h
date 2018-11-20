@@ -75,13 +75,14 @@ void setupWifi() {
   Serial.println(getJwt());
 
   // Set CA cert on wifi client
-  //client.setCACert(root_cert);
+  // If using a static (binary) cert:
+  // client.setCACert_P(ca_crt, ca_crt_len);
 
+  // Set CA cert from SPIFFS
   if (!SPIFFS.begin()) {
     Serial.println("Failed to mount file system");
     return;
   }
-
   File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
   if (!ca) {
     Serial.println("Failed to open ca file");
