@@ -95,6 +95,7 @@ String CloudIoTCoreDevice::getSetStatePath() {
 }
 
 void CloudIoTCoreDevice::fillPrivateKey() {
+  priv_key[8] = 0;
   for (int i = 7; i >= 0; i--) {
     priv_key[i] = 0;
     for (int byte_num = 0; byte_num < 4; byte_num++) {
