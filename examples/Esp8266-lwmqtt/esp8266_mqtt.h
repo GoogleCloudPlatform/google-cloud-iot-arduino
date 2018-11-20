@@ -12,9 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-// This file contains static methods for API requests using Wifi
-// TODO: abstract to interface / template?
-
+// This file contains static methods for API requests using Wifi / MQTT
 #ifndef __ESP8266_MQTT_H__
 #define __ESP8266_MQTT_H__
 #include <ESP8266WiFi.h>

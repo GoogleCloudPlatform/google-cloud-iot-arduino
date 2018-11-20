@@ -13,7 +13,6 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi
-// TODO: abstract to interface / template?
 
 #ifndef __ESP8266_WIFI_H__
 #define __ESP8266_WIFI_H__
@@ -201,4 +200,4 @@ void sendTelemetry() {
   sendTelemetry(getDefaultSensor());
 }
 
-#endif //__ESP8266_WIFI_
+#endif //__ESP8266_WIFI_H__

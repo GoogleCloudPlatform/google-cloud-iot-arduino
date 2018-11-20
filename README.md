@@ -74,7 +74,8 @@ console, that configuration will be reflrected on the device.
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
 * [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
-* [Buffered Streams](https://github.com/paulo-raca/ArduinoBufferedStreams) - Buffer for MQTT
+* [Buffered Streams](https://github.com/paulo-raca/ArduinoBufferedStreams) - Buffer for PubSub MQTT Client
+* [lwMQTT](https://github.com/knolleary/pubsubclient) - Used in MQTT Esp8266 example
 * [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
 * [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
 

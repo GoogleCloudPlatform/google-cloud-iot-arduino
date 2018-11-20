@@ -39,5 +39,5 @@ const char* private_key_str =
 // TODO: Use root certificate to verify tls connection rather than using a
 // fingerprint.
 //
-// To do this, install the Esp8266 Data Upload tool and uplaod the cert from
+// To do this, install the Esp8266 Data Upload tool and upload the cert from
 // the data folder by selecting Tools > ESP8266 Data Upload.
