@@ -43,9 +43,9 @@ Generate an Eliptic Curve (EC) private / public key pair:
 
 Register the device using the keys you generated:
 
-    gcloud iot devices create atest-dev —region=us-central1 \
-        —registry=atest-registry \
-        —public-key path=ec_public.pem,type=es256
+    gcloud iot devices create atest-dev --region=us-central1 \
+        --registry=atest-registry \
+        --public-key path=ec_public.pem,type=es256
 
 At this point, your registry is created and your device has been added to the
 registry so you're ready to connect it.
