@@ -81,6 +81,12 @@ Some examples use specific dependencies that need to be installed via the Arduin
 
 ## Known issues
 
+If you're using PlatformIO with the PubSub client, add the following line to your platformio.ini to increase the packet size in the build step.
+
+```
+build_flags = -DMQTT_MAX_PACKET_SIZE=384 
+```
+
 ### HTTP Examples
 * We occasionally encounter 403 errors on these samples, not sure of the cause.
   In some cases, it seems this is occurring due to invalid / bad iss / exp fields
