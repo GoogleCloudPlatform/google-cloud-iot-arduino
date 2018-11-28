@@ -100,6 +100,7 @@ void mqttConnect() {
   }
   Serial.println("\nconnected!");
   mqttClient->subscribe(device->getConfigTopic());
+  mqttClient->subscribe(device->getCommandsTopic());
   publishState("connected");
 }
 
@@ -122,7 +123,6 @@ void setupCloudIoT() {
 
   setupWifi();
   netClient = new WiFiClientSecure();
-  
   mqttClient = new MQTTClient(512);
   startMQTT();
 }

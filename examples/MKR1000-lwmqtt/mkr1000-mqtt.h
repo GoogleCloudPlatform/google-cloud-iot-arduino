@@ -97,6 +97,7 @@ void mqttConnect() {
   }
   Serial.println("\nconnected!");
   mqttClient->subscribe(device->getConfigTopic());
+  mqttClient->subscribe(device->getCommandsTopic());
   publishState("connected");
 }
 
