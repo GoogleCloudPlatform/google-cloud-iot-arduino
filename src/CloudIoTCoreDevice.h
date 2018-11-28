@@ -62,6 +62,7 @@ class CloudIoTCoreDevice {
 
   /* MQTT methods */
   String getClientId();
+  String getCommandsTopic();
   String getConfigTopic();
   String getEventsTopic();
   String getStateTopic();

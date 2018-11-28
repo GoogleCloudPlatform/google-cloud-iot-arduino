@@ -13,27 +13,26 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
-#ifndef __ESP8266_MQTT_H__
-#define __ESP8266_MQTT_H__
-#include <ESP8266WiFi.h>
+#ifndef __ESP32_MQTT_H__
+#define __ESP32_MQTT_H__
+#include <String.h>
+#include <WiFi.h>
 #include <WiFiClientSecure.h>
-#include "FS.h"
-#include <time.h>
+
 #include <rBase64.h>
-#include <CloudIoTCore.h>
 #include <MQTT.h>
 
-#include "ciotc_config.h" // Wifi configuration here
+#include <CloudIoTCore.h>
+#include "ciotc_config.h" // Update this file with your configuration
 
-// Holds Cloud IoT Core configuration
-CloudIoTCoreDevice *device;
-
-unsigned long iss = 0;
-String jwt;
-boolean wasErr;
+// Initialize the Genuino WiFi SSL client library / RTC
 WiFiClientSecure *netClient;
 MQTTClient *mqttClient;
 
+// Clout IoT configuration that you don't need to change
+CloudIoTCoreDevice *device;
+unsigned long iss = 0;
+String jwt;
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -44,42 +43,18 @@ String getDefaultSensor() {
 
 String getJwt() {
   if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
-    // Disable software watchdog as these operations can take a while.
-    ESP.wdtDisable();
     iss = time(nullptr);
     Serial.println("Refreshing JWT");
     jwt = device->createJWT(iss);
-    ESP.wdtEnable(0);
+  } else {
+    Serial.println("Reusing still-valid JWT");
   }
   return jwt;
 }
 
-void setupCert() {
-  // Set CA cert on wifi client
-  // If using a static (binary) cert:
-  // netClient->setCACert_P(ca_crt, ca_crt_len);
-
-  if (!SPIFFS.begin()) {
-    Serial.println("Failed to mount file system");
-    return;
-  }
-
-  // Set CA cert from SPIFFS
-  File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
-  if (!ca) {
-    Serial.println("Failed to open ca file");
-  } else {
-    Serial.println("Success to open ca file");
-  }
-
-  if(netClient->loadCertificate(ca)) {
-    Serial.println("loaded");
-  } else {
-    Serial.println("not loaded");
-  }
-}
-
 void setupWifi() {
+  Serial.println("Starting wifi");
+
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
@@ -103,7 +78,7 @@ void messageReceived(String &topic, String &payload) {
 }
 
 void startMQTT() {
-  mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  mqttClient->begin("mqtt.googleapis.com", 8883, *netClient);
   mqttClient->onMessage(messageReceived);
 }
 
@@ -119,7 +94,6 @@ void publishState(String data) {
 void mqttConnect() {
   Serial.print("\nconnecting...");
   while (!mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), false)) {
-    Serial.print(".");
     Serial.println(mqttClient->lastError());
     Serial.println(mqttClient->returnCode());
     delay(1000);
@@ -130,12 +104,11 @@ void mqttConnect() {
   publishState("connected");
 }
 
-
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 void connect() {
-  Serial.print("checking wifi..."); // TODO: Necessary?
+  Serial.print("checking wifi...");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(1000);
@@ -144,23 +117,13 @@ void connect() {
 }
 
 void setupCloudIoT() {
-  // Create the device
   device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id,
+      project_id, location, registry_id, device_id, 
       private_key_str);
 
-  // ESP8266 WiFi setup
-  netClient = new WiFiClientSecure();
   setupWifi();
-
-  // Device/Time OK, ESP8266 refresh JWT
-  Serial.println(getJwt());
-
-  // ESP8266 WiFi secure initialization
-  setupCert();
-
+  netClient = new WiFiClientSecure();
   mqttClient = new MQTTClient(512);
-  startMQTT(); // Opens connection
+  startMQTT();
 }
-
-#endif //__ESP8266_MQTT_H__
+#endif //__ESP32_MQTT_H__

@@ -12,11 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#include "mkr1000-mqtt.h"
+#include "esp32-mqtt.h"
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   setupCloudIoT();
 }

@@ -26,37 +26,19 @@
 #include "ciotc_config.h" // Update this file with your configuration
 
 // Initialize the Genuino WiFi SSL client library / RTC
-WiFiSSLClient* netClient;
-MQTTClient mqttClient(512);
+WiFiSSLClient *netClient;
+MQTTClient *mqttClient;
 
 // Clout IoT configuration that you don't need to change
 CloudIoTCoreDevice *device;
-
 unsigned long iss = 0;
 String jwt;
 
-void setupWifi() {
-  device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id, 
-      private_key_str);
-
-  // put your setup code here, to run once:
-  Serial.begin(9600);
-  delay(500);
-  Serial.println("Starting wifi");
-
-  WiFi.begin(ssid, password);
-  Serial.println("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(100);
-  }
-
-  Serial.println("Waiting on time sync...");
-  while (WiFi.getTime() < 1510644967) {
-    delay(10);
-  }
-
-  netClient = new WiFiSSLClient;
+///////////////////////////////
+// Helpers specific to this board
+///////////////////////////////
+String getDefaultSensor() {
+  return  "Wifi: " + String(WiFi.RSSI()) + "db";
 }
 
 String getJwt() {
@@ -69,45 +51,77 @@ String getJwt() {
   return jwt;
 }
 
-// Helpers for this board
-String getDefaultSensor() {
-  return  "Wifi: " + String(WiFi.RSSI()) + "db";
+void setupWifi() {
+  Serial.println("Starting wifi");
+
+  WiFi.begin(ssid, password);
+  Serial.println("Connecting to WiFi");
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(100);
+  }
+
+  Serial.println("Waiting on time sync...");
+  while (WiFi.getTime() < 1510644967) {
+    delay(10);
+  }
 }
 
+
+///////////////////////////////
+// MQTT common functions
+///////////////////////////////
 void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
 }
 
 void startMQTT() {
-  mqttClient.begin("mqtt.googleapis.com", 8883, *netClient);
-  mqttClient.onMessage(messageReceived);
+  mqttClient->begin("mqtt.googleapis.com", 8883, *netClient);
+  mqttClient->onMessage(messageReceived);
 }
 
 void publishTelemetry(String data) {
-  mqttClient.publish(device->getEventsTopic(), data);
+  mqttClient->publish(device->getEventsTopic(), data);
 }
 
 // Helper that just sends default sensor
 void publishState(String data) {
-  mqttClient.publish(device->getStateTopic(), data);
+  mqttClient->publish(device->getStateTopic(), data);
 }
 
+void mqttConnect() {
+  Serial.print("\nconnecting...");
+  while (!mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), false)) {
+    Serial.println(mqttClient->lastError());
+    Serial.println(mqttClient->returnCode());
+    delay(1000);
+  }
+  Serial.println("\nconnected!");
+  mqttClient->subscribe(device->getConfigTopic());
+  mqttClient->subscribe(device->getCommandsTopic());
+  publishState("connected");
+}
+
+///////////////////////////////
+// Orchestrates various methods from preceeding code.
+///////////////////////////////
 void connect() {
   Serial.print("checking wifi...");
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
     delay(1000);
   }
-
-  Serial.print("\nconnecting...");
-  while (!mqttClient.connect(device->getClientId().c_str(), "unused", getJwt().c_str(), false)) {
-    Serial.println(mqttClient.lastError());
-    Serial.println(mqttClient.returnCode());
-    delay(1000);
-  }
-  Serial.println("\nconnected!");
-  mqttClient.subscribe(device->getConfigTopic());
-  publishState("connected");
+  mqttConnect();
 }
 
+void setupCloudIoT() {
+  device = new CloudIoTCoreDevice(
+      project_id, location, registry_id, device_id,
+      private_key_str);
+
+  setupWifi();
+  netClient = new WiFiSSLClient;
+
+  mqttClient = new MQTTClient(512);
+  startMQTT();
+}
 #endif //__MKR1000_MQTT_H__

@@ -17,17 +17,17 @@
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
-  setupWifi();
+  setupCloudIoT(); // Creates globals for MQTT
   pinMode(LED_BUILTIN, OUTPUT);
   startMQTT();
 }
 
 unsigned long lastMillis = 0;
 void loop() {
-  mqttClient.loop();
+  mqttClient->loop();
   delay(10);  // <- fixes some issues with WiFi stability
 
-  if (!mqttClient.connected()) {
+  if (!mqttClient->connected()) {
     connect();
   }
 
