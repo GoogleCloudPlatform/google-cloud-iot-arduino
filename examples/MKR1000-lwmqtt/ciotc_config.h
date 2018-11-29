@@ -14,6 +14,10 @@
  *****************************************************************************/
 // This file contains your configuration used to connect to Cloud IoT Core
 
+// Important!
+// TODO(you): Install root certificate to verify tls connection as described
+// in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
+
 // Wifi newtork details.
 const char* ssid = "YOUR_SSID";
 const char* password = "YOUR_PASSWORD";
@@ -38,5 +42,3 @@ const char* private_key_str =
     "7d:ca";
 
 
-// TODO(you): Install root certificate to verify tls connection as described
-// in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
