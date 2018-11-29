@@ -70,6 +70,9 @@ When you run the sample, the device will connect and receive configuration
 from Cloud IoT Core. When you change the configuration in the Cloud IoT Core
 console, that configuration will be reflrected on the device.
 
+Before the examples will work, you will also need to configure the root
+certificate as described in the configuration headers.
+
 ## Dependencies
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
@@ -78,6 +81,12 @@ Some examples use specific dependencies that need to be installed via the Arduin
 * [lwMQTT](https://github.com/256dpi/arduino-mqtt) - Used in MQTT Esp8266 example
 * [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
 * [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
+
+## Error codes
+If you're using a sample that uses PubSub MQTT, the error codes are listed
+[in this header file](https://github.com/knolleary/pubsubclient/blob/master/src/PubSubClient.h#L44-L54).
+
+The error codes for the lwMQTT library are listed [in this header file](https://github.com/256dpi/arduino-mqtt/blob/master/src/lwmqtt/lwmqtt.h#L16-L29).
 
 ## Known issues
 
