@@ -91,7 +91,7 @@ int CloudIoTCoreMQTTClient::backoff(bool shouldDelay) {
     currDelay = maxBackoff;
   }
   if (debugLog)
-    Serial.printf("Waiting: %ld\n", currDelay);
+    Serial.printf("Waiting: %d\n", currDelay);
   if (shouldDelay){
     delay(currDelay);
   }
@@ -144,6 +144,7 @@ int CloudIoTCoreMQTTClient::mqttConnect() {
       return mqttClient->state();
     }
   }
+  return 0; // STATE_CONNECTED for client
 }
 
 int CloudIoTCoreMQTTClient::loop() {
