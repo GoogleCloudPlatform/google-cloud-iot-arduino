@@ -138,5 +138,5 @@ String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key, int 
 }
 
 String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key) {
-  CreateJwt(project_id, time, priv_key, 3600); // one hour default
+  return CreateJwt(project_id, time, priv_key, 3600); // one hour default
 }
