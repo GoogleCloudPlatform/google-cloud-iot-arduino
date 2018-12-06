@@ -15,7 +15,6 @@
 // This file contains static methods for API requests using Wifi / MQTT
 #ifndef __ESP32_MQTT_H__
 #define __ESP32_MQTT_H__
-#include <String.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
@@ -118,7 +117,7 @@ void connect() {
 
 void setupCloudIoT() {
   device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id, 
+      project_id, location, registry_id, device_id,
       private_key_str);
 
   setupWifi();
