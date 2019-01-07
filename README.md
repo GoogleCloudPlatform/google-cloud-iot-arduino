@@ -61,7 +61,7 @@ Find and replace the following values first:
 
 You will also need to extract your private key using the following command:
 
-    openssl ec -in ec_private.pem --noout -text
+    openssl ec -in ec_private.pem -noout -text
 
 ... and will need to copy the output for the private key bytes into the private
 key string in your Arduino project.
