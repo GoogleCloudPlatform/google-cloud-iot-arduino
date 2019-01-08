@@ -98,7 +98,7 @@ void loop() {
       Serial.println("Publish message");
 
       String payload = String("{\"Uptime\":\"") + msg +
-          String("\",\"Sig:\"") + WiFi.RSSI() +
+          String("\",\"Sig\":\"") + WiFi.RSSI() +
           String("\"}");
       if (encodePayload) {
         rbase64.encode(payload);
