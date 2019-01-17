@@ -10,6 +10,23 @@ how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
 **This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.**
 
+## Supported hardware targets
+
+Currently, we support the following hardware targets:
+
+* Genuino MKR1000 and WiFi101
+* Espressif ESP32
+* Espressif ESP8266
+
+## Dependencies
+Some examples use specific dependencies that need to be installed via the Arduino Library manager.
+
+* [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
+* [Buffered Streams](https://github.com/paulo-raca/ArduinoBufferedStreams) - Buffer for PubSub MQTT Client
+* [lwMQTT](https://github.com/256dpi/arduino-mqtt) - Used in MQTT Esp8266 example
+* [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
+* [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
+
 ## Quickstart
 
 First, install the library using the Arduino Library Manager.
@@ -73,14 +90,9 @@ console, that configuration will be reflrected on the device.
 Before the examples will work, you will also need to configure the root
 certificate as described in the configuration headers.
 
-## Dependencies
-Some examples use specific dependencies that need to be installed via the Arduino Library manager.
+## Demos
 
-* [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
-* [Buffered Streams](https://github.com/paulo-raca/ArduinoBufferedStreams) - Buffer for PubSub MQTT Client
-* [lwMQTT](https://github.com/256dpi/arduino-mqtt) - Used in MQTT Esp8266 example
-* [PubSub Client](https://github.com/knolleary/pubsubclient) - Used in MQTT for Esp32
-* [ThingPulse OLED SSD1306](https://github.com/ThingPulse/esp8266-oled-ssd1306) - Used in Esp32-ssd1306
+You can see the Arduino client library in action in [the Cloud IoT Demo from Google I/O 2018](https://www.youtube.com/watch?v=7kpE44tXQak#T=28m)
 
 ## Error codes
 If you're using a sample that uses PubSub MQTT, the error codes are listed
