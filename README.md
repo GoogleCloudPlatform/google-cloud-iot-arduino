@@ -7,8 +7,8 @@ This contains two parts: a library to make a JWT (json web token) which is used
 to authenticate with Google Cloud IOT, and Arduino sketches that demonstrate
 how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
 
-This example is not an officially supported Google product, does not have a
-SLA/SLO, and should not be used in production.
+**This example is not an officially supported Google product, does not have a
+SLA/SLO, and should not be used in production.**
 
 ## Quickstart
 
