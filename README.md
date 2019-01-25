@@ -90,6 +90,13 @@ console, that configuration will be reflrected on the device.
 Before the examples will work, you will also need to configure the root
 certificate as described in the configuration headers.
 
+## For more information
+* [Access Google Cloud IoT Core from Arduino](https://medium.com/@gguuss/accessing-cloud-iot-core-from-arduino-838c2138cf2b)
+* [Building Google Cloud-Connected Sensors](https://medium.com/@gguuss/building-google-cloud-connected-sensors-2d46a1c58012)
+* [Arduino and Google Cloud IoT](https://medium.com/@gguuss/arduino-and-google-cloud-iot-e2082e0ac000)
+* [Experimenting with Robots and Cloud IoT Core](https://medium.com/@gguuss/experimenting-with-robots-and-cloud-iot-core-790ee17345ef)
+* [Arduino Hexspider Revisited](https://medium.com/@gguuss/hexspider-robot-revisited-d78ff7ce9b6c)
+
 ## Demos
 
 You can see the Arduino client library in action in [the Cloud IoT Demo from Google I/O 2018](https://www.youtube.com/watch?v=7kpE44tXQak#T=28m)
