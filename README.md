@@ -10,6 +10,10 @@ how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
 **This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.**
 
+There's been a lot of confusion recently regarding which example to use, 
+it's recommended that you start with the lwmqtt (light-weight MQTT) examples
+as they seem to be the most stable.
+
 ## Supported hardware targets
 
 Currently, we support the following hardware targets:
