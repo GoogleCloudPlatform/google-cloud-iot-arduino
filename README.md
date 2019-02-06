@@ -10,7 +10,7 @@ how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
 **This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.**
 
-There's been a lot of confusion recently regarding which example to use, 
+There's been a lot of confusion recently regarding which example to use,
 it's recommended that you start with the lwmqtt (light-weight MQTT) examples
 as they seem to be the most stable.
 
@@ -116,8 +116,14 @@ The error codes for the lwMQTT library are listed [in this header file](https://
 If you're using PlatformIO with the PubSub client, add the following line to your platformio.ini to increase the packet size in the build step.
 
 ```
-build_flags = -DMQTT_MAX_PACKET_SIZE=384 
+build_flags = -DMQTT_MAX_PACKET_SIZE=384
 ```
+
+Some private keys do not correctly encode to the Base64 format that required
+for the device bridge. If you've tried everything else, try regenerating your
+device credentials and registering your device again with
+
+    gcloud iot devices create ...
 
 ### HTTP Examples
 * We occasionally encounter 403 errors on these samples, not sure of the cause.
