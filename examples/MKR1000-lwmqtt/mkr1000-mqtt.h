@@ -15,7 +15,6 @@
 // This file contains static methods for API requests using Wifi / MQTT
 #ifndef __MKR1000_MQTT_H__
 #define __MKR1000_MQTT_H__
-#include <String.h>
 #include <WiFi101.h>
 #include <WiFiSSLClient.h>
 
