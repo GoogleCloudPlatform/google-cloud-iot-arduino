@@ -91,7 +91,37 @@ console, that configuration will be reflrected on the device.
 Before the examples will work, you will also need to configure the root
 certificate as described in the configuration headers.
 
+## Notes on the certificate
+
+The [root certificate from Google](https://pki.goog/roots/pem) is used to verify communication to
+Google. Although unlikely, it's possible for the certificate to expire or rotate, requiring you to
+update it.
+
+If you're using the ESP8266 project, you need to either install the Certificate to SPIFFS
+using the [SPIFFS upload utility](https://github.com/esp8266/arduino-esp8266fs-plugin) or
+will need to uncomment the certificate bytes in the sample. Note that the SPIFFS utility simply 
+uploads the files stored in the **data** subfolder. The sample assumes the file is called `ca.crt`:
+
+    ├── Esp8266...
+    │   ├── data
+    │   │   └── ca.crt
+
+To convert the certificate to the DER format, the following command shuold be used:
+
+    wget pki.goog/roots.pem
+    openssl x509 -outform der -in roots.pem -out ca.crt
+
+If you're using the ESP32, you can paste the certificate bytes (don't forget the \n characters) 
+into the sample. You can use any of the root certificate bytes for the certificates with Google
+Trust Services (GTS) as the certificate authority (CA). This is easy to get using curl, e.g.
+
+    curl pki.goog/roots.pem
+
+If you're using Genuino boards like the MKR1000, you will need to add SSL certificates to your
+board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d).
+
 ## For more information
+
 * [Access Google Cloud IoT Core from Arduino](https://medium.com/@gguuss/accessing-cloud-iot-core-from-arduino-838c2138cf2b)
 * [Building Google Cloud-Connected Sensors](https://medium.com/@gguuss/building-google-cloud-connected-sensors-2d46a1c58012)
 * [Arduino and Google Cloud IoT](https://medium.com/@gguuss/arduino-and-google-cloud-iot-e2082e0ac000)
