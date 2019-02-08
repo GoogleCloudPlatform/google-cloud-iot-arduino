@@ -5,14 +5,10 @@ connecting to Google Cloud IoT Core.
 
 This contains two parts: a library to make a JWT (json web token) which is used
 to authenticate with Google Cloud IOT, and Arduino sketches that demonstrate
-how to connect to Google Cloud IOT using the available HTTP and MQTT bridges.
+how to connect to Google Cloud IOT using the available MQTT bridge.
 
 **This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.**
-
-There's been a lot of confusion recently regarding which example to use,
-it's recommended that you start with the lwmqtt (light-weight MQTT) examples
-as they seem to be the most stable.
 
 ## Supported hardware targets
 
@@ -133,31 +129,16 @@ board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-ce
 You can see the Arduino client library in action in [the Cloud IoT Demo from Google I/O 2018](https://www.youtube.com/watch?v=7kpE44tXQak#T=28m)
 
 ## Error codes
-If you're using a sample that uses PubSub MQTT, the error codes are listed
-[in this header file](https://github.com/knolleary/pubsubclient/blob/master/src/PubSubClient.h#L44-L54).
 
 The error codes for the lwMQTT library are listed [in this header file](https://github.com/256dpi/arduino-mqtt/blob/master/src/lwmqtt/lwmqtt.h#L16-L29).
 
 ## Known issues
-
-If you're using PlatformIO with the PubSub client, add the following line to your platformio.ini to increase the packet size in the build step.
-
-```
-build_flags = -DMQTT_MAX_PACKET_SIZE=384
-```
 
 Some private keys do not correctly encode to the Base64 format that required
 for the device bridge. If you've tried everything else, try regenerating your
 device credentials and registering your device again with
 
     gcloud iot devices create ...
-
-### HTTP Examples
-* We occasionally encounter 403 errors on these samples, not sure of the cause.
-  In some cases, it seems this is occurring due to invalid / bad iss / exp fields
-  in the JWT.
-* Transmitting telemetry seems less reliable than setting state and getting
-  device configuration.
 
 ## License
 
