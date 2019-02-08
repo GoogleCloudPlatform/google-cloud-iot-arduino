@@ -18,7 +18,6 @@
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-#include <rBase64.h>
 #include <MQTT.h>
 
 #include <CloudIoTCore.h>

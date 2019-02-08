@@ -21,7 +21,6 @@ Currently, we support the following hardware targets:
 ## Dependencies
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
-* [rBase64](https://github.com/boseji/rBASE64) - Used when encoding `binary_data` payloads
 * [lwMQTT](https://github.com/256dpi/arduino-mqtt) - Used in MQTT Esp8266 example
 
 ## Quickstart

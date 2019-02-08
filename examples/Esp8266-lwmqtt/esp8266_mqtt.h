@@ -16,13 +16,13 @@
 #ifndef __ESP8266_MQTT_H__
 #define __ESP8266_MQTT_H__
 #include <ESP8266WiFi.h>
-#include <WiFiClientSecure.h>
 #include "FS.h"
+#include <WiFiClientSecure.h>
 #include <time.h>
-#include <rBase64.h>
-#include <CloudIoTCore.h>
+
 #include <MQTT.h>
 
+#include <CloudIoTCore.h>
 #include "ciotc_config.h" // Wifi configuration here
 
 // Holds Cloud IoT Core configuration
