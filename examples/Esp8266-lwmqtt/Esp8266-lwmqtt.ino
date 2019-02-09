@@ -14,6 +14,10 @@
  *****************************************************************************/
 #include "esp8266_mqtt.h"
 
+#ifndef LED_BUILTIN
+  #define LED_BUILTIN 13
+#endif
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
