@@ -42,7 +42,7 @@ Core for testing on your Arduino device:
 Create the PubSub topic and subscription:
 
     gcloud pubsub topics create atest-pub --project=YOUR_PROJECT_ID
-    gcloud pubsub subscriptions create atest-sub --topic=atest--pub
+    gcloud pubsub subscriptions create atest-sub --topic=atest-pub
 
 Create the Cloud IoT Core registry:
 
