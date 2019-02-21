@@ -54,7 +54,6 @@ void setupWifi() {
   Serial.println("Starting wifi");
 
   WiFi.mode(WIFI_STA);
-  WiFi.setSleep(false); // MAY help with WiFi reliability
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
