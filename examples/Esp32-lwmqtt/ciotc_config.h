@@ -24,6 +24,14 @@ const char *location = "us-central1";
 const char *registry_id = "my-registry";
 const char *device_id = "my-esp32-device";
 
+// Configuration for NTP
+const char* ntp_primary = "pool.ntp.org";
+const char* ntp_secondary = "time.nist.gov";
+
+#ifndef LED_BUILTIN
+#define LED_BUILTIN 13
+#endif
+
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text

@@ -15,9 +15,11 @@
 // This file contains static methods for API requests using Wifi / MQTT
 #ifndef __ESP32_MQTT_H__
 #define __ESP32_MQTT_H__
+#include <String.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
+#include <rBase64.h>
 #include <MQTT.h>
 
 #include <CloudIoTCore.h>
@@ -60,7 +62,7 @@ void setupWifi() {
     delay(100);
   }
 
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  configTime(0, 0, ntp_primary, ntp_secondary);
   Serial.println("Waiting on time sync...");
   while (time(nullptr) < 1510644967) {
     delay(10);
