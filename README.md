@@ -127,9 +127,11 @@ board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-ce
 
 You can see the Arduino client library in action in [the Cloud IoT Demo from Google I/O 2018](https://www.youtube.com/watch?v=7kpE44tXQak#T=28m)
 
-## Error codes
+## Error codes and Debugging
 
 The error codes for the lwMQTT library are listed [in this header file](https://github.com/256dpi/arduino-mqtt/blob/master/src/lwmqtt/lwmqtt.h#L16-L29).
+
+If you're having trouble determining what's wrong, it may be helpful to enable more verbose debugging in Arduino by setting the debug level in the IDE under **Tools > Core Debug Level > Verbose**.
 
 ## Known issues
 
