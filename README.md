@@ -139,6 +139,9 @@ device credentials and registering your device again with
 
     gcloud iot devices create ...
 
+Some users have encountered issues with certain versions of the Community SDK 
+for Espressif, if you've tried everything else, try using the SDK 2.4.2.
+
 ## License
 
 Apache 2.0; see [LICENSE](LICENSE) for details.
