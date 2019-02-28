@@ -23,6 +23,11 @@ const char* project_id = "project-id";
 const char* location = "us-central1";
 const char* registry_id = "my-registry";
 const char* device_id = "my-device";
+
+// Configuration for NTP
+const char* ntp_primary = "pool.ntp.org";
+const char* ntp_secondary = "time.nist.gov";
+
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text

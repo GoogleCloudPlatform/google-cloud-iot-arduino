@@ -87,7 +87,7 @@ void setupWifi() {
     delay(100);
   }
 
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  configTime(0, 0, ntp_primary, ntp_secondary);
   Serial.println("Waiting on time sync...");
   while (time(nullptr) < 1510644967) {
     delay(10);
