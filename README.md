@@ -21,7 +21,7 @@ Currently, we support the following hardware targets:
 ## Dependencies
 Some examples use specific dependencies that need to be installed via the Arduino Library manager.
 
-* [lwMQTT](https://github.com/256dpi/arduino-mqtt) - Used in MQTT Esp8266 example
+* [lwMQTT](https://github.com/256dpi/arduino-mqtt)
 
 ## Quickstart
 
