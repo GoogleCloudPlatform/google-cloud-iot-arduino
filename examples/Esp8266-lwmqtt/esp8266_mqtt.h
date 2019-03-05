@@ -160,6 +160,7 @@ void setupCloudIoT() {
   setupCert();
 
   mqttClient = new MQTTClient(512);
+  mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   startMQTT(); // Opens connection
 }
 

@@ -124,6 +124,7 @@ void setupCloudIoT() {
   setupWifi();
   netClient = new WiFiClientSecure();
   mqttClient = new MQTTClient(512);
+  mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   startMQTT();
 }
 #endif //__ESP32_MQTT_H__

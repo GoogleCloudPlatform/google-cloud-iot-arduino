@@ -120,6 +120,7 @@ void setupCloudIoT() {
   netClient = new WiFiSSLClient;
 
   mqttClient = new MQTTClient(512);
+  mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   startMQTT();
 }
 #endif //__MKR1000_MQTT_H__
