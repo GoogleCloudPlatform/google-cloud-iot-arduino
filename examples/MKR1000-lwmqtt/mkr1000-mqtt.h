@@ -94,8 +94,8 @@ void mqttConnect() {
     delay(1000);
   }
   Serial.println("\nconnected!");
-  mqttClient->subscribe(device->getConfigTopic());
-  mqttClient->subscribe(device->getCommandsTopic());
+  mqttClient->subscribe(device->getConfigTopic(), 1); // Set QoS to 1 (ack) for configuration messages
+  mqttClient->subscribe(device->getCommandsTopic(), 0); // QoS 0 (no ack) for commands
   publishState("connected");
 }
 
