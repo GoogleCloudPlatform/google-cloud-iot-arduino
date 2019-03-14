@@ -77,3 +77,11 @@ const char *root_cert =
     "7a8IVk6wuy6pm+T7HT4LY8ibS5FEZlfAFLSW8NwsVz9SBK2Vqn1N0PIMn5xA6NZV\n"
     "c7o835DLAFshEWfC7TIe3g==\n"
     "-----END CERTIFICATE-----\n";
+
+// In case we ever need extra topics
+const int ex_num_topics = 0;
+const char* ex_topics[ex_num_topics];
+//const int ex_num_topics = 1;
+//const char* ex_topics[ex_num_topics] = {
+//  "/devices/my-device/tbd/#"
+//};    
