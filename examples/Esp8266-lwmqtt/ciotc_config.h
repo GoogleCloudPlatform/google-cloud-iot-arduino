@@ -168,3 +168,12 @@ const char* private_key_str =
 // };
 //
 // size_t ca_crt_len = 1374;
+
+
+// In case we ever need extra topics
+const int ex_num_topics = 0;
+const char* ex_topics[ex_num_topics];
+//const int ex_num_topics = 1;
+//const char* ex_topics[ex_num_topics] = {
+//  "/devices/my-device/tbd/#"
+//};
