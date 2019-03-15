@@ -64,6 +64,7 @@ class CloudIoTCoreDevice {
   String getClientId();
   String getCommandsTopic();
   String getConfigTopic();
+  String getDeviceId();
   String getEventsTopic();
   String getStateTopic();
 };

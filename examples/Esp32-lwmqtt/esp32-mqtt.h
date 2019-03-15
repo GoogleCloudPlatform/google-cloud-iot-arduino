@@ -25,6 +25,8 @@
 #include <CloudIoTCore.h>
 #include "ciotc_config.h" // Update this file with your configuration
 
+boolean LOG_CONNECT = true;
+
 // Initialize WiFi and MQTT for this board
 WiFiClientSecure *netClient;
 MQTTClient *mqttClient;
@@ -88,7 +90,7 @@ void connectWifi() {
 ///////////////////////////////
 void connect() {
   connectWifi();
-  mqttConnect(mqttClient);
+  mqttConnect(mqttClient, device);
 }
 
 void setupCloudIoT() {
