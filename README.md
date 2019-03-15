@@ -122,6 +122,7 @@ board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-ce
 * [Arduino and Google Cloud IoT](https://medium.com/@gguuss/arduino-and-google-cloud-iot-e2082e0ac000)
 * [Experimenting with Robots and Cloud IoT Core](https://medium.com/@gguuss/experimenting-with-robots-and-cloud-iot-core-790ee17345ef)
 * [Arduino Hexspider Revisited](https://medium.com/@gguuss/hexspider-robot-revisited-d78ff7ce9b6c)
+* [TBD FAQ](https://github.com/GoogleCloudPlatform/google-cloud-iot-arduino/issues/92)
 
 ## Demos
 
