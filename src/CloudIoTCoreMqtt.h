@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#ifndef __MQTT_COMMON_H__
-#define __MQTT_COMMON_H__
+#ifndef __CLOUDIOTCORE_MQTT_H__
+#define __CLOUDIOTCORE_MQTT_H__
 ///////////////////////////////
 // MQTT common functions
 ///////////////////////////////
@@ -169,4 +169,4 @@ void mqttConnect(MQTTClient *mqttClient, CloudIoTCoreDevice *device) {
 
   onConnect(mqttClient, device);
 }
-#endif // __MQTT_COMMON_H__
+#endif // __CLOUDIOTCORE_MQTT_H__
