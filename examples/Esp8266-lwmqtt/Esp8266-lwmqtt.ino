@@ -43,9 +43,6 @@ void loop() {
   // TODO: Replace with your code here
   if (millis() - lastMillis > 60000) {
     lastMillis = millis();
-    publishTelemetry(
-        mqttClient,
-        String("/" + device->getDeviceId()),
-        getDefaultSensor());
+    publishTelemetry(getDefaultSensor());
   }
 }

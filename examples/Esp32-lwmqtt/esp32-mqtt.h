@@ -83,14 +83,19 @@ void connectWifi() {
 void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
 }
+
 ///////////////////////////////
 // Common MQTT
-#include "mqtt_common.h"
+#include <CloudIoTCoreMqtt.h>
 ///////////////////////////////
 
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
+void publishTelemetry(String data) {
+  publishTelemetry(mqttClient, data);
+}
+
 void connect() {
   connectWifi();
   mqttConnect(mqttClient, device);

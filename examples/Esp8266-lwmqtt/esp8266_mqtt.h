@@ -106,12 +106,20 @@ void messageReceived(String &topic, String &payload) {
 
 ///////////////////////////////
 // Common MQTT
-#include "mqtt_common.h"
+#include <CloudIoTCoreMqtt.h>
 ///////////////////////////////
 
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
+void publishTelemetry(String data) {
+  publishTelemetry(mqttClient, data);
+}
+
+void publishTelemetry(String subfolder, String data) {
+  publishTelemetry(mqttClient, subfolder, data);
+}
+
 void connect() {
   mqttConnect(mqttClient, device);
 }

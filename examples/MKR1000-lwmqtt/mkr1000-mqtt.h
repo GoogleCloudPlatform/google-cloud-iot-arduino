@@ -80,7 +80,7 @@ void messageReceived(String &topic, String &payload) {
 
 ///////////////////////////////
 // Common MQTT
-#include "mqtt_common.h"
+#include <CloudIoTCoreMqtt.h>
 ///////////////////////////////
 
 ///////////////////////////////
@@ -89,6 +89,10 @@ void messageReceived(String &topic, String &payload) {
 void connect() {
   connectWifi();
   mqttConnect(mqttClient, device);
+}
+
+void publishTelemetry(String data) {
+  publishTelemetry(mqttClient, data);
 }
 
 void setupCloudIoT() {
