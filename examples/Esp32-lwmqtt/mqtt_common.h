@@ -17,10 +17,6 @@
 ///////////////////////////////
 // MQTT common functions
 ///////////////////////////////
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
-}
-
 void startMQTT(MQTTClient *mqttClient) {
   mqttClient->begin("mqtt.googleapis.com", 8883, *netClient);
   mqttClient->onMessage(messageReceived);

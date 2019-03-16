@@ -100,6 +100,10 @@ void connectWifi() {
   }
 }
 
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+}
+
 ///////////////////////////////
 // Common MQTT
 #include "mqtt_common.h"
