@@ -23,6 +23,14 @@
 #include <CloudIoTCore.h>
 #include "ciotc_config.h" // Update this file with your configuration
 
+// !!REPLACEME!!
+// The MQTT callback function for commands and configuration updates
+// Place your message handler code here.
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+}
+///////////////////////////////
+
 boolean LOG_CONNECT = true;
 
 // Initialize the Genuino WiFi SSL client library / RTC
@@ -72,10 +80,6 @@ void connectWifi() {
     Serial.print(".");
     delay(1000);
   }
-}
-
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
 }
 
 ///////////////////////////////

@@ -27,6 +27,14 @@
 
 boolean LOG_CONNECT = true;
 
+// !!REPLACEME!!
+// The MQTT callback function for commands and configuration updates
+// Place your message handler code here.
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+}
+///////////////////////////////
+
 // Initialize WiFi and MQTT for this board
 WiFiClientSecure *netClient;
 MQTTClient *mqttClient;
@@ -78,10 +86,6 @@ void connectWifi() {
     Serial.print(".");
     delay(1000);
   }
-}
-
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
 }
 
 ///////////////////////////////

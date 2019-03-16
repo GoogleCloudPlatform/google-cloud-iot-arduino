@@ -25,6 +25,14 @@
 #include <CloudIoTCore.h>
 #include "ciotc_config.h" // Wifi configuration here
 
+// !!REPLACEME!!
+// The MQTT callback function for commands and configuration updates
+// Place your message handler code here.
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+}
+///////////////////////////////
+
 unsigned long iss = 0;
 String jwt;
 boolean wasErr;
@@ -98,10 +106,6 @@ void connectWifi() {
     Serial.print(".");
     delay(1000);
   }
-}
-
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
 }
 
 ///////////////////////////////
