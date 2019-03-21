@@ -113,7 +113,7 @@ Trust Services (GTS) as the certificate authority (CA). This is easy to get usin
     curl pki.goog/roots.pem
 
 If you're using Genuino boards like the MKR1000, you will need to add SSL certificates to your
-board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d).
+board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d). The MQTT server address is `mqtt.googleapis.com` and the port is either `8883` for most cases or `443` in case your device is running in an environment where port 8883 is blocked.
 
 ## For more information
 
