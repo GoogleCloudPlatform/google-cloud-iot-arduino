@@ -15,7 +15,7 @@
 // This file contains static methods for API requests using Wifi / MQTT
 #ifndef __ESP32_MQTT_H__
 #define __ESP32_MQTT_H__
-#include <String.h>
+
 #include <Client.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -91,6 +91,10 @@ void connectWifi() {
 ///////////////////////////////
 void publishTelemetry(String data) {
   mqtt->publishTelemetry(data);
+}
+
+void publishTelemetry(String subfolder, String data) {
+  mqtt->publishTelemetry(subfolder, data);
 }
 
 void connect() {

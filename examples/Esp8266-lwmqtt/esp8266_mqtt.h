@@ -63,9 +63,11 @@ String getJwt() {
 
 void setupCert() {
   // Set CA cert on wifi client
-  // If using a static (binary) cert:
-  // netClient->setCACert_P(ca_crt, ca_crt_len);
+  // If using a static (binary) cert, uncomment in ciotc_config.h:
+  //((WiFiClientSecure*)netClient)->setCACert_P(ca_crt, ca_crt_len);
+  //return;
 
+  // If using the (preferred) method with the cert in /data (SPIFFS)
   if (!SPIFFS.begin()) {
     Serial.println("Failed to mount file system");
     return;

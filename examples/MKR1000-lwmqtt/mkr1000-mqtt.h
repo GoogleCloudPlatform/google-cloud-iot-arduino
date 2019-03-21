@@ -92,6 +92,10 @@ void publishTelemetry(String data) {
   mqtt->publishTelemetry(data);
 }
 
+void publishTelemetry(String subfolder, String data) {
+  mqtt->publishTelemetry(subfolder, data);
+}
+
 void setupCloudIoT() {
   device = new CloudIoTCoreDevice(
       project_id, location, registry_id, device_id,
