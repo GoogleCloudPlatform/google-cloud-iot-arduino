@@ -16,16 +16,15 @@
 #ifndef __ESP32_MQTT_H__
 #define __ESP32_MQTT_H__
 #include <String.h>
+#include <Client.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
 
-#include <rBase64.h>
 #include <MQTT.h>
 
 #include <CloudIoTCore.h>
+#include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Update this file with your configuration
-
-boolean LOG_CONNECT = true;
 
 // !!REPLACEME!!
 // The MQTT callback function for commands and configuration updates
@@ -36,11 +35,10 @@ void messageReceived(String &topic, String &payload) {
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
-WiFiClientSecure *netClient;
-MQTTClient *mqttClient;
-
-// Cloud IoT configuration that you don't need to change
+Client *netClient;
 CloudIoTCoreDevice *device;
+CloudIoTCoreMqtt *mqtt;
+MQTTClient *mqttClient;
 unsigned long iss = 0;
 String jwt;
 
@@ -89,20 +87,15 @@ void connectWifi() {
 }
 
 ///////////////////////////////
-// Common MQTT
-#include <CloudIoTCoreMqtt.h>
-///////////////////////////////
-
-///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 void publishTelemetry(String data) {
-  publishTelemetry(mqttClient, data);
+  mqtt->publishTelemetry(data);
 }
 
 void connect() {
   connectWifi();
-  mqttConnect(mqttClient, device);
+  mqtt->mqttConnect();
 }
 
 void setupCloudIoT() {
@@ -114,6 +107,7 @@ void setupCloudIoT() {
   netClient = new WiFiClientSecure();
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  startMQTT(mqttClient);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt->startMQTT();
 }
 #endif //__ESP32_MQTT_H__

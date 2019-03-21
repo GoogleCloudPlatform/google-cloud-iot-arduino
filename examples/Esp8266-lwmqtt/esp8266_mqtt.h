@@ -23,6 +23,7 @@
 #include <MQTT.h>
 
 #include <CloudIoTCore.h>
+#include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Wifi configuration here
 
 // !!REPLACEME!!
@@ -33,13 +34,13 @@ void messageReceived(String &topic, String &payload) {
 }
 ///////////////////////////////
 
+// Initialize WiFi and MQTT for this board
+MQTTClient *mqttClient;
+Client *netClient;
+CloudIoTCoreDevice *device;
+CloudIoTCoreMqtt *mqtt;
 unsigned long iss = 0;
 String jwt;
-boolean wasErr;
-WiFiClientSecure *netClient;
-MQTTClient *mqttClient;
-
-boolean LOG_CONNECT = true;
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -78,7 +79,7 @@ void setupCert() {
     Serial.println("Success to open ca file");
   }
 
-  if(netClient->loadCertificate(ca)) {
+  if(((WiFiClientSecure*)netClient)->loadCertificate(ca)) {
     Serial.println("loaded");
   } else {
     Serial.println("not loaded");
@@ -117,15 +118,15 @@ void connectWifi() {
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 void publishTelemetry(String data) {
-  publishTelemetry(mqttClient, data);
+  mqtt->publishTelemetry(data);
 }
 
 void publishTelemetry(String subfolder, String data) {
-  publishTelemetry(mqttClient, subfolder, data);
+  mqtt->publishTelemetry(subfolder, data);
 }
 
 void connect() {
-  mqttConnect(mqttClient, device);
+  mqtt->mqttConnect();
 }
 
 // TODO: fix globals
@@ -147,7 +148,8 @@ void setupCloudIoT() {
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  startMQTT(mqttClient); // Opens connection
+  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt->startMQTT(); // Opens connection
 }
 
 #endif //__ESP8266_MQTT_H__

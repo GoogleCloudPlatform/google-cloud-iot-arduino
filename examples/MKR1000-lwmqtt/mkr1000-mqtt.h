@@ -21,6 +21,7 @@
 #include <MQTT.h>
 
 #include <CloudIoTCore.h>
+#include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Update this file with your configuration
 
 // !!REPLACEME!!
@@ -31,14 +32,11 @@ void messageReceived(String &topic, String &payload) {
 }
 ///////////////////////////////
 
-boolean LOG_CONNECT = true;
-
-// Initialize the Genuino WiFi SSL client library / RTC
-WiFiSSLClient *netClient;
-MQTTClient *mqttClient;
-
 // Cloud IoT configuration that you don't need to change
+Client *netClient;
 CloudIoTCoreDevice *device;
+CloudIoTCoreMqtt *mqtt;
+MQTTClient *mqttClient;
 unsigned long iss = 0;
 String jwt;
 
@@ -83,20 +81,15 @@ void connectWifi() {
 }
 
 ///////////////////////////////
-// Common MQTT
-#include <CloudIoTCoreMqtt.h>
-///////////////////////////////
-
-///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 void connect() {
   connectWifi();
-  mqttConnect(mqttClient, device);
+  mqtt->mqttConnect();
 }
 
 void publishTelemetry(String data) {
-  publishTelemetry(mqttClient, data);
+  mqtt->publishTelemetry(data);
 }
 
 void setupCloudIoT() {
@@ -105,10 +98,11 @@ void setupCloudIoT() {
       private_key_str);
 
   setupWifi();
-  netClient = new WiFiSSLClient;
+  netClient = new WiFiSSLClient();
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  startMQTT(mqttClient);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt->startMQTT();
 }
 #endif //__MKR1000_MQTT_H__

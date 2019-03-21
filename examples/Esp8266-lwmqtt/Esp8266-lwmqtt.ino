@@ -14,9 +14,6 @@
  *****************************************************************************/
 #include <CloudIoTCore.h>
 
-// Holds Cloud IoT Core configuration
-CloudIoTCoreDevice *device;
-
 #include "esp8266_mqtt.h"
 
 #ifndef LED_BUILTIN
@@ -28,7 +25,6 @@ void setup() {
   Serial.begin(115200);
   setupCloudIoT(); // Creates globals for MQTT
   pinMode(LED_BUILTIN, OUTPUT);
-  startMQTT(mqttClient);
 }
 
 unsigned long lastMillis = 0;
