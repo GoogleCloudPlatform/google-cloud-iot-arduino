@@ -30,9 +30,11 @@ void loop() {
     connect();
   }
 
+  // TODO: replace with your code
   // publish a message roughly every second.
-  if (millis() - lastMillis > 1000) {
+  if (millis() - lastMillis > 60000) {
     lastMillis = millis();
+    //publishTelemetry(mqttClient, "/sensors", getDefaultSensor());
     publishTelemetry(getDefaultSensor());
   }
 }

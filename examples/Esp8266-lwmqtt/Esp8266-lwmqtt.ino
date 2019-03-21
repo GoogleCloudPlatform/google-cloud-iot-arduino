@@ -12,6 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+#include <CloudIoTCore.h>
+
 #include "esp8266_mqtt.h"
 
 #ifndef LED_BUILTIN
@@ -23,7 +25,6 @@ void setup() {
   Serial.begin(115200);
   setupCloudIoT(); // Creates globals for MQTT
   pinMode(LED_BUILTIN, OUTPUT);
-  startMQTT();
 }
 
 unsigned long lastMillis = 0;
@@ -35,8 +36,8 @@ void loop() {
     connect();
   }
 
-  // publish a message roughly every second.
-  if (millis() - lastMillis > 1000) {
+  // TODO: Replace with your code here
+  if (millis() - lastMillis > 60000) {
     lastMillis = millis();
     publishTelemetry(getDefaultSensor());
   }
