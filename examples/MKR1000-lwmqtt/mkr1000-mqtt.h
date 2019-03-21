@@ -37,7 +37,7 @@ boolean LOG_CONNECT = true;
 WiFiSSLClient *netClient;
 MQTTClient *mqttClient;
 
-// Clout IoT configuration that you don't need to change
+// Cloud IoT configuration that you don't need to change
 CloudIoTCoreDevice *device;
 unsigned long iss = 0;
 String jwt;
