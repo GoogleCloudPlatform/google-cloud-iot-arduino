@@ -41,6 +41,9 @@ const char* private_key_str =
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
     "7d:ca";
 
+// Time (seconds) to expire token += 20 minutes for drift
+const int jwt_exp_secs = 3600; // Maximum 24H (3600*24)
+
 // Use the root certificate to verify tls connection rather than
 // using a fingerprint.
 //

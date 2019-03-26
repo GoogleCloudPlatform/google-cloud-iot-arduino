@@ -50,14 +50,12 @@ String getDefaultSensor() {
 }
 
 String getJwt() {
-  if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
-    // Disable software watchdog as these operations can take a while.
-    ESP.wdtDisable();
-    iss = time(nullptr);
-    Serial.println("Refreshing JWT");
-    jwt = device->createJWT(iss);
-    ESP.wdtEnable(0);
-  }
+  // Disable software watchdog as these operations can take a while.
+  ESP.wdtDisable();
+  iss = time(nullptr);
+  Serial.println("Refreshing JWT");
+  jwt = device->createJWT(iss, jwt_exp_secs);
+  ESP.wdtEnable(0);
   return jwt;
 }
 
@@ -141,9 +139,6 @@ void setupCloudIoT() {
   // ESP8266 WiFi setup
   netClient = new WiFiClientSecure();
   setupWifi();
-
-  // Device/Time OK, ESP8266 refresh JWT
-  Serial.println(getJwt());
 
   // ESP8266 WiFi secure initialization
   setupCert();

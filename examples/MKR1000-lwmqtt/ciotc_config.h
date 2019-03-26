@@ -41,6 +41,9 @@ const char* private_key_str =
     "07:fd:ed:22:0d:03:2b:a6:b1:b6:04:0b:d5:9b:49:"
     "7d:ca";
 
+// Time (seconds) to expire token += 20 minutes for drift
+const int jwt_exp_secs = 3600; // Maximum 24H (3600*24)
+
 // In case we ever need extra topics
 const int ex_num_topics = 0;
 const char* ex_topics[ex_num_topics];

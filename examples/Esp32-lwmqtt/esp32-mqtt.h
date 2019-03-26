@@ -50,13 +50,9 @@ String getDefaultSensor() {
 }
 
 String getJwt() {
-  if (iss == 0 || time(nullptr) - iss > 3600) {  // TODO: exp in device
-    iss = time(nullptr);
-    Serial.println("Refreshing JWT");
-    jwt = device->createJWT(iss);
-  } else {
-    Serial.println("Reusing still-valid JWT");
-  }
+  iss = time(nullptr);
+  Serial.println("Refreshing JWT");
+  jwt = device->createJWT(iss, jwt_exp_secs);
   return jwt;
 }
 

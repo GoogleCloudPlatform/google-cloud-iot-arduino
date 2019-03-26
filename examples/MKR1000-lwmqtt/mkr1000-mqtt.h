@@ -48,12 +48,10 @@ String getDefaultSensor() {
 }
 
 String getJwt() {
-  if (iss == 0 || WiFi.getTime() - iss > 3600) {  // TODO: exp in device
-    // Disable software watchdog as these operations can take a while.
-    Serial.println("Refreshing JWT");
-    iss = WiFi.getTime();
-    jwt = device->createJWT(iss);
-  }
+  // Disable software watchdog as these operations can take a while.
+  Serial.println("Refreshing JWT");
+  iss = WiFi.getTime();
+  jwt = device->createJWT(iss, jwt_exp_secs);
   return jwt;
 }
 
