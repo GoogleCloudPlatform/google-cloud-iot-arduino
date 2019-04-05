@@ -19,14 +19,14 @@
 // in https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d
 
 // Wifi newtork details.
-const char* ssid = "wl-cloud-iot-dpe";
-const char* password = "Ocx9yw-4zc";
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASS";
 
 // Cloud iot details.
-const char* project_id = "intense-wavelet-343";
+const char* project_id = "YOUR_PROJECT_ID";
 const char* location = "us-central1";
-const char* registry_id = "arduino-taster";
-const char* device_id = "arduino-taste";
+const char* registry_id = "YOUR_REGISTRY_ID";
+const char* device_id = "YOUR_DEVICE_ID";
 
 // Configuration for NTP
 const char* ntp_primary = "pool.ntp.org";
@@ -45,9 +45,9 @@ const char* ntp_secondary = "time.nist.gov";
 // it's smaller add "00:" to the start. If it's too big or too small something
 // is probably wrong with your key.
 const char* private_key_str =
-    "ea:db:80:8b:1b:68:ba:bc:f3:e3:51:e9:83:4a:f9:"
-    "4a:2d:11:16:79:60:c0:77:0d:47:54:62:92:11:a6:"
-    "92:3c";
+    "42:42:42:42:42:42:42:42:42:e3:51:e9:83:4a:f9:"
+    "42:42:42:16:42:42:c0:77:0d:47:54:62:92:11:a6:"
+    "42:42";
 
 // Time (seconds) to expire token += 20 minutes for drift
 const int jwt_exp_secs = 3600; // Maximum 24H (3600*24)
