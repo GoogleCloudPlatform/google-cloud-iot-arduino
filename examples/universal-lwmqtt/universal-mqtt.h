@@ -36,14 +36,7 @@
 #include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Update this file with your configuration
 
-// !!REPLACEME!!
-// The MQTT callback function for commands and configuration updates
-// Place your message handler code here.
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
-}
 ///////////////////////////////
-
 // Cloud IoT configuration that you don't need to change
 Client *netClient;
 CloudIoTCoreDevice *device;
@@ -132,14 +125,6 @@ void setupCloudIoT() {
 #include <CloudIoTCore.h>
 #include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Update this file with your configuration
-
-// !!REPLACEME!!
-// The MQTT callback function for commands and configuration updates
-// Place your message handler code here.
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
-}
-///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
 Client *netClient;
@@ -232,12 +217,6 @@ void setupCloudIoT() {
 #include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Wifi configuration here
 
-// !!REPLACEME!!
-// The MQTT callback function for commands and configuration updates
-// Place your message handler code here.
-void messageReceived(String &topic, String &payload) {
-  Serial.println("incoming: " + topic + " - " + payload);
-}
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
@@ -268,8 +247,8 @@ String getJwt() {
 void setupCert() {
   // Set CA cert on wifi client
   // If using a static (binary) cert, uncomment in ciotc_config.h:
-  //((WiFiClientSecure*)netClient)->setCACert_P(ca_crt, ca_crt_len);
-  //return;
+  ((WiFiClientSecure*)netClient)->setCACert_P(ca_crt, ca_crt_len);
+  return;
 
   // If using the (preferred) method with the cert in /data (SPIFFS)
   if (!SPIFFS.begin()) {

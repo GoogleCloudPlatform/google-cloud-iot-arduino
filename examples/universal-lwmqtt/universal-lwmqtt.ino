@@ -12,11 +12,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+// !!REPLACEME!!
+// The MQTT callback function for commands and configuration updates
+// Place your message handler code here.
+void messageReceived(String &topic, String &payload) {
+  Serial.println("incoming: " + topic + " - " + payload);
+}
+
 #include "universal-mqtt.h"
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(115200);
   pinMode(LED_BUILTIN, OUTPUT);
   setupCloudIoT();
 }
