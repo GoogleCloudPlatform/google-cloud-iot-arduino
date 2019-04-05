@@ -21,7 +21,7 @@
 #define __ESP32_MQTT_H__
 #endif
 
-#if defined(ARDUINO_SAMD_ZERO || ARDUINO_SAMD_MKR1000)
+#if defined(ARDUINO_SAMD_MKR1000)
 #define __MKR1000_MQTT_H__
 #endif
 
