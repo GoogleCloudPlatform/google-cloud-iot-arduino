@@ -110,11 +110,6 @@ void connectWifi() {
 }
 
 ///////////////////////////////
-// Common MQTT
-#include <CloudIoTCoreMqtt.h>
-///////////////////////////////
-
-///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 void publishTelemetry(String data) {
