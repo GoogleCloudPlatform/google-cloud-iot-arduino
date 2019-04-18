@@ -42,12 +42,16 @@ void CloudIoTCoreMqtt::publishTelemetry(String data) {
   this->mqttClient->publish(device->getEventsTopic(), data);
 }
 
-void CloudIoTCoreMqtt::publishTelemetry(byte[] data, int length) {
-  this->mqttClient->publish(device->getEventsTopic(), data, length);
+void CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
+  this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
 }
 
 void CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
   this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
+}
+
+void CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
+  this->mqttClient->publish(String(device->getEventsTopic() + subtopic).c_str(), data, length);
 }
 
 // Helper that just sends default sensor
@@ -55,8 +59,8 @@ void CloudIoTCoreMqtt::publishState(String data) {
   this->mqttClient->publish(device->getStateTopic(), data);
 }
 
-void CloudIoTCoreMqtt::publishState(byte[] data, int length) {
-  this->mqttClient->publish(device->getStateTopic(), data, length);
+void CloudIoTCoreMqtt::publishState(const char* data, int length) {
+  this->mqttClient->publish(device->getStateTopic().c_str(), data, length);
 }
 
 void CloudIoTCoreMqtt::onConnect() {

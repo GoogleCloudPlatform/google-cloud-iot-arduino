@@ -81,17 +81,25 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-void connect() {
-  connectWifi();
-  mqtt->mqttConnect();
-}
-
 void publishTelemetry(String data) {
   mqtt->publishTelemetry(data);
 }
 
+void publishTelemetry(const char* data, int length) {
+  mqtt->publishTelemetry(data, length);
+}
+
 void publishTelemetry(String subfolder, String data) {
   mqtt->publishTelemetry(subfolder, data);
+}
+
+void publishTelemetry(String subfolder, const char* data, int length) {
+  mqtt->publishTelemetry(subfolder, data, length);
+}
+
+void connect() {
+  connectWifi();
+  mqtt->mqttConnect();
 }
 
 void setupCloudIoT() {
