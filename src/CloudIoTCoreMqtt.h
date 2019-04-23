@@ -39,8 +39,11 @@ class CloudIoTCoreMqtt {
 
     void startMQTT();
     void publishTelemetry(String data);
+    void publishTelemetry(const char* data, int length);
     void publishTelemetry(String subtopic, String data);
+    void publishTelemetry(String subtopic, const char* data, int length);
     void publishState(String data);
+    void publishState(const char* data, int length);
     void onConnect();
     void setLogConnect(boolean enabled);
     void logError();

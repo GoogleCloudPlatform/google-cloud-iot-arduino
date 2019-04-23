@@ -15,7 +15,7 @@
 #include "CloudIoTCoreMqtt.h"
 
 // Forward global callback declarations
-String getJwt(); 
+String getJwt();
 void messageReceived(String &topic, String &payload);
 
 
@@ -42,13 +42,25 @@ void CloudIoTCoreMqtt::publishTelemetry(String data) {
   this->mqttClient->publish(device->getEventsTopic(), data);
 }
 
+void CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
+  this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
+}
+
 void CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
   this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
+}
+
+void CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
+  this->mqttClient->publish(String(device->getEventsTopic() + subtopic).c_str(), data, length);
 }
 
 // Helper that just sends default sensor
 void CloudIoTCoreMqtt::publishState(String data) {
   this->mqttClient->publish(device->getStateTopic(), data);
+}
+
+void CloudIoTCoreMqtt::publishState(const char* data, int length) {
+  this->mqttClient->publish(device->getStateTopic().c_str(), data, length);
 }
 
 void CloudIoTCoreMqtt::onConnect() {
@@ -170,7 +182,7 @@ void CloudIoTCoreMqtt::mqttConnect() {
   }
 
   // Set QoS to 1 (ack) for configuration messages
-  this->mqttClient->subscribe(device->getConfigTopic(), 1); 
+  this->mqttClient->subscribe(device->getConfigTopic(), 1);
   // QoS 0 (no ack) for commands
   this->mqttClient->subscribe(device->getCommandsTopic(), 0);
 
