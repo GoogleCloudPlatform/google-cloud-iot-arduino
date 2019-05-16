@@ -35,7 +35,7 @@ class CloudIoTCoreMqtt {
     CloudIoTCoreDevice *device;
 
   public:
-    CloudIoTCoreMqtt(MQTTClient *&mqttClient, Client *&netClient, CloudIoTCoreDevice *&device);
+    CloudIoTCoreMqtt(MQTTClient *mqttClient, Client *netClient, CloudIoTCoreDevice *device);
 
     void startMQTT();
     void publishTelemetry(String data);
