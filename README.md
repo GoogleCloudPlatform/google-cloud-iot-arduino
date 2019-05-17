@@ -86,6 +86,19 @@ console, that configuration will be reflrected on the device.
 Before the examples will work, you will also need to configure the root
 certificate as described in the configuration headers.
 
+After you have published telemetry data, you can read it from the PubSub topic
+using the [Google Cloud SDK](https://cloud.google.com/sdk). With the SDK installed,
+run the following command to create a :
+
+```
+gcloud pubsub subscriptions create <your-subscription-name> --topic=<your-iot-pubsub-topic>
+```
+
+Then read the telemetry messages:
+```
+gcloud pubsub subscriptions pull --limit 500 --auto-ack <your-subscription-name>
+```
+
 ## Notes on the certificate
 
 The [root certificate from Google](https://pki.goog/roots/pem) is used to verify communication to

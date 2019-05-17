@@ -23,7 +23,7 @@ void messageReceived(String &topic, String &payload);
 // MQTT common functions
 ///////////////////////////////
 CloudIoTCoreMqtt::CloudIoTCoreMqtt(
-    MQTTClient *&_mqttClient, Client *&_netClient, CloudIoTCoreDevice *&_device){
+    MQTTClient *_mqttClient, Client *_netClient, CloudIoTCoreDevice *_device){
   this->mqttClient = _mqttClient;
   this->netClient = _netClient;
   this->device = _device;
