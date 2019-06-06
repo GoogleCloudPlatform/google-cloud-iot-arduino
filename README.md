@@ -142,11 +142,17 @@ board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-ce
 
 You can see the Arduino client library in action in [the Cloud IoT Demo from Google I/O 2018](https://www.youtube.com/watch?v=7kpE44tXQak#T=28m)
 
-## Error codes and Debugging
+## Error codes, Debugging, and Troubleshooting
 
 The error codes for the lwMQTT library are listed [in this header file](https://github.com/256dpi/arduino-mqtt/blob/master/src/lwmqtt/lwmqtt.h#L16-L29).
 
 If you're having trouble determining what's wrong, it may be helpful to enable more verbose debugging in Arduino by setting the debug level in the IDE under **Tools > Core Debug Level > Verbose**.
+
+A few things worth checking while troubleshooting:
+* Is billing enabled for your project?
+* Is the PubSub topic configured with your device registry valid?
+* Is the [JWT valid](https://jwt.io)?
+* Are the values setup in `ciotc_config.h` appearing correctly in `*_mqtt.h`?
 
 ## Known issues
 
