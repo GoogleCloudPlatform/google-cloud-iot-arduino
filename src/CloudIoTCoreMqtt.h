@@ -15,6 +15,7 @@
 #ifndef __CLOUDIOTCORE_MQTT_H__
 #define __CLOUDIOTCORE_MQTT_H__
 #include <Arduino.h>
+#include "CloudIoTCore.h"
 #include "CloudIoTCoreDevice.h"
 #include <Client.h>
 #include <MQTTClient.h>
