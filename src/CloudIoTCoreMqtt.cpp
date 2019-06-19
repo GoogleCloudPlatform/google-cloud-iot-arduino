@@ -34,7 +34,11 @@ void CloudIoTCoreMqtt::setLogConnect(boolean enabled) {
 }
 
 void CloudIoTCoreMqtt::startMQTT() {
+  #ifdef USE_LTS
   this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST_LTS, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  #else
+  this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  #endif
   this->mqttClient->onMessage(messageReceived);
 }
 
