@@ -34,7 +34,7 @@ void CloudIoTCoreMqtt::setLogConnect(boolean enabled) {
 }
 
 void CloudIoTCoreMqtt::startMQTT() {
-  this->mqttClient->begin("mqtt.googleapis.com", 8883, *netClient);
+  this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST_LTS, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
   this->mqttClient->onMessage(messageReceived);
 }
 
