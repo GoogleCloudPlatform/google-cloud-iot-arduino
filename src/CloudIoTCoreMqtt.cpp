@@ -33,8 +33,20 @@ void CloudIoTCoreMqtt::setLogConnect(boolean enabled) {
   this->logConnect = enabled;
 }
 
+void CloudIoTCoreMqtt::setUseLts(boolean enabled) {
+  this->useLts = enabled;
+}
+
 void CloudIoTCoreMqtt::startMQTT() {
-  this->mqttClient->begin("mqtt.googleapis.com", 8883, *netClient);
+  if (this->useLts) {
+    //TODO: Debugging
+    //Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) + ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
+    this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST_LTS, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  } else {
+    //TODO: Debugging
+    //Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) + ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
+    this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  }
   this->mqttClient->onMessage(messageReceived);
 }
 

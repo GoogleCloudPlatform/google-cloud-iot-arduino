@@ -30,8 +30,12 @@
 #define CLOUD_IOT_CORE_MQTT_HOST "mqtt.googleapis.com"
 #endif
 
+#ifndef CLOUD_IOT_CORE_MQTT_HOST_LTS
+#define CLOUD_IOT_CORE_MQTT_HOST_LTS "mqtt.2030.ltsapis.goog"
+#endif
+
 #ifndef CLOUD_IOT_CORE_MQTT_PORT
-#define CLOUD_IOT_CORE_MQTT_PORT 443
+#define CLOUD_IOT_CORE_MQTT_PORT 8883
 #endif
 
 #endif // CloudIoTCore_h

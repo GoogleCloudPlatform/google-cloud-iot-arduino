@@ -126,13 +126,16 @@ Trust Services (GTS) as the certificate authority (CA). This is easy to get usin
     curl pki.goog/roots.pem
 
 If you're using Genuino boards like the MKR1000, you will need to add SSL certificates to your
-board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d). The MQTT server address is `mqtt.googleapis.com` and the port is either `8883` for most cases or `443` in case your device is running in an environment where port 8883 is blocked.
+board as [described on Hackster.io](https://www.hackster.io/arichetta/add-ssl-certificates-to-mkr1000-93c89d). 
+The MQTT server address is `mqtt.googleapis.com` and the port is either `8883` for most cases or `443` in 
+case your device is running in an environment where port 8883 is blocked. For long-term support,
+the server is `mqtt.2030.ltsapis.goog`.
 
 In future versions of this library, the MQTT domain and certificates will be changed for long term support (LTS) to:
 
-  MQTT LTS Domain - mqtt.2030.ltsapis.goog
-  Primary cert - [https://pki.goog/gtsltsr/gtsltsr.crt](https://pki.goog/gtsltsr/gtsltsr.crt)
-  Backup cert - [https://pki.goog/gsr4/GSR4.crt](https://pki.goog/gsr4/GSR4.crt)
+* MQTT LTS Domain - mqtt.2030.ltsapis.goog
+* Primary cert - [https://pki.goog/gtsltsr/gtsltsr.crt](https://pki.goog/gtsltsr/gtsltsr.crt)
+* Backup cert - [https://pki.goog/gsr4/GSR4.crt](https://pki.goog/gsr4/GSR4.crt)
 
 ## For more information
 
