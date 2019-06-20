@@ -29,6 +29,7 @@ class CloudIoTCoreMqtt {
     int __jitter__ = 500; // max random jitter, ms
     unsigned long iss = 0;
     boolean logConnect = true;
+    boolean useLts = false;
     String jwt;
 
     MQTTClient *mqttClient;
@@ -47,6 +48,7 @@ class CloudIoTCoreMqtt {
     void publishState(const char* data, int length);
     void onConnect();
     void setLogConnect(boolean enabled);
+    void setUseLts(boolean enabled);
     void logError();
     void logReturnCode();
     void mqttConnect();
