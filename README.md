@@ -4,8 +4,8 @@ This is an example of how to generate JSON Web Token (JWT) credentials for
 connecting to Google Cloud IoT Core.
 
 This contains two parts: a library to make a JWT (json web token) which is used
-to authenticate with Google Cloud IOT, and Arduino sketches that demonstrate
-how to connect to Google Cloud IOT using the available MQTT bridge.
+to authenticate with Google Cloud IoT, and Arduino sketches that demonstrate
+how to connect to Google Cloud IoT using the available MQTT bridge.
 
 **This example is not an officially supported Google product, does not have a
 SLA/SLO, and should not be used in production.**
