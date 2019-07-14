@@ -17,10 +17,11 @@
 #include "esp8266_mqtt.h"
 
 #ifndef LED_BUILTIN
-  #define LED_BUILTIN 13
+#define LED_BUILTIN 13
 #endif
 
-void setup() {
+void setup()
+{
   // put your setup code here, to run once:
   Serial.begin(115200);
   setupCloudIoT(); // Creates globals for MQTT
@@ -28,16 +29,21 @@ void setup() {
 }
 
 unsigned long lastMillis = 0;
-void loop() {
+void loop()
+{
   mqttClient->loop();
-  delay(10);  // <- fixes some issues with WiFi stability
+  delay(10); // <- fixes some issues with WiFi stability
 
-  if (!mqttClient->connected()) {
+  if (!mqttClient->connected())
+  {
+    ESP.wdtDisable();
     connect();
+    ESP.wdtEnable(0);
   }
 
   // TODO: Replace with your code here
-  if (millis() - lastMillis > 60000) {
+  if (millis() - lastMillis > 60000)
+  {
     lastMillis = millis();
     publishTelemetry(getDefaultSensor());
   }
