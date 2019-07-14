@@ -17,7 +17,7 @@
 #define __ESP8266_MQTT_H__
 #include <ESP8266WiFi.h>
 #include "FS.h"
-#include <WiFiClientSecure.h>
+#include "WiFiClientSecureBearSSL.h"
 #include <time.h>
 
 #include <MQTT.h>
@@ -29,14 +29,16 @@
 // !!REPLACEME!!
 // The MQTT callback function for commands and configuration updates
 // Place your message handler code here.
-void messageReceived(String &topic, String &payload) {
+void messageReceived(String &topic, String &payload)
+{
   Serial.println("incoming: " + topic + " - " + payload);
 }
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
 MQTTClient *mqttClient;
-Client *netClient;
+BearSSL::WiFiClientSecure *netClient;
+BearSSL::X509List certList;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 unsigned long iss = 0;
@@ -45,11 +47,13 @@ String jwt;
 ///////////////////////////////
 // Helpers specific to this board
 ///////////////////////////////
-String getDefaultSensor() {
-  return  "Wifi: " + String(WiFi.RSSI()) + "db";
+String getDefaultSensor()
+{
+  return "Wifi: " + String(WiFi.RSSI()) + "db";
 }
 
-String getJwt() {
+String getJwt()
+{
   // Disable software watchdog as these operations can take a while.
   ESP.wdtDisable();
   iss = time(nullptr);
@@ -59,51 +63,71 @@ String getJwt() {
   return jwt;
 }
 
-void setupCert() {
+void setupCert()
+{
   // Set CA cert on wifi client
-  // If using a static (binary) cert, uncomment in ciotc_config.h:
-  //((WiFiClientSecure*)netClient)->setCACert_P(ca_crt, ca_crt_len);
-  //return;
+  // If using a static (pem) cert, uncomment in ciotc_config.h:
+  // certList.append(primary_ca);
+  // certList.append(backup_ca);
+  // netClient->setTrustAnchors(&certList);
+  // return;
 
   // If using the (preferred) method with the cert in /data (SPIFFS)
-  if (!SPIFFS.begin()) {
+
+  if (!SPIFFS.begin())
+  {
     Serial.println("Failed to mount file system");
     return;
   }
 
-  // Set CA cert from SPIFFS
-  File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
-  if (!ca) {
+  File ca = SPIFFS.open("/primary_ca.pem", "r");
+  if (!ca)
+  {
     Serial.println("Failed to open ca file");
-  } else {
+  }
+  else
+  {
     Serial.println("Success to open ca file");
+    certList.append(strdup(ca.readString().c_str()));
   }
 
-  if(((WiFiClientSecure*)netClient)->loadCertificate(ca)) {
-    Serial.println("loaded");
-  } else {
-    Serial.println("not loaded");
+  ca = SPIFFS.open("/backup_ca.pem", "r");
+  if (!ca)
+  {
+    Serial.println("Failed to open ca file");
   }
+  else
+  {
+    Serial.println("Success to open ca file");
+    certList.append(strdup(ca.readString().c_str()));
+  }
+
+  netClient->setTrustAnchors(&certList);
 }
 
-void setupWifi() {
+void setupWifi()
+{
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   Serial.println("Connecting to WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(100);
   }
 
   configTime(0, 0, ntp_primary, ntp_secondary);
   Serial.println("Waiting on time sync...");
-  while (time(nullptr) < 1510644967) {
+  while (time(nullptr) < 1510644967)
+  {
     delay(10);
   }
 }
 
-void connectWifi() {
+void connectWifi()
+{
   Serial.print("checking wifi..."); // TODO: Necessary?
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     Serial.print(".");
     delay(1000);
   }
@@ -112,28 +136,34 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-void publishTelemetry(String data) {
+void publishTelemetry(String data)
+{
   mqtt->publishTelemetry(data);
 }
 
-void publishTelemetry(const char* data, int length) {
+void publishTelemetry(const char *data, int length)
+{
   mqtt->publishTelemetry(data, length);
 }
 
-void publishTelemetry(String subfolder, String data) {
+void publishTelemetry(String subfolder, String data)
+{
   mqtt->publishTelemetry(subfolder, data);
 }
 
-void publishTelemetry(String subfolder, const char* data, int length) {
+void publishTelemetry(String subfolder, const char *data, int length)
+{
   mqtt->publishTelemetry(subfolder, data, length);
 }
 
-void connect() {
+void connect()
+{
   mqtt->mqttConnect();
 }
 
 // TODO: fix globals
-void setupCloudIoT() {
+void setupCloudIoT()
+{
   // Create the device
   device = new CloudIoTCoreDevice(
       project_id, location, registry_id, device_id,
@@ -149,6 +179,7 @@ void setupCloudIoT() {
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }
 
