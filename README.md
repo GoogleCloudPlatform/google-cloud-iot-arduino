@@ -101,7 +101,7 @@ gcloud pubsub subscriptions pull --limit 500 --auto-ack <your-subscription-name>
 
 ## Notes on the certificate
 
-The [root certificate from Google](https://pki.goog/roots/pem) is used to verify communication to
+The [root certificate from Google](https://pki.goog/roots.pem) is used to verify communication to
 Google. Although unlikely, it's possible for the certificate to expire or rotate, requiring you to
 update it.
 
