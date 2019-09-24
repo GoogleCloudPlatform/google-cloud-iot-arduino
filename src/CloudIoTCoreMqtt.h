@@ -40,12 +40,12 @@ class CloudIoTCoreMqtt {
     CloudIoTCoreMqtt(MQTTClient *mqttClient, Client *netClient, CloudIoTCoreDevice *device);
 
     void startMQTT();
-    void publishTelemetry(String data);
-    void publishTelemetry(const char* data, int length);
-    void publishTelemetry(String subtopic, String data);
-    void publishTelemetry(String subtopic, const char* data, int length);
-    void publishState(String data);
-    void publishState(const char* data, int length);
+    bool publishTelemetry(String data);
+    bool publishTelemetry(const char* data, int length);
+    bool publishTelemetry(String subtopic, String data);
+    bool publishTelemetry(String subtopic, const char* data, int length);
+    bool publishState(String data);
+    bool publishState(const char* data, int length);
     void onConnect();
     void setLogConnect(boolean enabled);
     void setUseLts(boolean enabled);
