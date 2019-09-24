@@ -50,29 +50,29 @@ void CloudIoTCoreMqtt::startMQTT() {
   this->mqttClient->onMessage(messageReceived);
 }
 
-void CloudIoTCoreMqtt::publishTelemetry(String data) {
-  this->mqttClient->publish(device->getEventsTopic(), data);
+bool CloudIoTCoreMqtt::publishTelemetry(String data) {
+  return this->mqttClient->publish(device->getEventsTopic(), data);
 }
 
-void CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
-  this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
+bool CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
+  return this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
 }
 
-void CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
-  this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
+bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
+  return this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
 }
 
-void CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
-  this->mqttClient->publish(String(device->getEventsTopic() + subtopic).c_str(), data, length);
+bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
+  return this->mqttClient->publish(String(device->getEventsTopic() + subtopic).c_str(), data, length);
 }
 
 // Helper that just sends default sensor
-void CloudIoTCoreMqtt::publishState(String data) {
-  this->mqttClient->publish(device->getStateTopic(), data);
+bool CloudIoTCoreMqtt::publishState(String data) {
+  return this->mqttClient->publish(device->getStateTopic(), data);
 }
 
-void CloudIoTCoreMqtt::publishState(const char* data, int length) {
-  this->mqttClient->publish(device->getStateTopic().c_str(), data, length);
+bool CloudIoTCoreMqtt::publishState(const char* data, int length) {
+  return this->mqttClient->publish(device->getStateTopic().c_str(), data, length);
 }
 
 void CloudIoTCoreMqtt::onConnect() {
