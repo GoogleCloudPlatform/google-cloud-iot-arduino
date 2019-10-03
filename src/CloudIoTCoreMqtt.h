@@ -51,6 +51,6 @@ class CloudIoTCoreMqtt {
     void setUseLts(boolean enabled);
     void logError();
     void logReturnCode();
-    void mqttConnect();
+    void mqttConnect(bool skip = false);
 };
 #endif // __CLOUDIOTCORE_MQTT_H__
