@@ -162,11 +162,11 @@ void CloudIoTCoreMqtt::logReturnCode() {
   }
 }
 
-void CloudIoTCoreMqtt::mqttConnect() {
+void CloudIoTCoreMqtt::mqttConnect(bool skip) {
   Serial.print("\nconnecting...");
   bool keepgoing = true;
   while (keepgoing) {
-    this->mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), false);
+    this->mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), skip);
 
     if (this->mqttClient->lastError() != LWMQTT_SUCCESS){
       logError();
