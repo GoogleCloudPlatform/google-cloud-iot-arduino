@@ -182,6 +182,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
 
       // Clean up the client
       this->mqttClient->disconnect();
+      skip = false;
       Serial.println("Delaying " + String(this->__backoff__) + "ms");
       delay(this->__backoff__);
       keepgoing = true;
