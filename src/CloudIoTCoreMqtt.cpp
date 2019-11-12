@@ -166,9 +166,14 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
   Serial.print("\nconnecting...");
   bool keepgoing = true;
   while (keepgoing) {
-    this->mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), skip);
+    bool result =
+        this->mqttClient->connect(
+            device->getClientId().c_str(),
+            "unused",
+            getJwt().c_str(),
+            skip);
 
-    if (this->mqttClient->lastError() != LWMQTT_SUCCESS){
+    if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result){
       logError();
       logReturnCode();
       // See https://cloud.google.com/iot/docs/how-tos/exponential-backoff
