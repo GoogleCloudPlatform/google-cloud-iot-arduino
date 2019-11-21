@@ -14,7 +14,7 @@
  *****************************************************************************/
 // This file contains your configuration used to connect to Cloud IoT Core
 
-// Wifi newtork details.
+// Wifi network details.
 const char *ssid = "SSID";
 const char *password = "PASSWORD";
 
