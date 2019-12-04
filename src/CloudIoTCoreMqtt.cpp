@@ -30,6 +30,14 @@ CloudIoTCoreMqtt::CloudIoTCoreMqtt(
 }
 
 void CloudIoTCoreMqtt::loop() {
+  if (millis() > device->getExpMillis()) {
+    // reconnect
+    Serial.println("Reconnecting before JWT expiration");
+    iss = 0; // Force JWT regeneration
+    getJwt(); // Regenerate JWT using device function
+    mqttClient->disconnect();
+    mqttConnect(false); // TODO: should we skip closing connection
+  }
   this->mqttClient->loop();
 }
 
@@ -163,11 +171,11 @@ void CloudIoTCoreMqtt::logError() {
   }
 }
 
-void logConfiguration() {
+void CloudIoTCoreMqtt::logConfiguration() {
   Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) +
       ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
   Serial.println("ClientId: " + device->getClientId());
-  Serial.println("JWT: " + getJwt())
+  Serial.println("JWT: " + getJwt());
 }
 
 void CloudIoTCoreMqtt::logReturnCode() {

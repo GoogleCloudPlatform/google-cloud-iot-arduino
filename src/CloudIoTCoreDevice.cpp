@@ -40,12 +40,23 @@ CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
   setPrivateKey(private_key);
 }
 
+unsigned long CloudIoTCoreDevice::getExpMillis() {
+  return exp_millis;
+}
+
+int CloudIoTCoreDevice::getJwtExpSecs() {
+  return jwt_exp_secs;
+}
+
 String CloudIoTCoreDevice::createJWT(long long int current_time) {
+  exp_millis = millis() + (jwt_exp_secs * 1000);
   jwt = CreateJwt(project_id, current_time, priv_key, this->jwt_exp_secs);
   return jwt;
 }
 
 String CloudIoTCoreDevice::createJWT(long long int current_time, int exp_in_secs) {
+  jwt_exp_secs = exp_in_secs;
+  exp_millis = millis() + (jwt_exp_secs * 1000);
   jwt = CreateJwt(project_id, current_time, priv_key, exp_in_secs);
   return jwt;
 }
@@ -140,7 +151,7 @@ CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
 CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
   this->private_key = private_key;
   if ( strlen(private_key) != (95) ) {
-    Serial.println("Warning: expected private key to be 95, was: " + 
+    Serial.println("Warning: expected private key to be 95, was: " +
         String(strlen(private_key)));
   }
   fillPrivateKey();
