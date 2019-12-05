@@ -220,9 +220,9 @@ void publishTelemetryFromFile() {
   Serial.println(String(i) + " bytes read");
 
   delay(10);
-  mqttClient->loop();
+  mqtt->loop();
   mqtt->publishTelemetry(data, file.size());
-  mqttClient->loop();
+  mqtt->loop();
   delay(10);
   file.close();
   Serial.println("Done publish.");
@@ -314,6 +314,6 @@ void loop() {
   if (!mqttClient->connected()) {
     connect();
   } else {
-    mqttClient->loop();
+    mqtt->loop();
   }
 }

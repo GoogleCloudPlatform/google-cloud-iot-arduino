@@ -31,7 +31,7 @@ void setup()
 unsigned long lastMillis = 0;
 void loop()
 {
-  mqttClient->loop();
+  mqtt->loop();
   delay(10); // <- fixes some issues with WiFi stability
 
   if (!mqttClient->connected())

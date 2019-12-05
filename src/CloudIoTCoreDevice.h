@@ -29,8 +29,8 @@ class CloudIoTCoreDevice {
 
   NN_DIGIT priv_key[9];
   String jwt;
-  unsigned long iss = 0;
-  int jwt_exp_secs = 3600;
+  int jwt_exp_secs;
+  unsigned long exp_millis = 0;
 
   void fillPrivateKey();
   String getBasePath();
@@ -49,7 +49,8 @@ class CloudIoTCoreDevice {
   CloudIoTCoreDevice &setDeviceId(const char *device_id);
   CloudIoTCoreDevice &setPrivateKey(const char *private_key);
   void setJwtExpSecs(int exp_in_secs);
-
+  int getJwtExpSecs();
+  unsigned long getExpMillis();
   String createJWT(long long int time);
   String createJWT(long long int time, int jwt_in_time);
   String getJWT();
