@@ -50,7 +50,7 @@ class CloudIoTCoreMqtt {
     bool publishState(String data);
     bool publishState(const char* data, int length);
 
-    void logConfiguration();
+    void logConfiguration(bool showJWT);
     void logError();
     void logReturnCode();
 

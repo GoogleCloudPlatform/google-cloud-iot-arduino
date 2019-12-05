@@ -16,6 +16,8 @@
 
 // Forward global callback declarations
 String getJwt();
+void setupCert();
+Client* setupNetwork(bool);
 void messageReceived(String &topic, String &payload);
 
 
@@ -30,13 +32,13 @@ CloudIoTCoreMqtt::CloudIoTCoreMqtt(
 }
 
 void CloudIoTCoreMqtt::loop() {
-  if (millis() > device->getExpMillis()) {
+  if (false && millis() > device->getExpMillis() && mqttClient->connected()) {
     // reconnect
     Serial.println("Reconnecting before JWT expiration");
     iss = 0; // Force JWT regeneration
     getJwt(); // Regenerate JWT using device function
     mqttClient->disconnect();
-    mqttConnect(false); // TODO: should we skip closing connection
+    mqttConnect(true); // TODO: should we skip closing connection
   }
   this->mqttClient->loop();
 }
@@ -53,10 +55,11 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
             skip);
 
     if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result){
+      // TODO: refactorme
       // Inform the client why it could not connect and help debugging.
       logError();
       logReturnCode();
-      logConfiguration();
+      logConfiguration(false);
 
       // See https://cloud.google.com/iot/docs/how-tos/exponential-backoff
       if (this->__backoff__ < this->__minbackoff__) {
@@ -74,10 +77,21 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
       delay(this->__backoff__);
       keepgoing = true;
     } else {
-      // We're now connected
-      Serial.println("\nconnected!");
-      keepgoing = false;
-      this->__backoff__ = this->__minbackoff__;
+      Serial.println(mqttClient->connected() ? "connected" : "not connected");
+      if (!mqttClient->connected()) {
+        Serial.println("Settings incorrect or missing a cyper for SSL");
+        mqttClient->disconnect();
+        logConfiguration(false);
+        skip = false;
+        keepgoing = true;
+        Serial.println("Waiting 60 seconds, retry will likely fail");
+        delay(this->__max_backoff__);
+      } else {
+        // We're now connected
+        Serial.println("\nLibrary connected!");
+        keepgoing = false;
+        this->__backoff__ = this->__minbackoff__;
+      }
     }
   }
 
@@ -171,11 +185,13 @@ void CloudIoTCoreMqtt::logError() {
   }
 }
 
-void CloudIoTCoreMqtt::logConfiguration() {
+void CloudIoTCoreMqtt::logConfiguration(bool showJWT) {
   Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) +
       ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
   Serial.println("ClientId: " + device->getClientId());
-  Serial.println("JWT: " + getJwt());
+  if (showJWT) {
+    Serial.println("JWT: " + getJwt());
+  }
 }
 
 void CloudIoTCoreMqtt::logReturnCode() {
