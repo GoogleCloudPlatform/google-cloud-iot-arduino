@@ -32,7 +32,7 @@ CloudIoTCoreMqtt::CloudIoTCoreMqtt(
 }
 
 void CloudIoTCoreMqtt::loop() {
-  if (false && millis() > device->getExpMillis() && mqttClient->connected()) {
+  if (millis() > device->getExpMillis() && mqttClient->connected()) {
     // reconnect
     Serial.println("Reconnecting before JWT expiration");
     iss = 0; // Force JWT regeneration
