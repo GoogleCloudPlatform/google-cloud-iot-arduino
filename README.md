@@ -157,6 +157,8 @@ The error codes for the lwMQTT library are listed [in this header file](https://
 
 If you're having trouble determining what's wrong, it may be helpful to enable more verbose debugging in Arduino by setting the debug level in the IDE under **Tools > Core Debug Level > Verbose**.
 
+If you are using newer versions of the ESP8266 SDK, you need to set SSL support to "All SSL Cyphers" and you may need to modify the memory settings in BearSSL by modifying [Arduino/cores/esp8266/StackThunk.cpp](https://github.com/esp8266/Arduino/issues/6811).
+
 A few things worth checking while troubleshooting:
 * Is billing enabled for your project?
 * Is the PubSub topic configured with your device registry valid?
