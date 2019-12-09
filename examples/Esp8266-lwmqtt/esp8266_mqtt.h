@@ -136,24 +136,24 @@ void connectWifi()
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-void publishTelemetry(String data)
+bool publishTelemetry(String data)
 {
-  mqtt->publishTelemetry(data);
+  return mqtt->publishTelemetry(data);
 }
 
-void publishTelemetry(const char *data, int length)
+bool publishTelemetry(const char *data, int length)
 {
-  mqtt->publishTelemetry(data, length);
+  return mqtt->publishTelemetry(data, length);
 }
 
-void publishTelemetry(String subfolder, String data)
+bool publishTelemetry(String subfolder, String data)
 {
-  mqtt->publishTelemetry(subfolder, data);
+  return mqtt->publishTelemetry(subfolder, data);
 }
 
-void publishTelemetry(String subfolder, const char *data, int length)
+bool publishTelemetry(String subfolder, const char *data, int length)
 {
-  mqtt->publishTelemetry(subfolder, data, length);
+  return mqtt->publishTelemetry(subfolder, data, length);
 }
 
 void connect()

@@ -91,12 +91,12 @@ void connect() {
   mqtt->mqttConnect();
 }
 
-void publishTelemetry(String data) {
-  mqtt->publishTelemetry(data);
+bool punlishTelemetry(String data) {
+  return return mqtt->publishTelemetry(data);
 }
 
-void publishTelemetry(String subfolder, String data) {
-  mqtt->publishTelemetry(subfolder, data);
+bool punlishTelemetry(String subfolder, String data) {
+  return mqtt->publishTelemetry(subfolder, data);
 }
 
 void setupCloudIoT() {
@@ -177,12 +177,12 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-void publishTelemetry(String data) {
-  mqtt->publishTelemetry(data);
+bool punlishTelemetry(String data) {
+  return mqtt->publishTelemetry(data);
 }
 
-void publishTelemetry(String subfolder, String data) {
-  mqtt->publishTelemetry(subfolder, data);
+bool punlishTelemetry(String subfolder, String data) {
+  return mqtt->publishTelemetry(subfolder, data);
 }
 
 void connect() {
@@ -297,20 +297,20 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-void publishTelemetry(String data) {
-  mqtt->publishTelemetry(data);
+bool punlishTelemetry(String data) {
+  return mqtt->publishTelemetry(data);
 }
 
-void publishTelemetry(const char* data, int length) {
-  mqtt->publishTelemetry(data, length);
+bool punlishTelemetry(const char* data, int length) {
+  return mqtt->publishTelemetry(data, length);
 }
 
-void publishTelemetry(String subfolder, String data) {
-  mqtt->publishTelemetry(subfolder, data);
+bool punlishTelemetry(String subfolder, String data) {
+  return mqtt->publishTelemetry(subfolder, data);
 }
 
-void publishTelemetry(String subfolder, const char* data, int length) {
-  mqtt->publishTelemetry(subfolder, data, length);
+bool punlishTelemetry(String subfolder, const char* data, int length) {
+  return mqtt->publishTelemetry(subfolder, data, length);
 }
 
 void connect() {
