@@ -91,11 +91,11 @@ void connect() {
   mqtt->mqttConnect();
 }
 
-bool punlishTelemetry(String data) {
+bool publishTelemetry(String data) {
   return return mqtt->publishTelemetry(data);
 }
 
-bool punlishTelemetry(String subfolder, String data) {
+bool publishTelemetry(String subfolder, String data) {
   return mqtt->publishTelemetry(subfolder, data);
 }
 
@@ -177,11 +177,11 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-bool punlishTelemetry(String data) {
+bool publishTelemetry(String data) {
   return mqtt->publishTelemetry(data);
 }
 
-bool punlishTelemetry(String subfolder, String data) {
+bool publishTelemetry(String subfolder, String data) {
   return mqtt->publishTelemetry(subfolder, data);
 }
 
@@ -297,19 +297,19 @@ void connectWifi() {
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-bool punlishTelemetry(String data) {
+bool publishTelemetry(String data) {
   return mqtt->publishTelemetry(data);
 }
 
-bool punlishTelemetry(const char* data, int length) {
+bool publishTelemetry(const char* data, int length) {
   return mqtt->publishTelemetry(data, length);
 }
 
-bool punlishTelemetry(String subfolder, String data) {
+bool publishTelemetry(String subfolder, String data) {
   return mqtt->publishTelemetry(subfolder, data);
 }
 
-bool punlishTelemetry(String subfolder, const char* data, int length) {
+bool publishTelemetry(String subfolder, const char* data, int length) {
   return mqtt->publishTelemetry(subfolder, data, length);
 }
 
