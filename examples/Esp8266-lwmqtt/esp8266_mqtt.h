@@ -17,6 +17,10 @@
 #define __ESP8266_MQTT_H__
 #include <ESP8266WiFi.h>
 #include "FS.h"
+
+// You need to set certificates to All SSL cyphers and you may need to
+// increase memory settings in Arduino/cores/esp8266/StackThunk.cpp:
+//   https://github.com/esp8266/Arduino/issues/6811
 #include "WiFiClientSecureBearSSL.h"
 #include <time.h>
 
@@ -67,10 +71,10 @@ void setupCert()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
-  // certList.append(primary_ca);
-  // certList.append(backup_ca);
-  // netClient->setTrustAnchors(&certList);
-  // return;
+  certList.append(primary_ca);
+  certList.append(backup_ca);
+  netClient->setTrustAnchors(&certList);
+  return;
 
   // If using the (preferred) method with the cert in /data (SPIFFS)
 

@@ -221,7 +221,8 @@ void setupCloudIoT() {
 
 // Initialize WiFi and MQTT for this board
 MQTTClient *mqttClient;
-Client *netClient;
+BearSSL::WiFiClientSecure *netClient;
+BearSSL::X509List certList;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 unsigned long iss = 0;
@@ -246,29 +247,11 @@ String getJwt() {
 
 void setupCert() {
   // Set CA cert on wifi client
-  // If using a static (binary) cert, uncomment in ciotc_config.h:
-  ((WiFiClientSecure*)netClient)->setCACert_P(ca_crt, ca_crt_len);
+  // If using a static (pem) cert, uncomment in ciotc_config.h:
+  certList.append(primary_ca);
+  certList.append(backup_ca);
+  netClient->setTrustAnchors(&certList);
   return;
-
-  // If using the (preferred) method with the cert in /data (SPIFFS)
-  if (!SPIFFS.begin()) {
-    Serial.println("Failed to mount file system");
-    return;
-  }
-
-  // Set CA cert from SPIFFS
-  File ca = SPIFFS.open("/ca.crt", "r"); //replace ca.crt eith your uploaded file name
-  if (!ca) {
-    Serial.println("Failed to open ca file");
-  } else {
-    Serial.println("Success to open ca file");
-  }
-
-  if(((WiFiClientSecure*)netClient)->loadCertificate(ca)) {
-    Serial.println("loaded");
-  } else {
-    Serial.println("not loaded");
-  }
 }
 
 void setupWifi() {
@@ -334,6 +317,7 @@ void setupCloudIoT() {
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt->setUseLts(true); // Long-term service for MQTT
   mqtt->startMQTT(); // Opens connection
 }
 #endif //__ESP8266_MQTT_H__

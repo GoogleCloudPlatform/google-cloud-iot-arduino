@@ -39,18 +39,23 @@ class CloudIoTCoreMqtt {
   public:
     CloudIoTCoreMqtt(MQTTClient *mqttClient, Client *netClient, CloudIoTCoreDevice *device);
 
+    void loop();
+    void mqttConnect(bool skip = false);
     void startMQTT();
+
     bool publishTelemetry(String data);
     bool publishTelemetry(const char* data, int length);
     bool publishTelemetry(String subtopic, String data);
     bool publishTelemetry(String subtopic, const char* data, int length);
     bool publishState(String data);
     bool publishState(const char* data, int length);
+
+    void logConfiguration(bool showJWT);
+    void logError();
+    void logReturnCode();
+
     void onConnect();
     void setLogConnect(boolean enabled);
     void setUseLts(boolean enabled);
-    void logError();
-    void logReturnCode();
-    void mqttConnect(bool skip = false);
 };
 #endif // __CLOUDIOTCORE_MQTT_H__

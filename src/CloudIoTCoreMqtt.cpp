@@ -16,6 +16,8 @@
 
 // Forward global callback declarations
 String getJwt();
+void setupCert();
+Client* setupNetwork(bool);
 void messageReceived(String &topic, String &payload);
 
 
@@ -29,22 +31,82 @@ CloudIoTCoreMqtt::CloudIoTCoreMqtt(
   this->device = _device;
 }
 
-void CloudIoTCoreMqtt::setLogConnect(boolean enabled) {
-  this->logConnect = enabled;
+void CloudIoTCoreMqtt::loop() {
+  if (millis() > device->getExpMillis() && mqttClient->connected()) {
+    // reconnect
+    Serial.println("Reconnecting before JWT expiration");
+    iss = 0; // Force JWT regeneration
+    getJwt(); // Regenerate JWT using device function
+    mqttClient->disconnect();
+    mqttConnect(true); // TODO: should we skip closing connection
+  }
+  this->mqttClient->loop();
 }
 
-void CloudIoTCoreMqtt::setUseLts(boolean enabled) {
-  this->useLts = enabled;
+void CloudIoTCoreMqtt::mqttConnect(bool skip) {
+  Serial.print("\nconnecting...");
+  bool keepgoing = true;
+  while (keepgoing) {
+    bool result =
+        this->mqttClient->connect(
+            device->getClientId().c_str(),
+            "unused",
+            getJwt().c_str(),
+            skip);
+
+    if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result){
+      // TODO: refactorme
+      // Inform the client why it could not connect and help debugging.
+      logError();
+      logReturnCode();
+      logConfiguration(false);
+
+      // See https://cloud.google.com/iot/docs/how-tos/exponential-backoff
+      if (this->__backoff__ < this->__minbackoff__) {
+        this->__backoff__ = this->__minbackoff__;
+      }
+      this->__backoff__ = (this->__backoff__ * this->__factor__) + random(this->__jitter__);
+      if (this->__backoff__ > this->__max_backoff__) {
+        this->__backoff__ = this->__max_backoff__;
+      }
+
+      // Clean up the client
+      this->mqttClient->disconnect();
+      skip = false;
+      Serial.println("Delaying " + String(this->__backoff__) + "ms");
+      delay(this->__backoff__);
+      keepgoing = true;
+    } else {
+      Serial.println(mqttClient->connected() ? "connected" : "not connected");
+      if (!mqttClient->connected()) {
+        Serial.println("Settings incorrect or missing a cyper for SSL");
+        mqttClient->disconnect();
+        logConfiguration(false);
+        skip = false;
+        keepgoing = true;
+        Serial.println("Waiting 60 seconds, retry will likely fail");
+        delay(this->__max_backoff__);
+      } else {
+        // We're now connected
+        Serial.println("\nLibrary connected!");
+        keepgoing = false;
+        this->__backoff__ = this->__minbackoff__;
+      }
+    }
+  }
+
+  // Set QoS to 1 (ack) for configuration messages
+  this->mqttClient->subscribe(device->getConfigTopic(), 1);
+  // QoS 0 (no ack) for commands
+  this->mqttClient->subscribe(device->getCommandsTopic(), 0);
+
+  onConnect();
 }
 
 void CloudIoTCoreMqtt::startMQTT() {
   if (this->useLts) {
-    //TODO: Debugging
-    //Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) + ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
     this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST_LTS, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
   } else {
-    //TODO: Debugging
-    //Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) + ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
     this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
   }
   this->mqttClient->onMessage(messageReceived);
@@ -73,13 +135,6 @@ bool CloudIoTCoreMqtt::publishState(String data) {
 
 bool CloudIoTCoreMqtt::publishState(const char* data, int length) {
   return this->mqttClient->publish(device->getStateTopic().c_str(), data, length);
-}
-
-void CloudIoTCoreMqtt::onConnect() {
-  if (logConnect) {
-    publishState("connected");
-    publishTelemetry("/events", device->getDeviceId() + String("-connected"));
-  }
 }
 
 void CloudIoTCoreMqtt::logError() {
@@ -130,6 +185,15 @@ void CloudIoTCoreMqtt::logError() {
   }
 }
 
+void CloudIoTCoreMqtt::logConfiguration(bool showJWT) {
+  Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) +
+      ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
+  Serial.println("ClientId: " + device->getClientId());
+  if (showJWT) {
+    Serial.println("JWT: " + getJwt());
+  }
+}
+
 void CloudIoTCoreMqtt::logReturnCode() {
   Serial.println(this->mqttClient->returnCode());
   switch(this->mqttClient->returnCode()) {
@@ -162,42 +226,17 @@ void CloudIoTCoreMqtt::logReturnCode() {
   }
 }
 
-void CloudIoTCoreMqtt::mqttConnect(bool skip) {
-  Serial.print("\nconnecting...");
-  bool keepgoing = true;
-  while (keepgoing) {
-    this->mqttClient->connect(device->getClientId().c_str(), "unused", getJwt().c_str(), skip);
-
-    if (this->mqttClient->lastError() != LWMQTT_SUCCESS){
-      logError();
-      logReturnCode();
-      // See https://cloud.google.com/iot/docs/how-tos/exponential-backoff
-      if (this->__backoff__ < this->__minbackoff__) {
-        this->__backoff__ = this->__minbackoff__;
-      }
-      this->__backoff__ = (this->__backoff__ * this->__factor__) + random(this->__jitter__);
-      if (this->__backoff__ > this->__max_backoff__) {
-        this->__backoff__ = this->__max_backoff__;
-      }
-
-      // Clean up the client
-      this->mqttClient->disconnect();
-      skip = false;
-      Serial.println("Delaying " + String(this->__backoff__) + "ms");
-      delay(this->__backoff__);
-      keepgoing = true;
-    } else {
-      // We're now connected
-      Serial.println("\nconnected!");
-      keepgoing = false;
-      this->__backoff__ = this->__minbackoff__;
-    }
+void CloudIoTCoreMqtt::onConnect() {
+  if (logConnect) {
+    publishState("connected");
+    publishTelemetry("/events", device->getDeviceId() + String("-connected"));
   }
+}
 
-  // Set QoS to 1 (ack) for configuration messages
-  this->mqttClient->subscribe(device->getConfigTopic(), 1);
-  // QoS 0 (no ack) for commands
-  this->mqttClient->subscribe(device->getCommandsTopic(), 0);
+void CloudIoTCoreMqtt::setLogConnect(boolean enabled) {
+  this->logConnect = enabled;
+}
 
-  onConnect();
+void CloudIoTCoreMqtt::setUseLts(boolean enabled) {
+  this->useLts = enabled;
 }
