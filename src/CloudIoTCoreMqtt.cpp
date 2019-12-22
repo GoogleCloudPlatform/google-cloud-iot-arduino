@@ -128,7 +128,7 @@ bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
   return this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(subtopic, String data, int qos) {
+bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data, int qos) {
   return this->mqttClient->publish(device->getEventsTopic() + subtopic, data, false, qos);
 }
 
