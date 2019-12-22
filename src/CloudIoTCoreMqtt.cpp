@@ -35,7 +35,7 @@ void CloudIoTCoreMqtt::loop() {
   if (millis() > device->getExpMillis() && mqttClient->connected()) {
     // reconnect
     Serial.println("Reconnecting before JWT expiration");
-    iss = 0; // Force JWT regeneration
+    iat = 0; // Force JWT regeneration
     getJwt(); // Regenerate JWT using device function
     mqttClient->disconnect();
     mqttConnect(true); // TODO: should we skip closing connection
@@ -54,7 +54,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
             getJwt().c_str(),
             skip);
 
-    if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result){
+    if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result == true){
       // TODO: refactorme
       // Inform the client why it could not connect and help debugging.
       logError();
@@ -94,6 +94,62 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
       }
     }
   }
+
+  // Set QoS to 1 (ack) for configuration messages
+  this->mqttClient->subscribe(device->getConfigTopic(), 1);
+  // QoS 0 (no ack) for commands
+  this->mqttClient->subscribe(device->getCommandsTopic(), 0);
+
+  onConnect();
+}
+
+void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
+  Serial.print("\nconnecting...");
+  
+  bool result =
+      this->mqttClient->connect(
+          device->getClientId().c_str(),
+          "unused",
+          getJwt().c_str(),
+          skip);
+
+  if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result == true){
+    // TODO: refactorme
+    // Inform the client why it could not connect and help debugging.
+    logError();
+    logReturnCode();
+    logConfiguration(false);
+
+    // See https://cloud.google.com/iot/docs/how-tos/exponential-backoff
+    if (this->__backoff__ < this->__minbackoff__) {
+      this->__backoff__ = this->__minbackoff__;
+    }
+    this->__backoff__ = (this->__backoff__ * this->__factor__) + random(this->__jitter__);
+    if (this->__backoff__ > this->__max_backoff__) {
+      this->__backoff__ = this->__max_backoff__;
+    }
+
+    // Clean up the client
+    this->mqttClient->disconnect();
+    skip = false;
+    Serial.println("Delaying " + String(this->__backoff__) + "ms");
+    delay(this->__backoff__);
+  } else {
+    Serial.println(mqttClient->connected() ? "connected" : "not connected");
+    if (!mqttClient->connected()) {
+      Serial.println("Settings incorrect or missing a cyper for SSL");
+      mqttClient->disconnect();
+      logConfiguration(false);
+      skip = false;
+      Serial.println("Waiting 60 seconds, retry will likely fail");
+      delay(this->__max_backoff__);
+    } else {
+      // We're now connected
+      Serial.println("\nLibrary connected!");
+      this->__backoff__ = this->__minbackoff__;
+    }
+  }
+  
 
   // Set QoS to 1 (ack) for configuration messages
   this->mqttClient->subscribe(device->getConfigTopic(), 1);
@@ -219,11 +275,11 @@ void CloudIoTCoreMqtt::logReturnCode() {
       break;
     case (LWMQTT_BAD_USERNAME_OR_PASSWORD):
       Serial.println("LWMQTT_BAD_USERNAME_OR_PASSWORD");
-      iss = 0; // Force JWT regeneration
+      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_NOT_AUTHORIZED):
       Serial.println("LWMQTT_NOT_AUTHORIZED");
-      iss = 0; // Force JWT regeneration
+      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_UNKNOWN_RETURN_CODE):
       Serial.println("LWMQTT_UNKNOWN_RETURN_CODE");
