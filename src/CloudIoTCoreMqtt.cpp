@@ -116,12 +116,20 @@ bool CloudIoTCoreMqtt::publishTelemetry(String data) {
   return this->mqttClient->publish(device->getEventsTopic(), data);
 }
 
+bool CloudIoTCoreMqtt::publishTelemetry(String data, int qos) {
+  return this->mqttClient->publish(device->getEventsTopic(), data, false, qos);
+}
+
 bool CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
   return this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
 }
 
 bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
   return this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
+}
+
+bool CloudIoTCoreMqtt::publishTelemetry(subtopic, String data, int qos) {
+  return this->mqttClient->publish(device->getEventsTopic() + subtopic, data, false, qos);
 }
 
 bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
