@@ -137,12 +137,12 @@ void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
   } else {
     Serial.println(mqttClient->connected() ? "connected" : "not connected");
     if (!mqttClient->connected()) {
-      Serial.println("Settings incorrect or missing a cyper for SSL");
+      Serial.println("No internet or Settings incorrect or missing a cyper for SSL");
       mqttClient->disconnect();
       logConfiguration(false);
       skip = false;
-      Serial.println("Waiting 60 seconds, retry will likely fail");
-      delay(this->__max_backoff__);
+      Serial.println("\naborting mqtt connection attempt, lets rety later...\tLibrary not connected!");
+      // delay(this->__max_backoff__);
     } else {
       // We're now connected
       Serial.println("\nLibrary connected!");
