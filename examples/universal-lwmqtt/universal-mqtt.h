@@ -42,7 +42,7 @@ Client *netClient;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
-unsigned long iss = 0;
+unsigned long iat = 0;
 String jwt;
 
 ///////////////////////////////
@@ -55,8 +55,8 @@ String getDefaultSensor() {
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
   Serial.println("Refreshing JWT");
-  iss = WiFi.getTime();
-  jwt = device->createJWT(iss, jwt_exp_secs);
+  iat = WiFi.getTime();
+  jwt = device->createJWT(iat, jwt_exp_secs);
   return jwt;
 }
 
@@ -131,7 +131,7 @@ Client *netClient;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
-unsigned long iss = 0;
+unsigned long iat = 0;
 String jwt;
 
 ///////////////////////////////
@@ -142,9 +142,9 @@ String getDefaultSensor() {
 }
 
 String getJwt() {
-  iss = time(nullptr);
+  iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iss, jwt_exp_secs);
+  jwt = device->createJWT(iat, jwt_exp_secs);
   return jwt;
 }
 
@@ -225,7 +225,7 @@ BearSSL::WiFiClientSecure *netClient;
 BearSSL::X509List certList;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
-unsigned long iss = 0;
+unsigned long iat = 0;
 String jwt;
 
 ///////////////////////////////
@@ -238,9 +238,9 @@ String getDefaultSensor() {
 String getJwt() {
   // Disable software watchdog as these operations can take a while.
   ESP.wdtDisable();
-  iss = time(nullptr);
+  iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iss, jwt_exp_secs);
+  jwt = device->createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
 }

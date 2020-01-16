@@ -27,7 +27,7 @@ class CloudIoTCoreMqtt {
     int __minbackoff__ = 1000; // minimum backoff, ms
     int __max_backoff__ = 60000; // maximum backoff, ms
     int __jitter__ = 500; // max random jitter, ms
-    unsigned long iss = 0;
+    unsigned long iat = 0; // "Issued At Time" time parameter for jwt
     boolean logConnect = true;
     boolean useLts = false;
     String jwt;
@@ -41,11 +41,14 @@ class CloudIoTCoreMqtt {
 
     void loop();
     void mqttConnect(bool skip = false);
+    void mqttConnect_nonBlocking(bool skip = false);
     void startMQTT();
 
     bool publishTelemetry(String data);
+    bool publishTelemetry(String data, int qos);
     bool publishTelemetry(const char* data, int length);
     bool publishTelemetry(String subtopic, String data);
+    bool publishTelemetry(String subtopic, String data, int qos);
     bool publishTelemetry(String subtopic, const char* data, int length);
     bool publishState(String data);
     bool publishState(const char* data, int length);

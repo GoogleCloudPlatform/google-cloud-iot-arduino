@@ -39,7 +39,7 @@ Client *netClient;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
-unsigned long iss = 0;
+unsigned long iat = 0;
 String jwt;
 
 ///////////////////////////////
@@ -50,9 +50,9 @@ String getDefaultSensor() {
 }
 
 String getJwt() {
-  iss = time(nullptr);
+  iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iss, jwt_exp_secs);
+  jwt = device->createJWT(iat, jwt_exp_secs);
   return jwt;
 }
 
