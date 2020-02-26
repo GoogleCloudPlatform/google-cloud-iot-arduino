@@ -134,8 +134,8 @@ void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
     // Clean up the client
     this->mqttClient->disconnect();
     skip = false;
-    Serial.println("Delaying " + String(this->__backoff__) + "ms");
-    delay(this->__backoff__);
+    // Serial.println("Delaying " + String(this->__backoff__) + "ms");
+    // delay(this->__backoff__);
   } else {
     Serial.println(mqttClient->connected() ? "connected" : "not connected");
     if (!mqttClient->connected()) {
