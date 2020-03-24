@@ -32,6 +32,8 @@ const char* ntp_secondary = "time.nist.gov";
 #define LED_BUILTIN 13
 #endif
 
+
+
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):
 // openssl ec -in <private-key.pem> -noout -text
@@ -44,6 +46,9 @@ const char *private_key_str =
     "6e:b8:17:35:c7:fc:6b:d7:a9:cb:cb:49:7f:a0:67:"
     "63:38:b0:90:57:57:e0:c0:9a:e8:6f:06:0c:d9:ee:"
     "31:41";
+
+// Time (seconds) to expire token += 20 minutes for drift
+const int jwt_exp_secs = 60*20; // Maximum 24H (3600*24)
 
 // To get the certificate for your region run:
 // openssl s_client -showcerts -connect mqtt.googleapis.com:8883
