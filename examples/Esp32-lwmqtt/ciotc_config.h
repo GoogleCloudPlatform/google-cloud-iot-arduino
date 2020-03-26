@@ -46,7 +46,7 @@ const char *private_key_str =
     "31:41";
 
 // Time (seconds) to expire token += 20 minutes for drift
-const int jwt_exp_secs = 3600; // Maximum 24H (3600*24)
+const int jwt_exp_secs = 60*20; // Maximum 24H (3600*24)
 
 // To get the certificate for your region run:
 //   openssl s_client -showcerts -connect mqtt.googleapis.com:8883
