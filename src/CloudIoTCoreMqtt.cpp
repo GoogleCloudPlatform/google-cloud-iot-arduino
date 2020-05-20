@@ -43,21 +43,19 @@ void CloudIoTCoreMqtt::loop() {
   this->mqttClient->loop();
 }
 
+
 void CloudIoTCoreMqtt::mqttConnect(bool skip) {
-  // If too early, backoff still active, don't try and don't flood the console/logs
-  if (millis() < _backoff_at_millis)
-    return;
-
   Serial.print("\nconnecting...");
-
-  bool result =
+  bool keepgoing = true;
+  while (keepgoing) {
+    bool result =
         this->mqttClient->connect(
             device->getClientId().c_str(),
             "unused",
             getJwt().c_str(),
             skip);
 
-  if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result == true){
+    if (this->mqttClient->lastError() != LWMQTT_SUCCESS && result){
       // TODO: refactorme
       // Inform the client why it could not connect and help debugging.
       logError();
@@ -77,24 +75,25 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
       this->mqttClient->disconnect();
       skip = false;
       Serial.println("Delaying " + String(this->__backoff__) + "ms");
-      _backoff_at_millis = millis() + this->__backoff__;
-      return;
-  } else {
+      delay(this->__backoff__);
+      keepgoing = true;
+    } else {
       Serial.println(mqttClient->connected() ? "connected" : "not connected");
       if (!mqttClient->connected()) {
         Serial.println("Settings incorrect or missing a cyper for SSL");
         mqttClient->disconnect();
         logConfiguration(false);
         skip = false;
-        //keepgoing = true;
+        keepgoing = true;
         Serial.println("Waiting 60 seconds, retry will likely fail");
-        _backoff_at_millis = millis() + __max_backoff__;
-        return;
+        delay(this->__max_backoff__);
       } else {
         // We're now connected
         Serial.println("\nLibrary connected!");
+        keepgoing = false;
         this->__backoff__ = this->__minbackoff__;
       }
+    }
   }
 
   // Set QoS to 1 (ack) for configuration messages
@@ -107,7 +106,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
 
 void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
   Serial.print("\nconnecting...");
-  
+
   bool result =
       this->mqttClient->connect(
           device->getClientId().c_str(),
@@ -151,7 +150,7 @@ void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
       this->__backoff__ = this->__minbackoff__;
     }
   }
-  
+
 
   // Set QoS to 1 (ack) for configuration messages
   this->mqttClient->subscribe(device->getConfigTopic(), 1);
