@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2018 Google
+ * Copyright 2020 Google
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,13 +18,15 @@
 const char *ssid = "SSID";
 const char *password = "PASSWORD";
 
-// Cloud iot details.
+// Configuration from https://console.cloud.google.com/iot
+
+// Cloud IoT details.
 const char *project_id = "project-id";
 const char *location = "us-central1";
 const char *registry_id = "my-registry";
 const char *device_id = "my-esp32-device";
 
-// Cloud iot delegate device details.
+// Cloud IoT delegate device details.
 const String delegate_device_id[] = {"delegate-esp32-device1","delegate-esp32-device2"};
 
 // Configuration for NTP
@@ -44,9 +46,9 @@ const char* ntp_secondary = "time.nist.gov";
 // it's smaller add "00:" to the start. If it's too big or too small something
 // is probably wrong with your key.
 const char *private_key_str =
-    "5e:1d:04:53:a2:5d:15:66:85:87:25:12:9c:65:87:"
-    "e1:82:11:da:eb:53:37:9e:81:39:ba:97:60:de:4b:"
-    "3c:c9";
+    "8g:1d:0j:5j:42:1d:65:16:95:47:21:12:9c:65:87:"
+    "e7:8:11:db:e7:53:77:9n:81:41:bk:17:60:de:4b:"
+    "3d:c6";
 
 
 // Time (seconds) to expire token += 20 minutes for drift

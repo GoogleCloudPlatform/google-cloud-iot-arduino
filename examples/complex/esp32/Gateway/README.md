@@ -1,29 +1,31 @@
 # ESP32 Gateway demo
 
-This demo uses two inexpensive and readily available ESP32's to send
-telemetry data, one ESP32 acting as a gateway to Google Cloud IoT core and another ESP32
-acting as the delegate device that sends data to the gateway.The gateway will send the
-data to Google Cloud IoT core and publish to PubSub. For example, you can send temperature
-data from multiple delegate devices to Google Cloud and store that information to see
+This demo uses two inexpensive and readily available ESP32 devices to send and receive
+data from Google Cloud. The device with a connection to Google Cloud (Gateway) will
+communicate on behalf of other devices (delegate devices).
+The gateway will send the data to Google Cloud IoT core and publish to PubSub.
+For example, you can send temperature data from multiple delegate devices to Google Cloud and store that information to see
 any drastic temperature changes in a room.
 
-**Disclaimer** This demo is still in a rough state, it can crash the ESP32 and is
-offered with limited support.
+**Disclaimer** This demo is not a robust solution, can crash the ESP32, and is offered with limited support.
 
 Some of the SerialBT code is based on [Espressif](https://github.com/espressif/arduino-esp32/tree/master/libraries/BluetoothSerial/examples/) examples
 that shows you how to connect two devices over serial bluetooth.
 
 ## Configuration
-You need to configure the devices to connect over bluetooth in `ESP32_delegate.ino`.
-Make sure that the device_id you enter matches the device_id on the Google Cloud IoT core.
-The example configurations reflect models encountered during testing but you
-may need to add your own based on the data sheet for your device.
+
+Create a gateway and a delegate device, make sure that the both devices are setup on the cloud and that the delegate device is bound to the gateway.
+
+Specify the devices that connect over bluetooth in `ESP32_delegate.ino`. These devices
+must correspond to devices created in the [Cloud IoT Core section of the Cloud Console](https://console.cloud.google.com/iot).
+The example IDs correspond to the device_id on the Google Cloud IoT core.
 
 Update the values in [ciotc_config.h](ciotc_config.h) so that they match the
 configuration for your gateway device and delegate devices.
 
 ## Running the demo
-After your gateway device is connected, you can now send an attach command
+Flash the gateway device with the project sources in Esp32-Gateway and delegate device(s) with the project sources in Esp32-delegate,
+then restart both devices.After your gateway device is connected, you can now send an attach command
 which will attach the delegate devices found in [ciotc_config.h](ciotc_config.h).
 Once you delegate devices are attached you can send a command to your devices from the cloud,
 the command must follow the following order and structure:
@@ -42,4 +44,4 @@ After you pull the message from the PubSub topic, you should then see the temper
 
 ## Troubleshooting
 If the MQTT connection is resetting when you're attaching the delegate devices,
-make sure to check that you delegate devices are bounded to the gateway and that they are set up correctly.
+make sure that your delegate devices are bound to the gateway and that the gateway is configured to use association-only in the [Cloud Console](https://console.cloud.google.com/iot?pli=1).

@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2018 Google
+ * Copyright 2020 Google
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,12 @@
 
 unsigned long lastMillis = millis();
 
-void setup()
-{
+void setup() {
   Serial.begin(115200);
   setupCloudIoT();
 }
 
 void loop() {
-
     mqtt->loop();
     delay(10);  // <- fixes some issues with WiFi stability
 

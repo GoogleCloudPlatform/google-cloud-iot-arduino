@@ -1,3 +1,18 @@
+/******************************************************************************
+ * Copyright 2020 Google
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *****************************************************************************/
+
 #include "BluetoothSerial.h"
 
 BluetoothSerial SerialBT;
@@ -13,12 +28,11 @@ void setupSerialBT() {
   //SerialBT.setPin(pin);
   Serial.println("The device started in master mode, make sure remote BT device is on!");
 
-  // connect(address) is fast (upto 10 secs max), connect(name) is slow (upto 30 secs max) as it needs
+  // Note: connect(address) is fast (up to 10 secs max), connect(name) is slow (upto 30 secs max) as it needs
   // to resolve name to address first, but it allows to connect to different devices with the same name.
-  // Set CoreDebugLevel to Info to view devices bluetooth address and device names
-  //ESP32test
+  // Set CoreDebugLevel to Info to view devices bluetooth address and device names.
+  // connected = SerialBT.connect(address); // for cases where you want to use connect(name)
   connected = SerialBT.connect(staticBTDeviceID);
-  //connected = SerialBT.connect(address);
 
   if(connected) {
     Serial.println("Connected Succesfully!");

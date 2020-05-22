@@ -1,5 +1,5 @@
 /******************************************************************************
- * Copyright 2018 Google
+ * Copyright 2020 Google
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,22 +33,21 @@ CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
 unsigned long iss = 0;
-String jwt,incoming_payload,incoming_command, input="NOT FOUND";
+String jwt, incoming_payload, incoming_command, input="NOT FOUND";
 
 ///////////////////////////////
 // Helpers specific to this board
 ///////////////////////////////
 
-void getDeviceID(String payload)
-{
+void getDeviceID(String payload) {
   char buf[payload.length() + 1];
   payload.toCharArray(buf, payload.length() + 1);
   char *pars = strtok(buf, ",");
   staticBTDeviceID = pars;
   pars = strtok(NULL, ",");
   incoming_command = pars;
-  
 }
+
 
 String getJwt() {
   iss = time(nullptr);
@@ -58,9 +57,9 @@ String getJwt() {
   return jwt;
 }
 
+
 void setupWifi() {
   Serial.println("Starting wifi");
-  //WiFi.setSleep(false); // May help with disconnect? Seems to have been removed from WiFi
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   WiFi.begin(ssid, password);
@@ -78,6 +77,7 @@ void setupWifi() {
   }
 }
 
+
 void connectWifi() {
   Serial.print("checking wifi...");
   while (WiFi.status() != WL_CONNECTED) {
@@ -88,21 +88,19 @@ void connectWifi() {
 
 
 void detachDelegate(String delegate_id) {
-
-   
   //subscribe to delegate configuration
   mqttClient->unsubscribe("/devices/"+ delegate_id +"/config");
 
   //subscribe to delegate commands
   mqttClient->unsubscribe("/devices/"+ delegate_id +"/commands/#");
-  
+
     //attach to delegate device
   String dat = "{}";
   mqttClient->publish(String("/devices/"+ delegate_id +"/detach").c_str(),dat.c_str(),false,1);
 }
 
-bool attachAndSubscribe(String delegate_id) {
 
+bool attachAndSubscribe(String delegate_id) {
   //attach to delegate device
   String dat = "{}";
   mqttClient->publish(String("/devices/"+ delegate_id +"/attach").c_str(),dat.c_str(),false,1);
@@ -114,17 +112,17 @@ bool attachAndSubscribe(String delegate_id) {
   mqttClient->subscribe("/devices/"+ delegate_id +"/commands/#",0);
 }
 
-// !!REPLACEME!!
+
 // The MQTT callback function for commands and configuration updates
-// Place your message handler code here.
+// This is were incoming command from the gateway gets saved,
+// to forward to the delegate device
 void messageReceived(String &topic, String &payload) {
   int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
   Serial.println("incoming: " + topic + " - " + payload);
   getDeviceID(payload);
   incoming_payload = payload;
 
-  if(payload == "attach")
-  {
+  if(payload == "attach") {
     for(int i = 0; i < size;i++) {
       attachAndSubscribe(delegate_device_id[i]);
       mqttClient->loop();
@@ -143,17 +141,21 @@ void messageReceived(String &topic, String &payload) {
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
 
+
 bool publishTelemetry(String data) {
   return mqtt->publishTelemetry(data);
 }
+
 
 bool publishTelemetry(const char* data, int length) {
   return mqtt->publishTelemetry(data, length);
 }
 
+
 bool publishTelemetry(String subfolder, String data) {
   return mqtt->publishTelemetry(subfolder, data);
 }
+
 
 bool publishTelemetry(String subfolder, const char* data, int length) {
   return mqtt->publishTelemetry(subfolder, data, length);
@@ -161,13 +163,18 @@ bool publishTelemetry(String subfolder, const char* data, int length) {
 
 
 bool publishDelegateTelemetry(String delegate_id,String data) {
-  return mqttClient->publish(String("/devices/" + delegate_id + "/events").c_str(), String(data).c_str(), false, 1);
+  return mqttClient->publish(String("/devices/"+ delegate_id +"/events").c_str(), String(data).c_str(), false, 1);
 }
+
 
 bool publishDelegateState(String delegate_id,String data) {
   return mqttClient->publish(String("/devices/"+ delegate_id +"/state").c_str(),String(data).c_str(),false,1);
 }
 
+
+// Polls sensor data from the delegate devices and forwards Cloud-to-device messages.
+// Message from the delegate device is semicolon terminated and takes the format:
+//    <deviceid>,<command>,<payload>;
 String pollDelegate() {
   if (incoming_payload != "") {
     setupSerialBT();
@@ -182,26 +189,24 @@ String pollDelegate() {
       Serial.println(".");
       delay(500);
     }
-    
+
     input = (SerialBT.readStringUntil(';'));
 
     if(incoming_command == "event") {
       publishDelegateTelemetry(staticBTDeviceID,input);
-    }
-    else if(incoming_command == "state") { 
+    } else if(incoming_command == "state") {
       publishDelegateState(staticBTDeviceID,input);
     }
 
     Serial.println("Delegate Published");
 
     disconnectSerialBT();
-  }
-  else {
+  } else {
     Serial.println("Connect - No Incoming Commands ");
   }
-  
   return input;
 }
+
 
 void connect() {
   connectWifi();
@@ -209,7 +214,8 @@ void connect() {
   delay(500); // <- fixes some issues with WiFi stability
 }
 
-void setupCloudIoT(){
+
+void setupCloudIoT() {
   device = new CloudIoTCoreDevice(
       project_id, location, registry_id, device_id,
       private_key_str);
@@ -221,6 +227,6 @@ void setupCloudIoT(){
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
   mqtt->setUseLts(true);
   mqtt->startMQTT();
-  mqttClient->subscribe("/devices/"+String(device_id)+"/errors",1);
+  mqttClient->subscribe("/devices/"+ String(device_id) +"/errors",1);
 }
 #endif //__ESP32_MQTT_H__
