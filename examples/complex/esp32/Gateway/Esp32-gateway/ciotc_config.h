@@ -18,16 +18,14 @@
 const char *ssid = "SSID";
 const char *password = "PASSWORD";
 
-// Configuration from https://console.cloud.google.com/iot
-
-// Cloud IoT details.
+// Cloud iot details.
 const char *project_id = "project-id";
 const char *location = "us-central1";
 const char *registry_id = "my-registry";
-const char *device_id = "my-esp32-device";
+const char *device_id = "my-esp32-gateway";
 
-// Cloud IoT delegate device details.
-const String delegate_device_id[] = {"delegate-esp32-device1","delegate-esp32-device2"};
+// Cloud iot delegate device details.
+const String delegate_device_id[] = {"my-esp32-device1","my-esp32-device2"};
 
 // Configuration for NTP
 const char* ntp_primary = "pool.ntp.org";
@@ -46,9 +44,9 @@ const char* ntp_secondary = "time.nist.gov";
 // it's smaller add "00:" to the start. If it's too big or too small something
 // is probably wrong with your key.
 const char *private_key_str =
-    "8g:1d:0j:5j:42:1d:65:16:95:47:21:12:9c:65:87:"
-    "e7:8:11:db:e7:53:77:9n:81:41:bk:17:60:de:4b:"
-    "3d:c6";
+    "6e:b8:17:35:c7:fc:6b:d7:a9:cb:cb:49:7f:a0:67:"
+    "63:38:b0:90:57:57:e0:c0:9a:e8:6f:06:0c:d9:ee:"
+    "31:41";
 
 
 // Time (seconds) to expire token += 20 minutes for drift

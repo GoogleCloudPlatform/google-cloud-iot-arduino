@@ -62,7 +62,7 @@ void setupWifi() {
   Serial.println("Starting wifi");
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  WiFi.begin(ssid, password);
+  WiFi.begin(ssid,password);
   Serial.println("Connecting");
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -121,13 +121,7 @@ void messageReceived(String &topic, String &payload) {
   Serial.println("incoming: " + topic + " - " + payload);
   getDeviceID(payload);
   incoming_payload = payload;
-
-  if(payload == "attach") {
-    for(int i = 0; i < size;i++) {
-      attachAndSubscribe(delegate_device_id[i]);
-      mqttClient->loop();
-    }
-  }
+    
   if(payload == "detach") {
     for(int i = 0; i < size;i++) {
       detachDelegate(delegate_device_id[i]);
@@ -211,6 +205,14 @@ String pollDelegate() {
 void connect() {
   connectWifi();
   mqtt->mqttConnect();
+
+  int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
+  
+  for(int i = 0; i < size;i++) {
+    attachAndSubscribe(delegate_device_id[i]);
+    mqttClient->loop();
+  }
+  
   delay(500); // <- fixes some issues with WiFi stability
 }
 
@@ -227,6 +229,6 @@ void setupCloudIoT() {
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
   mqtt->setUseLts(true);
   mqtt->startMQTT();
-  mqttClient->subscribe("/devices/"+ String(device_id) +"/errors",1);
+  mqttClient->subscribe("/devices/"+ String(device_id) +"/errors",0);
 }
 #endif //__ESP32_MQTT_H__

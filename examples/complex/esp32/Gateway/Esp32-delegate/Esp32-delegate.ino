@@ -16,7 +16,7 @@
 
 BluetoothSerial SerialBT;
 
-const String DeviceID = "delegate-esp32-device";
+const String DeviceID = "my-esp-device";
 
 #ifdef __cplusplus
 extern "C" {
