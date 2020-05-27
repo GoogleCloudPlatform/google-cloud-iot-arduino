@@ -104,7 +104,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
   onConnect();
 }
 
-void CloudIoTCoreMqtt::mqttConnect_nonBlocking(bool skip) {
+void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
   Serial.print("\nconnecting...");
 
   bool result =

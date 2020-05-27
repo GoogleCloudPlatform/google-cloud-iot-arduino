@@ -72,9 +72,9 @@ void handleGatewayCommand() {
 
 void parseInput(String in) {
   int x = 0;
-  char str_array[in.length()+1];
-  in.toCharArray(str_array,in.length()+1);
-  char* pars = strtok (str_array,",");
+  char strArray[in.length()+1];
+  in.toCharArray(strArray,in.length()+1);
+  char* pars = strtok (strArray,",");
   char* msgArray[3];
   while (pars != NULL) {
     msgArray[x] = pars;
