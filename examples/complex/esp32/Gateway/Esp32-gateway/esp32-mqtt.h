@@ -33,7 +33,7 @@ CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
 unsigned long iss = 0;
-String jwt, incoming_payload, incoming_command, input="NOT FOUND";
+String jwt, incomingPayload, incomingCommand, input="NOT FOUND";
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -45,7 +45,7 @@ void getDeviceID(String payload) {
   char *pars = strtok(buf, ",");
   staticBTDeviceID = pars;
   pars = strtok(NULL, ",");
-  incoming_command = pars;
+  incomingCommand = pars;
 }
 
 
@@ -87,29 +87,32 @@ void connectWifi() {
 }
 
 
-void detachDelegate(String delegate_id) {
+void detachDelegate(String delegateId) {
   //subscribe to delegate configuration
-  mqttClient->unsubscribe("/devices/"+ delegate_id +"/config");
+  mqttClient->unsubscribe("/devices/"+ delegateId +"/config");
 
   //subscribe to delegate commands
-  mqttClient->unsubscribe("/devices/"+ delegate_id +"/commands/#");
+  mqttClient->unsubscribe("/devices/"+ delegateId +"/commands/#");
 
     //attach to delegate device
   String dat = "{}";
-  mqttClient->publish(String("/devices/"+ delegate_id +"/detach").c_str(),dat.c_str(),false,1);
+  mqttClient->publish(
+      String("/devices/"+ delegateId +"/detach").c_str(),
+      dat.c_str(), false, 1);
 }
 
 
-bool attachAndSubscribe(String delegate_id) {
+bool attachAndSubscribe(String delegateId) {
   //attach to delegate device
   String dat = "{}";
-  mqttClient->publish(String("/devices/"+ delegate_id +"/attach").c_str(),dat.c_str(),false,1);
+  mqttClient->publish(String("/devices/"+ delegateId +"/attach").c_str(),
+      dat.c_str(), false, 1);
 
   //subscribe to delegate configuration
-  mqttClient->subscribe("/devices/"+ delegate_id +"/config",1);
+  mqttClient->subscribe("/devices/"+ delegateId +"/config", 1);
 
   //subscribe to delegate commands
-  mqttClient->subscribe("/devices/"+ delegate_id +"/commands/#",0);
+  mqttClient->subscribe("/devices/"+ delegateId +"/commands/#", 0);
 }
 
 
@@ -117,14 +120,14 @@ bool attachAndSubscribe(String delegate_id) {
 // This is were incoming command from the gateway gets saved,
 // to forward to the delegate device
 void messageReceived(String &topic, String &payload) {
-  int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
+  int size = sizeof(delegateDeviceId) / sizeof(delegateDeviceId[0]);
   Serial.println("incoming: " + topic + " - " + payload);
   getDeviceID(payload);
-  incoming_payload = payload;
-    
+  incomingPayload = payload;
+
   if(payload == "detach") {
     for(int i = 0; i < size;i++) {
-      detachDelegate(delegate_device_id[i]);
+      detachDelegate(delegateDeviceId[i]);
       mqttClient->loop();
     }
   }
@@ -156,13 +159,17 @@ bool publishTelemetry(String subfolder, const char* data, int length) {
 }
 
 
-bool publishDelegateTelemetry(String delegate_id,String data) {
-  return mqttClient->publish(String("/devices/"+ delegate_id +"/events").c_str(), String(data).c_str(), false, 1);
+bool publishDelegateTelemetry(String delegateId,String data) {
+  return mqttClient->publish(
+      String("/devices/"+ delegateId +"/events").c_str(),
+      String(data).c_str(), false, 1);
 }
 
 
-bool publishDelegateState(String delegate_id,String data) {
-  return mqttClient->publish(String("/devices/"+ delegate_id +"/state").c_str(),String(data).c_str(),false,1);
+bool publishDelegateState(String delegateId,String data) {
+  return mqttClient->publish(
+      String("/devices/"+ delegateId +"/state").c_str(),
+      String(data).c_str(), false, 1);
 }
 
 
@@ -170,10 +177,10 @@ bool publishDelegateState(String delegate_id,String data) {
 // Message from the delegate device is semicolon terminated and takes the format:
 //    <deviceid>,<command>,<payload>;
 String pollDelegate() {
-  if (incoming_payload != "") {
+  if (incomingPayload != "") {
     setupSerialBT();
-    forwardComand(incoming_payload);
-    incoming_payload = "";
+    forwardComand(incomingPayload);
+    incomingPayload = "";
 
     if (Serial.available()) {
       SerialBT.write(Serial.read());
@@ -186,9 +193,9 @@ String pollDelegate() {
 
     input = (SerialBT.readStringUntil(';'));
 
-    if(incoming_command == "event") {
+    if(incomingCommand == "event") {
       publishDelegateTelemetry(staticBTDeviceID,input);
-    } else if(incoming_command == "state") {
+    } else if(incomingCommand == "state") {
       publishDelegateState(staticBTDeviceID,input);
     }
 
@@ -206,13 +213,13 @@ void connect() {
   connectWifi();
   mqtt->mqttConnect();
 
-  int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
-  
-  for(int i = 0; i < size;i++) {
-    attachAndSubscribe(delegate_device_id[i]);
+  int size = sizeof(delegateDeviceId) / sizeof(delegateDeviceId[0]);
+
+  for(int i = 0; i < size; i++) {
+    attachAndSubscribe(delegateDeviceId[i]);
     mqttClient->loop();
   }
-  
+
   delay(500); // <- fixes some issues with WiFi stability
 }
 

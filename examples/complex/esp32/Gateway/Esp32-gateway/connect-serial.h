@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-
 #include "BluetoothSerial.h"
 
 BluetoothSerial SerialBT;
@@ -21,7 +20,6 @@ static String staticBTDeviceID = "";
 bool connected;
 
 void setupSerialBT() {
-
   //SerialBT.setPin(pin);
   delay(5000);
   SerialBT.begin("my-esp32-gateway",true);
@@ -38,7 +36,7 @@ void setupSerialBT() {
     Serial.println("Connected Succesfully!");
   } else {
     while(!SerialBT.connected(10000)) {
-      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app."); 
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
     }
   }
 }
