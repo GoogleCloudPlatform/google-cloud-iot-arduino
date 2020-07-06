@@ -14,6 +14,7 @@
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
 
+#include "BluetoothSerial.h"
 #include <Client.h>
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
@@ -23,7 +24,51 @@
 #include <CloudIoTCore.h>
 #include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Update this file with your configuration
-#include "connect-serial.h"
+
+BluetoothSerial SerialBT;
+
+static String staticBTDeviceID = "";
+bool connected;
+
+void setupSerialBT()
+{
+  //SerialBT.setPin(pin);
+  delay(5000);
+  SerialBT.begin("my-esp32-gateway", true);
+  //SerialBT.setPin(pin);
+  Serial.println("The device started in master mode, make sure remote BT device is on!");
+
+  // Note: connect(address) is fast (up to 10 secs max), connect(name) is slow (upto 30 secs max) as it needs
+  // to resolve name to address first, but it allows to connect to different devices with the same name.
+  // Set CoreDebugLevel to Info to view devices bluetooth address and device names.
+  // connected = SerialBT.connect(address); // for cases where you want to use connect(name)
+  connected = SerialBT.connect(staticBTDeviceID);
+
+  if (connected)
+  {
+    Serial.println("Connected Succesfully!");
+  }
+  else
+  {
+    while (!SerialBT.connected(10000))
+    {
+      Serial.println("Failed to connect. Make sure remote device is available and in range, then restart app.");
+    }
+  }
+}
+
+void disconnectSerialBT()
+{
+  if (SerialBT.disconnect())
+  {
+    Serial.println("Disconnected!");
+  }
+}
+
+void forwardComand(String payload)
+{
+  SerialBT.println(payload);
+}
 
 // Initialize WiFi and MQTT for this board
 Client *netClient;
