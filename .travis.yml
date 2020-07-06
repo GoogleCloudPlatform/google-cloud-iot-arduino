@@ -24,13 +24,6 @@ env:
 #    - DOXYFILE: $TRAVIS_BUILD_DIR/Doxyfile
 
 before_install:
-
-    # Check for tabs (excluding subtrees and keywords.txt files)
-  - find . -path './.git' -prune -or -path './avr/bootloaders/optiboot_flash' -prune -or -path './avr/cores/MCUdude_corefiles' -prune -or -path './avr/travis-ci/arduino-ci-script' -prune -or \( -not -name 'keywords.txt' -and -type f \) -exec grep --with-filename --line-number --binary-files=without-match --regexp=$'\t' '{}' \; -exec echo 'Tab found.' \; -exec false '{}' +
-
-  # Check for non-Unix line endings (excluding subtrees)
-  - find . -path './.git' -prune -or -path './avr/bootloaders/optiboot_flash' -prune -or -path './avr/cores/MCUdude_corefiles' -prune -or -path './avr/travis-ci/arduino-ci-script' -prune -or -type f -exec grep --files-with-matches --binary-files=without-match --regexp=$'\r$' '{}' \; -exec echo 'Non-Unix EOL detected.' \; -exec false '{}' +
-  
   - source $TRAVIS_BUILD_DIR/install.sh
 
 install:
@@ -38,3 +31,7 @@ install:
 
 script:
    - build_main_platforms
+
+ignore:
+  - /examples/complex/Esp32-gateway.ino
+  - /examples/complex/Esp32-delegate.ino
