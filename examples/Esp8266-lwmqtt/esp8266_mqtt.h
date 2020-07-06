@@ -13,8 +13,7 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
-#ifndef __ESP8266_MQTT_H__
-#define __ESP8266_MQTT_H__
+
 #include <ESP8266WiFi.h>
 #include "FS.h"
 
@@ -186,5 +185,3 @@ void setupCloudIoT()
   mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }
-
-#endif //__ESP8266_MQTT_H__

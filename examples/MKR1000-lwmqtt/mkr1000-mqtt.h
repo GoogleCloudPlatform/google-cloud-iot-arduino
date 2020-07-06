@@ -13,8 +13,6 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
-#ifndef __MKR1000_MQTT_H__
-#define __MKR1000_MQTT_H__
 #include <WiFi101.h>
 #include <WiFiSSLClient.h>
 
@@ -115,4 +113,3 @@ void setupCloudIoT() {
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
   mqtt->startMQTT();
 }
-#endif //__MKR1000_MQTT_H__

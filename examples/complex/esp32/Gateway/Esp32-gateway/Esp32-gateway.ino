@@ -12,6 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
+#if defined(ARDUINO_SAMD_MKR1000) or defined(ESP8266)
+#define __SKIP_ESP32__
+#endif
+
+#if defined(ESP32)
+#define __ESP32_MQTT_H__
+#endif
+
+#ifdef __SKIP_ESP32__
+
+#include <Arduino.h>
+
+void setup()
+{
+  Serial.begin(115200);
+}
+
+void loop()
+{
+  Serial.println("Hello World");
+}
+#endif
+
+#ifdef __ESP32_MQTT_H__
+
 #include "esp32-mqtt.h"
 
 unsigned long lastMillis = millis();
@@ -36,3 +61,4 @@ void loop() {
       pollDelegate();
     }
 }
+#endif
