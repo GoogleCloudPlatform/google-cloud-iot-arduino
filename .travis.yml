@@ -29,9 +29,10 @@ before_install:
 install:
    - arduino --install-library "MQTT","Google Cloud IoT Core JWT","WiFi101"
 
+ignore:
+  - /examples/complex/Gateway/Esp32-gateway.ino
+  - /examples/complex/Gateway/Esp32-delegate.ino
+
 script:
    - build_main_platforms
 
-ignore:
-  - /examples/complex/Esp32-gateway.ino
-  - /examples/complex/Esp32-delegate.ino
