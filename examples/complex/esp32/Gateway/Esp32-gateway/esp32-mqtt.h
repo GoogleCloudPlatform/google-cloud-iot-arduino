@@ -13,8 +13,6 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
-#ifndef __ESP32_MQTT_H__
-#define __ESP32_MQTT_H__
 
 #include <Client.h>
 #include <WiFi.h>
@@ -238,4 +236,3 @@ void setupCloudIoT() {
   mqtt->startMQTT();
   mqttClient->subscribe("/devices/"+ String(device_id) +"/errors",0);
 }
-#endif //__ESP32_MQTT_H__

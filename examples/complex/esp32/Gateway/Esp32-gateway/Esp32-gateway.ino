@@ -37,6 +37,7 @@ void loop()
 
 #ifdef __ESP32_MQTT_H__
 
+#include <Arduino.h>
 #include "esp32-mqtt.h"
 
 unsigned long lastMillis = millis();
