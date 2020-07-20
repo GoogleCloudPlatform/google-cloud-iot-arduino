@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#if defined(ESP8266) or defined(ARDUINO_SAMD_MKR1000)
+#if defined(ESP8266) or defined(ARDUINO_ARCH_SAMD)
 #define __SKIP_ESP32__
 #endif
 

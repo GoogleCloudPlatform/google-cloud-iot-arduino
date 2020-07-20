@@ -17,7 +17,7 @@
 #define __SKIP_MKR1000__
 #endif
 
-#if defined(ARDUINO_SAMD_MKR1000)
+#if defined(ARDUINO_ARCH_SAMD)
 #define __MKR1000_MQTT_H__
 #endif
 

@@ -38,7 +38,7 @@
   copies or substantial portions of the Software.
   """
 *********/
-#if defined(ESP8266) or defined(ARDUINO_SAMD_MKR1000)
+#if defined(ESP8266) or defined(ARDUINO_ARCH_SAMD)
 #define __SKIP_ESP32__
 #endif
 
