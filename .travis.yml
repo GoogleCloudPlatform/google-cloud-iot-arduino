@@ -27,7 +27,7 @@ before_install:
   - source $TRAVIS_BUILD_DIR/install.sh
 
 install:
-   - arduino --install-library "MQTT","Google Cloud IoT Core JWT","WiFi101"
+   - arduino --install-library "MQTT","WiFi101"
 script:
    - build_main_platforms
 
