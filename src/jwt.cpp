@@ -26,8 +26,6 @@ static const String base64_chars =
     "abcdefghijklmnopqrstuvwxyz"
     "0123456789-_";
 
-static const unsigned char trailing_char = '.';
-
 String base64_encode(const unsigned char *bytes_to_encode,
                      unsigned int in_len) {
   String ret;
