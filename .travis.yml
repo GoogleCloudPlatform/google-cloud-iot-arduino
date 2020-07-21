@@ -28,7 +28,7 @@ before_install:
 
 install:
    - arduino --install-library "MQTT","WiFi101"
-   - arduino --install-boards "arduino:samd"
+   - arduino --install-board "arduino:samd:mkr1000"
 script:
    - build_main_platforms
 
