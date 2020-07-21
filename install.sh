@@ -22,7 +22,7 @@ fi
 # associative array for the platforms that will be verified in build_main_platforms()
 # this will be eval'd in the functions below because arrays can't be exported
 # Uno is ATmega328, Zero is SAMD21G18, ESP8266, Leonardo is ATmega32u4, M4 is SAMD51, Mega is ATmega2560, ESP32
-export MAIN_PLATFORMS='declare -A main_platforms=( [esp8266]="esp8266:esp8266:generic:xtal=80,vt=flash,exception=disabled,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=dout,eesz=512K,led=2,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200" [esp32]="esp32:esp32:featheresp32:FlashFreq=80,PartitionScheme=no_ota" [mkr1000]="arduino:samd:mkr1000" )'
+export MAIN_PLATFORMS='declare -A main_platforms=( [esp8266]="esp8266:esp8266:generic:xtal=80,vt=flash,exception=disabled,ResetMethod=ck,CrystalFreq=26,FlashFreq=40,FlashMode=dout,eesz=512K,led=2,ip=lm2f,dbg=Disabled,lvl=None____,wipe=none,baud=115200" [esp32]="esp32:esp32:featheresp32:FlashFreq=80,PartitionScheme=no_ota" [mkr1000]="arduino:samd:arduino_mkr1000" )'
 
 # associative array for other platforms that can be called explicitly in .travis.yml configs
 # this will be eval'd in the functions below because arrays can't be exported
@@ -30,13 +30,13 @@ export AUX_PLATFORMS=''
 
 export CPLAY_PLATFORMS=''
 
-export SAMD_PLATFORMS='declare -A samd_platforms=( [zero]="arduino:samd:arduino_zero_native", [cplayExpress]="arduino:samd:adafruit_circuitplayground_m0", [m4]="adafruit:samd:adafruit_metro_m4:speed=120" )'
+export SAMD_PLATFORMS='declare -A samd_platforms=( [zero]="arduino:samd:arduino_zero_native", [mkr1000]="arduino:samd:arduino_mkr1000", [cplayExpress]="arduino:samd:adafruit_circuitplayground_m0", [m4]="adafruit:samd:adafruit_metro_m4:speed=120" )'
 
 export M4_PLATFORMS=''
 
 export ARCADA_PLATFORMS=''
 
-export IO_PLATFORMS='declare -A io_platforms=( [zero]="arduino:samd:arduino_zero_native", [m4wifi]="adafruit:samd:adafruit_metro_m4_airliftlite:speed=120", [esp8266]="esp8266:esp8266:huzzah:eesz=4M3M,xtal=80" [esp32]="esp32:esp32:featheresp32:FlashFreq=80" )'
+export IO_PLATFORMS='declare -A io_platforms=( [zero]="arduino:samd:arduino_zero_native",  [m4wifi]="adafruit:samd:adafruit_metro_m4_airliftlite:speed=120", [esp8266]="esp8266:esp8266:huzzah:eesz=4M3M,xtal=80" [esp32]="esp32:esp32:featheresp32:FlashFreq=80" )'
 
 export NRF5X_PLATFORMS=''
 
