@@ -13,8 +13,6 @@
  * limitations under the License.
  *****************************************************************************/
 // This file contains static methods for API requests using Wifi / MQTT
-#ifndef __ESP32_MQTT_H__
-#define __ESP32_MQTT_H__
 
 #include <Client.h>
 #include <WiFi.h>
@@ -102,7 +100,7 @@ void detachDelegate(String delegateId) {
 }
 
 
-bool attachAndSubscribe(String delegateId) {
+void attachAndSubscribe(String delegateId) {
   //attach to delegate device
   String dat = "{}";
   mqttClient->publish(String("/devices/"+ delegateId +"/attach").c_str(),
@@ -120,14 +118,14 @@ bool attachAndSubscribe(String delegateId) {
 // This is were incoming command from the gateway gets saved,
 // to forward to the delegate device
 void messageReceived(String &topic, String &payload) {
-  int size = sizeof(delegateDeviceId) / sizeof(delegateDeviceId[0]);
+  int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
   Serial.println("incoming: " + topic + " - " + payload);
   getDeviceID(payload);
   incomingPayload = payload;
 
   if(payload == "detach") {
     for(int i = 0; i < size;i++) {
-      detachDelegate(delegateDeviceId[i]);
+      detachDelegate(delegate_device_id[i]);
       mqttClient->loop();
     }
   }
@@ -213,10 +211,10 @@ void connect() {
   connectWifi();
   mqtt->mqttConnect();
 
-  int size = sizeof(delegateDeviceId) / sizeof(delegateDeviceId[0]);
+  int size = sizeof(delegate_device_id) / sizeof(delegate_device_id[0]);
 
   for(int i = 0; i < size; i++) {
-    attachAndSubscribe(delegateDeviceId[i]);
+    attachAndSubscribe(delegate_device_id[i]);
     mqttClient->loop();
   }
 
@@ -238,4 +236,3 @@ void setupCloudIoT() {
   mqtt->startMQTT();
   mqttClient->subscribe("/devices/"+ String(device_id) +"/errors",0);
 }
-#endif //__ESP32_MQTT_H__

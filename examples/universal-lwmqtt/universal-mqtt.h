@@ -92,7 +92,7 @@ void connect() {
 }
 
 bool publishTelemetry(String data) {
-  return return mqtt->publishTelemetry(data);
+  return mqtt->publishTelemetry(data);
 }
 
 bool publishTelemetry(String subfolder, String data) {

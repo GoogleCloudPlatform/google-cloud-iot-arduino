@@ -12,8 +12,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *****************************************************************************/
-#include "mkr1000-mqtt.h"
 
+#if defined(ESP8266) or defined(ESP32)
+#define __SKIP_MKR1000__
+#endif
+
+#if defined(ARDUINO_SAMD_MKR1000)
+#define __MKR1000_MQTT_H__
+#endif
+
+#ifdef __SKIP_MKR1000__
+
+#include <Arduino.h>
+
+void setup(){
+  Serial.begin(115200);
+}
+
+void loop(){
+  Serial.println("Hello World");
+}
+
+#endif
+
+#ifdef __MKR1000_MQTT_H__
+#include "mkr1000-mqtt.h"
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
@@ -36,3 +59,4 @@ void loop() {
     publishTelemetry(getDefaultSensor());
   }
 }
+#endif

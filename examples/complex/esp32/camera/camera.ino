@@ -38,6 +38,29 @@
   copies or substantial portions of the Software.
   """
 *********/
+#if defined(ESP8266) or defined(ARDUINO_SAMD_MKR1000)
+#define __SKIP_ESP32__
+#endif
+
+#if defined(ESP32)
+#define __ESP32_MQTT__
+#endif
+
+#ifdef __SKIP_ESP32__
+
+#include <Arduino.h>
+
+void setup(){
+  Serial.begin(115200);
+}
+
+void loop(){
+  Serial.println("Hello World");
+}
+
+#endif
+
+#ifdef __ESP32_MQTT__
 
 #include "esp_camera.h"
 #include <esp_wifi.h>
@@ -317,3 +340,4 @@ void loop() {
     mqtt->loop();
   }
 }
+#endif
