@@ -27,7 +27,7 @@ before_install:
   - source $TRAVIS_BUILD_DIR/install.sh
 
 install:
-   - arduino --install-library "MQTT","WiFi101", "DHT-sensor-library"
+   - arduino --install-library "MQTT","WiFi101", "DHT sensor library"
 script:
    - build_main_platforms
 
