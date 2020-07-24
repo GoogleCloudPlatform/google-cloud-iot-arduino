@@ -24,7 +24,7 @@
 static const String base64_chars =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     "abcdefghijklmnopqrstuvwxyz"
-    "0123456789+/";
+    "0123456789-_";
 
 String base64_encode(const unsigned char *bytes_to_encode,
                      unsigned int in_len) {
@@ -66,10 +66,6 @@ String base64_encode(const unsigned char *bytes_to_encode,
     for (j = 0; (j < i + 1); j++) {
       ret += base64_chars[char_array_4[j]];
     }
-
-    while ((i++ < 3)) {
-      ret += '=';
-    }
   }
 
   return ret;
@@ -77,19 +73,6 @@ String base64_encode(const unsigned char *bytes_to_encode,
 
 String base64_encode(String str) {
   return base64_encode((const unsigned char *)str.c_str(), str.length());
-}
-
-// Get's sha256 of str.
-String get_sha(const String& str) {
-  Sha256 sha256Instance;
-
-  sha256Instance.update((const unsigned char *)str.c_str(), str.length());
-
-  unsigned char sha256[SHA256_DIGEST_LENGTH];
-
-  sha256Instance.final(sha256);
-
-  return String((const char*)sha256);
 }
 
 // Get base64 signature string from the signature_r and signature_s ecdsa
@@ -122,7 +105,10 @@ String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key, int 
   String header_payload_base64 =
       base64_encode(header) + "." + base64_encode(payload);
 
-  String sha256 = get_sha(header_payload_base64);
+  Sha256 sha256Instance;
+  sha256Instance.update((const unsigned char *)header_payload_base64.c_str(), header_payload_base64.length());
+  unsigned char sha256[SHA256_DIGEST_LENGTH];
+  sha256Instance.final(sha256);
 
   // Signing sha with ec key. Bellow is the ec private key.
   point_t pub_key;
@@ -131,7 +117,7 @@ String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key, int 
   ecdsa_init(&pub_key);
 
   NN_DIGIT signature_r[NUMWORDS], signature_s[NUMWORDS];
-  ecdsa_sign((uint8_t *)sha256.c_str(), signature_r, signature_s, priv_key);
+  ecdsa_sign((uint8_t *)sha256, signature_r, signature_s, priv_key);
 
   return header_payload_base64 + "." +
          MakeBase64Signature(signature_r, signature_s);
