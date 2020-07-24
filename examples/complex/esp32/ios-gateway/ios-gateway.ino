@@ -33,9 +33,7 @@ void loop(){
 #include <Wire.h> 
 
 #include <string.h>
-#include "DHT.h"
-
-#include "DHT.h"
+#include <DHT.h>
 
 #define DHTPIN 4 // Digital pin connected to the DHT sensor
 
