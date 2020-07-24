@@ -2,3 +2,12 @@
 .vscode
 build
 .DS_Store
+
+# Xcode
+## Build generated
+examples/complex/esp32/ios-gateway/extras/build/
+examples/complex/esp32/ios-gateway/extras/DerivedData/ 
+## Various settings
+*.pbxuser
+examples/complex/esp32/ios-gateway/extras/iOS_IoTCore_Client.xcodeproj/xcuserdata/
+examples/complex/esp32/ios-gateway/extras/iOS_IoTCore_Client.xcodeproj/project.xcworkspace/xcuserdata
