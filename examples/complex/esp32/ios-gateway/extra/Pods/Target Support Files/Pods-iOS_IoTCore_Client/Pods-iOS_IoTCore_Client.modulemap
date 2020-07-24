@@ -1,0 +1,6 @@
+framework module Pods_iOS_IoTCore_Client {
+  umbrella header "Pods-iOS_IoTCore_Client-umbrella.h"
+
+  export *
+  module * { export * }
+}

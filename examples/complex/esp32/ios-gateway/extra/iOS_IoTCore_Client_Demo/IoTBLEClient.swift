@@ -1,10 +1,17 @@
+//**************************************************************************
+// Copyright 2020 Google
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
 //
-//  IoTBLEClient.swift
-//  iOS_IoTCore_Client
+//    http://www.apache.org/licenses/LICENSE-2.0
 //
-//  Created by Gal Zahavi on 7/16/20.
-//  Copyright © 2020 Danilo Campos. All rights reserved.
-//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// *****************************************************************************/
 
 import UIKit
 import SwiftUI
@@ -38,7 +45,7 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        let centralQueue: DispatchQueue = DispatchQueue(label: "com.ryandetzel.BLE", attributes: .concurrent)
+        let centralQueue: DispatchQueue = DispatchQueue(label: "com.IoTCore.BLE", attributes: .concurrent)
         centralManager = CBCentralManager(delegate: self, queue: centralQueue)
         
         
@@ -59,6 +66,7 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
         
     }
     
+    
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
             case .unknown:
@@ -77,19 +85,18 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
         } // END switch
     }
     
+    
     @IBSegueAction func swiftUIAction(_ coder: NSCoder) -> UIViewController? {
         getJWT()
         return UIHostingController(coder: coder, rootView:SwiftUIClient(delegate: delegate, viewController: self))
     }
     
+    
     @Published var switchIsOn = true
     @Published var command = ""
     @Published var sensorData = ""
     @Published var connected = true
-    
-    @IBAction func handleSwitch(_ sender: UISwitch) {
 
-    }
     
     struct MyClaims: Claims {
         let iat: Date
@@ -100,15 +107,13 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
 
     func getJWT(){
         let myHeader = Header()
-        let myClaims = MyClaims(iat: Date(timeIntervalSinceNow: 0),exp: Date(timeIntervalSinceNow: 3600), aud: "class-does-iot-demos")
+        let myClaims = MyClaims(iat: Date(timeIntervalSinceNow: 0),exp: Date(timeIntervalSinceNow: 3600), aud: "{project-id}")
         
         var myJWT = JWT(header: myHeader, claims: myClaims)
         
         let privateKeyPath = """
         -----BEGIN EC PRIVATE KEY-----
-        MHcCAQEEIHQy3AzIYZYvgSzXOnrVowZ0ZnMwQwZne2z7gylZ7nHCoAoGCCqGSM49
-        AwEHoUQDQgAEh7N5ZehmvIVNQOIQzPq1frE1as5P8BvFFmAH0N4X5gk7GLUwiI3W
-        O8GtpR/66l/D0uqhXuu6ZqGi9rIeLvvqdQ==
+
         -----END EC PRIVATE KEY-----
         """
         
@@ -118,19 +123,19 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
         cloudConnect(jwtstring: signedJWT)
     }
 
-    func cloudConnect(jwtstring:String){
-        mqtt = CocoaMQTT(clientID: "projects/class-does-iot-demos/locations/us-central1/registries/ios/devices/phone", host: "mqtt.googleapis.com", port: 8883)
+    
+    func cloudConnect(jwtstring:String) {
+        mqtt = CocoaMQTT(clientID: "projects/{project-id}/locations/us-central1/registries/{registry-id}/devices/{device-id}", host: "mqtt.googleapis.com", port: 8883)
         mqtt!.username = ""
         mqtt!.password = jwtstring
         mqtt?.enableSSL = true
         mqtt?.keepAlive = 6000
         print(jwtstring)
         mqtt!.connect()
-        //mqtt?.publish("devices/phone/state", withString: "Connected")
-        //mqtt?.publish("devices/phone/events", withString: "Hello")
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { // Change `2.0` to the desired number of seconds.
-            self.mqtt?.subscribe("/devices/phone/commands/#", qos: CocoaMQTTQOS(rawValue: 1)!)
-            self.mqtt?.subscribe("/devices/phone/config", qos: CocoaMQTTQOS(rawValue: 1)!)
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.mqtt?.subscribe("/devices/{device-id}}/commands/#", qos: CocoaMQTTQOS(rawValue: 1)!)
+            self.mqtt?.subscribe("/devices/{device-id}/config", qos: CocoaMQTTQOS(rawValue: 1)!)
             print("Subscribed")
         }
        
@@ -145,20 +150,21 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
         }
     }
 
-    func publish(){
-        
-        mqtt?.publish("/devices/phone/state", withString: "Connected")
+    
+    func publish() {
+        mqtt?.publish("/devices/{device-id}/state", withString: "Connected")
         
         if(self.sensorData != ""){
-            mqtt?.publish("/devices/phone/events", withString: sensorData)
+            mqtt?.publish("/devices/{device-id}/events", withString: sensorData)
         }
         else{
-            mqtt?.publish("/devices/phone/events", withString: "Text Empty")
+            mqtt?.publish("/devices/{device-id}/events", withString: "Text Empty")
         }
         
         print("Published")
     }
 
+    
     func toggleFlash() {
         guard let device = AVCaptureDevice.default(for: AVMediaType.video) else { return }
         guard device.hasTorch else { return }
@@ -182,6 +188,7 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
         }
     }
     
+    
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
 
            print(peripheral.name!)
@@ -193,25 +200,24 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
             DispatchQueue.main.async { () -> Void in
                 //ble connected
             };
-
-
        } // END func centralManager(... didDiscover peripheral
 
-       func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
            self.peripheral?.discoverServices([serviceUUID])
        } // END func centralManager(... didConnect peripheral
 
-       func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
            print("Disconnected!")
            DispatchQueue.main.async { () -> Void in
                  // discconected
              };
            connected = false
            centralManager?.scanForPeripherals(withServices: [serviceUUID])
-           
        } // END func centralManager(... didDisconnectPeripheral peripheral
 
-       func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
            for service in peripheral.services! {
                if service.uuid == serviceUUID {
                    peripheral.discoverCharacteristics(nil, for: service)
@@ -219,19 +225,20 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
            }
        } // END func peripheral(... didDiscoverServices
 
-       func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
            for characteristic in service.characteristics! {
                if characteristic.uuid == readUUID {
                    // Read how many bytes we should read from the esp32.
                    peripheral.readValue(for: characteristic)
-               }else if characteristic.uuid == dataUUID {
+               } else if characteristic.uuid == dataUUID {
                    dumpDataCharacteristic = characteristic
                }
            } // END for
        } // END func peripheral(... didDiscoverCharacteristicsFor service
 
 
-       func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
 
            if characteristic.uuid == readUUID {
                let data = characteristic.value!
@@ -258,16 +265,12 @@ class IoTBLEView: UIViewController, ObservableObject, CBCentralManagerDelegate, 
                         self.sensorData = ""
                     }
                 };
-   
 
-               if (allData.count >= size){
+               if (allData.count >= size) {
                    peripheral.setNotifyValue(true, for: dumpDataCharacteristic!)
-
                    // We should verify the data.
                    print("\n" + String(decoding: characteristic.value!, as: UTF8.self) + "\n")
-                   
                }
            } // END if characteristic.uuid ==...
        }
-    
 }
