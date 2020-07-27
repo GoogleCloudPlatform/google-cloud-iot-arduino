@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="slN-Rq-75x">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <scenes>
+        <!--UIKit > SwiftUI-->
+        <scene sceneID="ESk-y9-4Cp">
+            <objects>
+                <viewController id="slN-Rq-75x" customClass="IoTBLEView" customModule="iOS_IoTCore_Client" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Hg6-nB-KRC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="J1E-y1-HKM">
+                                <rect key="frame" x="149" y="412" width="116" height="72"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <segue destination="fsm-1S-vdJ" kind="show" destinationCreationSelector="swiftUIAction:" id="vAl-c6-qMc"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <viewLayoutGuide key="safeArea" id="bgE-ac-jhl"/>
+                    </view>
+                    <tabBarItem key="tabBarItem" title="UIKit &gt; SwiftUI" id="boe-Xg-IJp"/>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HAp-TK-V0t" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="173.91304347826087" y="259.82142857142856"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="8wh-5F-JLn">
+            <objects>
+                <hostingController wantsFullScreenLayout="YES" modalPresentationStyle="fullScreen" id="fsm-1S-vdJ" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="j9E-lR-58h"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="PiD-HV-kq1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1054" y="260"/>
+        </scene>
+    </scenes>
+</document>
