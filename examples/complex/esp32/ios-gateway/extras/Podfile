@@ -1,0 +1,9 @@
+# Uncomment the next line to define a global platform for your project
+# platform :ios, '9.0'
+
+target 'iOS_IoTCore_Client' do
+  pod 'SwiftJWT'
+  use_frameworks! # Add this if you are targeting iOS 8+ or using Swift
+  pod 'CocoaMQTT' 
+end
+
