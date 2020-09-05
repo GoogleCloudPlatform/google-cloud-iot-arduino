@@ -229,7 +229,7 @@ void setupCloudIoT() {
 
   setupWifi();
   netClient = new WiFiClientSecure();
-  mqttClient = new MQTTClient(360);
+  mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 10000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
   mqtt->setUseLts(true);
