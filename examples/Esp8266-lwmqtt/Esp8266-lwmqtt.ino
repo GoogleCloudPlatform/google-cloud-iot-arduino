@@ -59,16 +59,9 @@ void loop()
 
   if (!mqttClient->connected())
   {
-
-    #ifdef ESP32
-    connect();
-    #endif
-
-    #ifdef __ESP8266_MQTT_H__
     ESP.wdtDisable();
     connect();
     ESP.wdtEnable(0);
-    #endif
   }
 
   // TODO: Replace with your code here
