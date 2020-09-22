@@ -40,7 +40,7 @@ void messageReceived(String &topic, String &payload)
 
 // Initialize WiFi and MQTT for this board
 MQTTClient *mqttClient;
-BearSSL::WiFiClientSecure *netClient;
+BearSSL::WiFiClientSecure netClient;
 BearSSL::X509List certList;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
@@ -66,46 +66,47 @@ String getJwt()
   return jwt;
 }
 
+void readDerCert(const char *filename) {
+  File ca = SPIFFS.open(filename, "r");
+  if (ca)
+  {
+    Serial.print("Success to open ca file ");
+    Serial.println(filename);
+
+    size_t size = ca.size();
+    uint8_t *cert = new uint8_t[size];
+    ca.read(cert, size);
+    certList.append(cert, size);
+    ca.close();
+  }
+  else
+  {
+    Serial.println("Failed to open ca file");
+  }
+}
+
 void setupCert()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
   certList.append(primary_ca);
   certList.append(backup_ca);
-  netClient->setTrustAnchors(&certList);
+  netClient.setTrustAnchors(&certList);
   return;
 
   // If using the (preferred) method with the cert in /data (SPIFFS)
-
   if (!SPIFFS.begin())
   {
     Serial.println("Failed to mount file system");
     return;
   }
 
-  File ca = SPIFFS.open("/primary_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
-  }
+  readDerCert("/gtsltsr.crt"); // primary_ca.pem
+  readDerCert("/GSR4.crt"); // backup_ca.pem
 
-  ca = SPIFFS.open("/backup_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
-  }
+  SPIFFS.end();
 
-  netClient->setTrustAnchors(&certList);
+  netClient.setTrustAnchors(&certList);
 }
 
 void setupWifi()
@@ -173,7 +174,6 @@ void setupCloudIoT()
       private_key_str);
 
   // ESP8266 WiFi setup
-  netClient = new WiFiClientSecure();
   setupWifi();
 
   // ESP8266 WiFi secure initialization
@@ -181,7 +181,7 @@ void setupCloudIoT()
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, device);
   mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }
