@@ -16,8 +16,6 @@
 
 // Forward global callback declarations
 String getJwt();
-void setupCert();
-Client* setupNetwork(bool);
 void messageReceived(String &topic, String &payload);
 
 
