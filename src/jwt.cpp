@@ -88,22 +88,19 @@ String MakeBase64Signature(NN_DIGIT *signature_r, NN_DIGIT *signature_s) {
   return base64_encode(signature, 64);
 }
 
-// Convert an integer to a string.
-String int_to_string(long long int x) {
-  char buf[20];
-  snprintf(buf, 20, "%d", (int)x);
-  return String(buf);
-}
-
 String CreateJwt(String project_id, long long int time, NN_DIGIT *priv_key, int lib_jwt_exp_secs) {
   ecc_init();
   // Making jwt token json
-  String header = "{\"alg\":\"ES256\",\"typ\":\"JWT\"}";
-  String payload = "{\"iat\":" + int_to_string(time) +
-                   ",\"exp\":" + int_to_string(time + lib_jwt_exp_secs) + ",\"aud\":\"" +
-                   project_id + "\"}";
+
+  // payload
+  String payload;
+  payload += "{\"iat\":"; payload += (int) time;
+  payload += ",\"exp\":"; payload += (int) (time + lib_jwt_exp_secs);
+  payload += ",\"aud\":\""; payload += project_id; payload += "\"}";
+
+  // header: base64_encode("{\"alg\":\"ES256\",\"typ\":\"JWT\"}") + "."
   String header_payload_base64 =
-      base64_encode(header) + "." + base64_encode(payload);
+      "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9." + base64_encode(payload);
 
   Sha256 sha256Instance;
   sha256Instance.update((const unsigned char *)header_payload_base64.c_str(), header_payload_base64.length());
