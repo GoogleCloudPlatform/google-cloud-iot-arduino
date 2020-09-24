@@ -43,7 +43,7 @@ void CloudIoTCoreMqtt::loop() {
 
 
 void CloudIoTCoreMqtt::mqttConnect(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
   bool keepgoing = true;
   while (keepgoing) {
     bool result =
@@ -103,7 +103,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
 }
 
 void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
 
   bool result =
       this->mqttClient->connect(
