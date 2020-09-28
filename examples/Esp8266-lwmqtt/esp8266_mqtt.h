@@ -124,16 +124,6 @@ void setupWifi()
   }
 }
 
-void connectWifi()
-{
-  Serial.print("checking wifi..."); // TODO: Necessary?
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(1000);
-  }
-}
-
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
