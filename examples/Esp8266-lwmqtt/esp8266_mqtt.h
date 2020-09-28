@@ -42,7 +42,7 @@ void messageReceived(String &topic, String &payload)
 MQTTClient *mqttClient;
 BearSSL::WiFiClientSecure *netClient;
 BearSSL::X509List certList;
-CloudIoTCoreDevice *device;
+CloudIoTCoreDevice device = CloudIoTCoreDevice(project_id, location, registry_id, device_id);
 CloudIoTCoreMqtt *mqtt;
 unsigned long iat = 0;
 String jwt;
@@ -61,7 +61,7 @@ String getJwt()
   ESP.wdtDisable();
   iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iat, jwt_exp_secs);
+  jwt = device.createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
 }
@@ -167,10 +167,8 @@ void connect()
 // TODO: fix globals
 void setupCloudIoT()
 {
-  // Create the device
-  device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id,
-      private_key_str);
+  // Setup the device
+  device.setPrivateKey(private_key);
 
   // ESP8266 WiFi setup
   netClient = new WiFiClientSecure();
@@ -181,7 +179,7 @@ void setupCloudIoT()
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, &device);
   mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }
