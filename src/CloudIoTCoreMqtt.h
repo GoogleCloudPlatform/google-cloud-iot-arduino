@@ -44,6 +44,7 @@ class CloudIoTCoreMqtt {
     void mqttConnect(bool skip = false);
     void mqttConnectAsync(bool skip = false);
     void startMQTT();
+    void startMQTTAdvanced();
 
     bool publishTelemetry(String data);
     bool publishTelemetry(String data, int qos);
