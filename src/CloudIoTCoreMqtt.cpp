@@ -33,7 +33,6 @@ void CloudIoTCoreMqtt::loop() {
   if (millis() > device->getExpMillis() && mqttClient->connected()) {
     // reconnect
     Serial.println("Reconnecting before JWT expiration");
-    iat = 0; // Force JWT regeneration
     getJwt(); // Regenerate JWT using device function
     mqttClient->disconnect();
     mqttConnect(true); // TODO: should we skip closing connection
@@ -274,11 +273,9 @@ void CloudIoTCoreMqtt::logReturnCode() {
       break;
     case (LWMQTT_BAD_USERNAME_OR_PASSWORD):
       Serial.println("LWMQTT_BAD_USERNAME_OR_PASSWORD");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_NOT_AUTHORIZED):
       Serial.println("LWMQTT_NOT_AUTHORIZED");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_UNKNOWN_RETURN_CODE):
       Serial.println("LWMQTT_UNKNOWN_RETURN_CODE");
