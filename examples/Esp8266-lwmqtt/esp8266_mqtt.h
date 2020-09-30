@@ -70,19 +70,19 @@ void readDerCert(const char *filename) {
   File ca = SPIFFS.open(filename, "r");
   if (ca)
   {
-    Serial.print("Success to open ca file ");
-    Serial.println(filename);
-
     size_t size = ca.size();
-    uint8_t *cert = new uint8_t[size];
+    uint8_t cert[size];
     ca.read(cert, size);
     certList.append(cert, size);
     ca.close();
+
+    Serial.print("Success to open ca file ");
   }
   else
   {
-    Serial.println("Failed to open ca file");
+    Serial.print("Failed to open ca file ");
   }
+  Serial.println(filename);
 }
 
 void setupCert()
