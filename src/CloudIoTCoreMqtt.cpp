@@ -16,8 +16,6 @@
 
 // Forward global callback declarations
 String getJwt();
-void setupCert();
-Client* setupNetwork(bool);
 void messageReceived(String &topic, String &payload);
 
 
@@ -41,7 +39,7 @@ boolean CloudIoTCoreMqtt::loop() {
 }
 
 void CloudIoTCoreMqtt::mqttConnect(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
   bool keepgoing = true;
   while (keepgoing) {
     bool result =
@@ -101,7 +99,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
 }
 
 void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
 
   bool result =
       this->mqttClient->connect(
@@ -269,11 +267,9 @@ void CloudIoTCoreMqtt::logReturnCode() {
       break;
     case (LWMQTT_BAD_USERNAME_OR_PASSWORD):
       Serial.println("LWMQTT_BAD_USERNAME_OR_PASSWORD");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_NOT_AUTHORIZED):
       Serial.println("LWMQTT_NOT_AUTHORIZED");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_UNKNOWN_RETURN_CODE):
       Serial.println("LWMQTT_UNKNOWN_RETURN_CODE");

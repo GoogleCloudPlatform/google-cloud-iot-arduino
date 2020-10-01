@@ -45,8 +45,6 @@ static BearSSL::X509List certList;
 static CloudIoTCoreDevice *device;
 
 CloudIoTCoreMqtt *mqtt;
-unsigned long iat = 0;
-String jwt;
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -60,9 +58,9 @@ String getJwt()
 {
   // Disable software watchdog as these operations can take a while.
   ESP.wdtDisable();
-  iat = time(nullptr);
+  time_t iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iat, jwt_exp_secs);
+  String jwt = device->createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
 }
@@ -125,16 +123,6 @@ void setupWifi()
   while (time(nullptr) < 1510644967)
   {
     delay(10);
-  }
-}
-
-void connectWifi()
-{
-  Serial.print("checking wifi..."); // TODO: Necessary?
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(1000);
   }
 }
 

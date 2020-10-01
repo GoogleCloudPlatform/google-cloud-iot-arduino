@@ -96,9 +96,7 @@ String CloudIoTCoreDevice::getStateTopic(){
 }
 
 String CloudIoTCoreDevice::getConfigPath(int version) {
-  char buf[8] = {0};
-  itoa(version, buf, 10);
-  return this->getBasePath() + "/config?local_version=" + buf;
+  return this->getBasePath() + "/config?local_version=" + version;
 }
 
 String CloudIoTCoreDevice::getLastConfigPath() {
