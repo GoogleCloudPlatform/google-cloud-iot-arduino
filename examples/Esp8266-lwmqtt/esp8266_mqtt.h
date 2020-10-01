@@ -66,7 +66,7 @@ String getJwt()
   return jwt;
 }
 
-void setupCertAndPrivateKey()
+static void setupCertAndPrivateKey()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
@@ -129,7 +129,7 @@ void setupCertAndPrivateKey()
   SPIFFS.end();
 }
 
-void setupWifi()
+static void setupWifi()
 {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
