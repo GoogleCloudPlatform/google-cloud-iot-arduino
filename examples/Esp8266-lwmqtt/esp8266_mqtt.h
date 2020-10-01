@@ -40,7 +40,7 @@ void messageReceived(String &topic, String &payload)
 
 // Initialize WiFi and MQTT for this board
 static MQTTClient *mqttClient;
-static BearSSL::WiFiClientSecure *netClient;
+static BearSSL::WiFiClientSecure netClient;
 static BearSSL::X509List certList;
 static CloudIoTCoreDevice *device;
 
