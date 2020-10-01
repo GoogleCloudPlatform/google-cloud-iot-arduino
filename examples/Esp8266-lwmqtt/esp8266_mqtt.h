@@ -39,10 +39,11 @@ void messageReceived(String &topic, String &payload)
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
-MQTTClient *mqttClient;
-BearSSL::WiFiClientSecure netClient;
-BearSSL::X509List certList;
-CloudIoTCoreDevice *device;
+static MQTTClient *mqttClient;
+static BearSSL::WiFiClientSecure *netClient;
+static BearSSL::X509List certList;
+static CloudIoTCoreDevice *device;
+
 CloudIoTCoreMqtt *mqtt;
 unsigned long iat = 0;
 String jwt;
@@ -158,11 +159,6 @@ bool publishTelemetry(String subfolder, String data)
 bool publishTelemetry(String subfolder, const char *data, int length)
 {
   return mqtt->publishTelemetry(subfolder, data, length);
-}
-
-void connect()
-{
-  mqtt->mqttConnect();
 }
 
 // TODO: fix globals
