@@ -40,12 +40,10 @@ void messageReceived(String &topic, String &payload)
 
 // Initialize WiFi and MQTT for this board
 static MQTTClient *mqttClient;
-static BearSSL::WiFiClientSecure *netClient;
+static BearSSL::WiFiClientSecure netClient;
 static BearSSL::X509List certList;
 static CloudIoTCoreDevice device(project_id, location, registry_id, device_id);
 CloudIoTCoreMqtt *mqtt;
-unsigned long iat = 0;
-String jwt;
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -59,11 +57,30 @@ String getJwt()
 {
   // Disable software watchdog as these operations can take a while.
   ESP.wdtDisable();
-  iat = time(nullptr);
+  time_t iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device.createJWT(iat, jwt_exp_secs);
+  String jwt = device.createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
+}
+
+static void readDerCert(const char *filename) {
+  File ca = SPIFFS.open(filename, "r");
+  if (ca)
+  {
+    size_t size = ca.size();
+    uint8_t cert[size];
+    ca.read(cert, size);
+    certList.append(cert, size);
+    ca.close();
+
+    Serial.print("Success to open ca file ");
+  }
+  else
+  {
+    Serial.print("Failed to open ca file ");
+  }
+  Serial.println(filename);
 }
 
 static void setupCertAndPrivateKey()
@@ -72,7 +89,7 @@ static void setupCertAndPrivateKey()
   // If using a static (pem) cert, uncomment in ciotc_config.h:
   certList.append(primary_ca);
   certList.append(backup_ca);
-  netClient->setTrustAnchors(&certList);
+  netClient.setTrustAnchors(&certList);
 
   device.setPrivateKey(private_key);
   return;
@@ -87,29 +104,10 @@ static void setupCertAndPrivateKey()
     return;
   }
 
-  File ca = SPIFFS.open("/primary_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
-  }
+  readDerCert("/gtsltsr.crt"); // primary_ca.pem
+  readDerCert("/GSR4.crt"); // backup_ca.pem
+  netClient.setTrustAnchors(&certList);
 
-  ca = SPIFFS.open("/backup_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
-  }
-
-  netClient->setTrustAnchors(&certList);
 
   File f = SPIFFS.open("/private-key.der", "r");
   if (f) {
@@ -147,16 +145,6 @@ static void setupWifi()
   }
 }
 
-void connectWifi()
-{
-  Serial.print("checking wifi..."); // TODO: Necessary?
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(1000);
-  }
-}
-
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
@@ -184,7 +172,6 @@ bool publishTelemetry(String subfolder, const char *data, int length)
 void setupCloudIoT()
 {
   // ESP8266 WiFi setup
-  netClient = new WiFiClientSecure();
   setupWifi();
 
   // ESP8266 WiFi secure initialization and device private key
@@ -192,7 +179,7 @@ void setupCloudIoT()
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, &device);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, &device);
   mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }
