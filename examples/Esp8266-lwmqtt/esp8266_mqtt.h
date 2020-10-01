@@ -39,13 +39,11 @@ void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
-MQTTClient *mqttClient;
-BearSSL::WiFiClientSecure *netClient;
-BearSSL::X509List certList;
-CloudIoTCoreDevice *device;
+static MQTTClient *mqttClient;
+static BearSSL::WiFiClientSecure netClient;
+static BearSSL::X509List certList;
+static CloudIoTCoreDevice device(project_id, location, registry_id, device_id);
 CloudIoTCoreMqtt *mqtt;
-unsigned long iat = 0;
-String jwt;
 
 ///////////////////////////////
 // Helpers specific to this board
@@ -59,23 +57,46 @@ String getJwt()
 {
   // Disable software watchdog as these operations can take a while.
   ESP.wdtDisable();
-  iat = time(nullptr);
+  time_t iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  jwt = device->createJWT(iat, jwt_exp_secs);
+  String jwt = device.createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
 }
 
-void setupCert()
+static void readDerCert(const char *filename) {
+  File ca = SPIFFS.open(filename, "r");
+  if (ca)
+  {
+    size_t size = ca.size();
+    uint8_t cert[size];
+    ca.read(cert, size);
+    certList.append(cert, size);
+    ca.close();
+
+    Serial.print("Success to open ca file ");
+  }
+  else
+  {
+    Serial.print("Failed to open ca file ");
+  }
+  Serial.println(filename);
+}
+
+static void setupCertAndPrivateKey()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
   certList.append(primary_ca);
   certList.append(backup_ca);
-  netClient->setTrustAnchors(&certList);
+  netClient.setTrustAnchors(&certList);
+
+  device.setPrivateKey(private_key);
   return;
 
-  // If using the (preferred) method with the cert in /data (SPIFFS)
+  // If using the (preferred) method with the cert and private key in /data (SPIFFS)
+  // To get the private key run
+  // openssl ec -in <private-key.pem> -outform DER -out private-key.der
 
   if (!SPIFFS.begin())
   {
@@ -83,32 +104,30 @@ void setupCert()
     return;
   }
 
-  File ca = SPIFFS.open("/primary_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
+  readDerCert("/gtsltsr.crt"); // primary_ca.pem
+  readDerCert("/GSR4.crt"); // backup_ca.pem
+  netClient.setTrustAnchors(&certList);
+
+
+  File f = SPIFFS.open("/private-key.der", "r");
+  if (f) {
+    size_t size = f.size();
+    uint8_t data[size];
+    f.read(data, size);
+    f.close();
+
+    BearSSL::PrivateKey pk(data, size);
+    device.setPrivateKey(pk.getEC()->x);
+
+    Serial.println("Success to open private-key.der");
+  } else {
+    Serial.println("Failed to open private-key.der");
   }
 
-  ca = SPIFFS.open("/backup_ca.pem", "r");
-  if (!ca)
-  {
-    Serial.println("Failed to open ca file");
-  }
-  else
-  {
-    Serial.println("Success to open ca file");
-    certList.append(strdup(ca.readString().c_str()));
-  }
-
-  netClient->setTrustAnchors(&certList);
+  SPIFFS.end();
 }
 
-void setupWifi()
+static void setupWifi()
 {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -123,16 +142,6 @@ void setupWifi()
   while (time(nullptr) < 1510644967)
   {
     delay(10);
-  }
-}
-
-void connectWifi()
-{
-  Serial.print("checking wifi..."); // TODO: Necessary?
-  while (WiFi.status() != WL_CONNECTED)
-  {
-    Serial.print(".");
-    delay(1000);
   }
 }
 
@@ -159,29 +168,20 @@ bool publishTelemetry(String subfolder, const char *data, int length)
   return mqtt->publishTelemetry(subfolder, data, length);
 }
 
-void connect()
-{
-  mqtt->mqttConnect();
-}
-
 // TODO: fix globals
 void setupCloudIoT()
 {
-  // Create the device
-  device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id,
-      private_key_str);
-
   // ESP8266 WiFi setup
-  netClient = new WiFiClientSecure();
   setupWifi();
 
-  // ESP8266 WiFi secure initialization
-  setupCert();
+  // ESP8266 WiFi secure initialization and device private key
+  setupCertAndPrivateKey();
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, &device);
   mqtt->setUseLts(true);
-  mqtt->startMQTTAdvanced(); // Opens connection
+
+  //mqtt->startMQTTAdvanced(); // Opens connection using advanced callback
+  mqtt->startMQTT(); // Opens connection
 }

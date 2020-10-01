@@ -96,9 +96,7 @@ String CloudIoTCoreDevice::getStateTopic(){
 }
 
 String CloudIoTCoreDevice::getConfigPath(int version) {
-  char buf[8] = {0};
-  itoa(version, buf, 10);
-  return this->getBasePath() + "/config?local_version=" + buf;
+  return this->getBasePath() + "/config?local_version=" + version;
 }
 
 String CloudIoTCoreDevice::getLastConfigPath() {
@@ -111,17 +109,6 @@ String CloudIoTCoreDevice::getSendTelemetryPath() {
 
 String CloudIoTCoreDevice::getSetStatePath() {
   return this->getBasePath() + ":setState";
-}
-
-void CloudIoTCoreDevice::fillPrivateKey() {
-  priv_key[8] = 0;
-  for (int i = 7; i >= 0; i--) {
-    priv_key[i] = 0;
-    for (int byte_num = 0; byte_num < 4; byte_num++) {
-      priv_key[i] = (priv_key[i] << 8) + strtoul(private_key, NULL, 16);
-      private_key += 3;
-    }
-  }
 }
 
 void CloudIoTCoreDevice::setJwtExpSecs(int exp_in_secs) {
@@ -149,11 +136,28 @@ CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
 }
 
 CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
-  this->private_key = private_key;
   if ( strlen(private_key) != (95) ) {
     Serial.println("Warning: expected private key to be 95, was: " +
         String(strlen(private_key)));
   }
-  fillPrivateKey();
+  priv_key[8] = 0;
+  for (int i = 7; i >= 0; i--) {
+    priv_key[i] = 0;
+    for (int byte_num = 0; byte_num < 4; byte_num++) {
+      priv_key[i] = (priv_key[i] << 8) + strtoul(private_key, NULL, 16);
+      private_key += 3;
+    }
+  }
+  return *this;
+}
+
+CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const unsigned char *private_key) {
+  priv_key[8] = 0;
+  for (int i = 7; i >= 0; i--) {
+    for (int byte_num = 0; byte_num < 4; byte_num++) {
+      priv_key[i] = (priv_key[i] << 8) + *private_key;
+      ++private_key;
+    }
+  }
   return *this;
 }

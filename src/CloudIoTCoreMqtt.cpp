@@ -16,8 +16,6 @@
 
 // Forward global callback declarations
 String getJwt();
-void setupCert();
-Client* setupNetwork(bool);
 void messageReceived(String &topic, String &payload);
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length);
 
@@ -32,21 +30,17 @@ CloudIoTCoreMqtt::CloudIoTCoreMqtt(
   this->device = _device;
 }
 
-void CloudIoTCoreMqtt::loop() {
+boolean CloudIoTCoreMqtt::loop() {
   if (millis() > device->getExpMillis() && mqttClient->connected()) {
     // reconnect
     Serial.println("Reconnecting before JWT expiration");
-    iat = 0; // Force JWT regeneration
-    getJwt(); // Regenerate JWT using device function
     mqttClient->disconnect();
-    mqttConnect(true); // TODO: should we skip closing connection
   }
-  this->mqttClient->loop();
+  return this->mqttClient->loop();
 }
 
-
 void CloudIoTCoreMqtt::mqttConnect(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
   bool keepgoing = true;
   while (keepgoing) {
     bool result =
@@ -106,7 +100,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
 }
 
 void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
-  Serial.print("\nconnecting...");
+  Serial.println("Connecting...");
 
   bool result =
       this->mqttClient->connect(
@@ -162,11 +156,8 @@ void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
 }
 
 void CloudIoTCoreMqtt::startMQTT() {
-  if (this->useLts) {
-    this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST_LTS, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
-  } else {
-    this->mqttClient->begin(CLOUD_IOT_CORE_MQTT_HOST, CLOUD_IOT_CORE_MQTT_PORT, *netClient);
-  }
+  this->mqttClient->begin(useLts ? CLOUD_IOT_CORE_MQTT_HOST_LTS : CLOUD_IOT_CORE_MQTT_HOST,
+    CLOUD_IOT_CORE_MQTT_PORT, *netClient);
   this->mqttClient->onMessage(messageReceived);
 }
 
@@ -258,7 +249,7 @@ void CloudIoTCoreMqtt::logError() {
 }
 
 void CloudIoTCoreMqtt::logConfiguration(bool showJWT) {
-  Serial.println("Connect with " + String(CLOUD_IOT_CORE_MQTT_HOST_LTS) +
+  Serial.println("Connect with " + String(useLts ? CLOUD_IOT_CORE_MQTT_HOST_LTS : CLOUD_IOT_CORE_MQTT_HOST) +
       ":" + String(CLOUD_IOT_CORE_MQTT_PORT));
   Serial.println("ClientId: " + device->getClientId());
   if (showJWT) {
@@ -283,11 +274,9 @@ void CloudIoTCoreMqtt::logReturnCode() {
       break;
     case (LWMQTT_BAD_USERNAME_OR_PASSWORD):
       Serial.println("LWMQTT_BAD_USERNAME_OR_PASSWORD");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_NOT_AUTHORIZED):
       Serial.println("LWMQTT_NOT_AUTHORIZED");
-      iat = 0; // Force JWT regeneration
       break;
     case (LWMQTT_UNKNOWN_RETURN_CODE):
       Serial.println("LWMQTT_UNKNOWN_RETURN_CODE");
