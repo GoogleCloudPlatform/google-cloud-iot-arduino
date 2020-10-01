@@ -25,8 +25,8 @@ const char* registry_id = "my-registry";
 const char* device_id = "my-device";
 
 // Configuration for NTP
-const char* ntp_primary = "pool.ntp.org";
-const char* ntp_secondary = "time.nist.gov";
+const char* ntp_primary = "time.google.com";
+const char* ntp_secondary = "pool.ntp.org";
 
 // To get the private key run (where private-key.pem is the ec private key
 // used to create the certificate uploaded to google cloud iot):

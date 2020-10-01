@@ -40,7 +40,7 @@ class CloudIoTCoreMqtt {
   public:
     CloudIoTCoreMqtt(MQTTClient *mqttClient, Client *netClient, CloudIoTCoreDevice *device);
 
-    void loop();
+    boolean loop();
     void mqttConnect(bool skip = false);
     void mqttConnectAsync(bool skip = false);
     void startMQTT();
