@@ -66,7 +66,7 @@ String getJwt()
   return jwt;
 }
 
-void readDerCert(const char *filename) {
+static void readDerCert(const char *filename) {
   File ca = SPIFFS.open(filename, "r");
   if (ca)
   {
