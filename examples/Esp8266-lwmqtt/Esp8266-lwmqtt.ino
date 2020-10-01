@@ -51,18 +51,15 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
 }
 
-unsigned long lastMillis = 0;
+static unsigned long lastMillis = 0;
 void loop()
 {
-  mqtt->loop();
-  delay(10); // <- fixes some issues with WiFi stability
-
-  if (!mqttClient->connected())
+  if (!mqtt->loop())
   {
-    ESP.wdtDisable();
-    connect();
-    ESP.wdtEnable(0);
+    mqtt->mqttConnect();
   }
+
+  delay(10); // <- fixes some issues with WiFi stability
 
   // TODO: Replace with your code here
   if (millis() - lastMillis > 60000)
