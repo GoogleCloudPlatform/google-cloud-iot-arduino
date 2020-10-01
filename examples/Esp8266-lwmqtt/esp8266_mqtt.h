@@ -66,16 +66,20 @@ String getJwt()
   return jwt;
 }
 
-void setupCert()
+void setupCertAndPrivateKey()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
   certList.append(primary_ca);
   certList.append(backup_ca);
   netClient->setTrustAnchors(&certList);
+
+  device.setPrivateKey(private_key);
   return;
 
-  // If using the (preferred) method with the cert in /data (SPIFFS)
+  // If using the (preferred) method with the cert and private key in /data (SPIFFS)
+  // To get the private key run
+  // openssl ec -in <private-key.pem> -outform DER -out private-key.der
 
   if (!SPIFFS.begin())
   {
@@ -106,6 +110,23 @@ void setupCert()
   }
 
   netClient->setTrustAnchors(&certList);
+
+  File f = SPIFFS.open("/private-key.der", "r");
+  if (f) {
+    size_t size = f.size();
+    uint8_t data[size];
+    f.read(data, size);
+    f.close();
+
+    BearSSL::PrivateKey pk(data, size);
+    device.setPrivateKey(pk.getEC()->x);
+
+    Serial.println("Success to open private-key.der");
+  } else {
+    Serial.println("Failed to open private-key.der");
+  }
+
+  SPIFFS.end();
 }
 
 void setupWifi()
@@ -167,15 +188,12 @@ void connect()
 // TODO: fix globals
 void setupCloudIoT()
 {
-  // Setup the device
-  device.setPrivateKey(private_key);
-
   // ESP8266 WiFi setup
   netClient = new WiFiClientSecure();
   setupWifi();
 
-  // ESP8266 WiFi secure initialization
-  setupCert();
+  // ESP8266 WiFi secure initialization and device private key
+  setupCertAndPrivateKey();
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
