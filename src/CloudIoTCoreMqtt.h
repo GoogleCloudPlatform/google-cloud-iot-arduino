@@ -29,7 +29,6 @@ class CloudIoTCoreMqtt {
     static const int __jitter__ = 500; // max random jitter, ms
     boolean logConnect = true;
     boolean useLts = false;
-    String jwt;
 
     MQTTClient *mqttClient;
     Client *netClient;

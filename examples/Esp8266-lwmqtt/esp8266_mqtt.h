@@ -42,8 +42,7 @@ void messageReceived(String &topic, String &payload)
 static MQTTClient *mqttClient;
 static BearSSL::WiFiClientSecure netClient;
 static BearSSL::X509List certList;
-static CloudIoTCoreDevice *device;
-
+static CloudIoTCoreDevice device(project_id, location, registry_id, device_id);
 CloudIoTCoreMqtt *mqtt;
 
 ///////////////////////////////
@@ -60,7 +59,7 @@ String getJwt()
   ESP.wdtDisable();
   time_t iat = time(nullptr);
   Serial.println("Refreshing JWT");
-  String jwt = device->createJWT(iat, jwt_exp_secs);
+  String jwt = device.createJWT(iat, jwt_exp_secs);
   ESP.wdtEnable(0);
   return jwt;
 }
@@ -84,16 +83,21 @@ static void readDerCert(const char *filename) {
   Serial.println(filename);
 }
 
-void setupCert()
+static void setupCertAndPrivateKey()
 {
   // Set CA cert on wifi client
   // If using a static (pem) cert, uncomment in ciotc_config.h:
   certList.append(primary_ca);
   certList.append(backup_ca);
   netClient.setTrustAnchors(&certList);
+
+  device.setPrivateKey(private_key);
   return;
 
-  // If using the (preferred) method with the cert in /data (SPIFFS)
+  // If using the (preferred) method with the cert and private key in /data (SPIFFS)
+  // To get the private key run
+  // openssl ec -in <private-key.pem> -outform DER -out private-key.der
+
   if (!SPIFFS.begin())
   {
     Serial.println("Failed to mount file system");
@@ -102,13 +106,28 @@ void setupCert()
 
   readDerCert("/gtsltsr.crt"); // primary_ca.pem
   readDerCert("/GSR4.crt"); // backup_ca.pem
+  netClient.setTrustAnchors(&certList);
+
+
+  File f = SPIFFS.open("/private-key.der", "r");
+  if (f) {
+    size_t size = f.size();
+    uint8_t data[size];
+    f.read(data, size);
+    f.close();
+
+    BearSSL::PrivateKey pk(data, size);
+    device.setPrivateKey(pk.getEC()->x);
+
+    Serial.println("Success to open private-key.der");
+  } else {
+    Serial.println("Failed to open private-key.der");
+  }
 
   SPIFFS.end();
-
-  netClient.setTrustAnchors(&certList);
 }
 
-void setupWifi()
+static void setupWifi()
 {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
@@ -152,20 +171,15 @@ bool publishTelemetry(String subfolder, const char *data, int length)
 // TODO: fix globals
 void setupCloudIoT()
 {
-  // Create the device
-  device = new CloudIoTCoreDevice(
-      project_id, location, registry_id, device_id,
-      private_key_str);
-
   // ESP8266 WiFi setup
   setupWifi();
 
-  // ESP8266 WiFi secure initialization
-  setupCert();
+  // ESP8266 WiFi secure initialization and device private key
+  setupCertAndPrivateKey();
 
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
-  mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, device);
+  mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, &device);
   mqtt->setUseLts(true);
   mqtt->startMQTT(); // Opens connection
 }

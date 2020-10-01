@@ -25,14 +25,12 @@ class CloudIoTCoreDevice {
   const char *location;
   const char *registry_id;
   const char *device_id;
-  const char *private_key;
 
   NN_DIGIT priv_key[9];
   String jwt;
   int jwt_exp_secs;
   unsigned long exp_millis = 0;
 
-  void fillPrivateKey();
   String getBasePath();
 
  public:
@@ -48,6 +46,7 @@ class CloudIoTCoreDevice {
   CloudIoTCoreDevice &setRegistryId(const char *registry_id);
   CloudIoTCoreDevice &setDeviceId(const char *device_id);
   CloudIoTCoreDevice &setPrivateKey(const char *private_key);
+  CloudIoTCoreDevice &setPrivateKey(const unsigned char *private_key);
   void setJwtExpSecs(int exp_in_secs);
   int getJwtExpSecs();
   unsigned long getExpMillis();
