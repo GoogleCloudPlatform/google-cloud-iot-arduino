@@ -17,6 +17,8 @@
 // Forward global callback declarations
 String getJwt();
 void messageReceived(String &topic, String &payload);
+// callback for startMQTTAdvanced
+void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length);
 
 
 ///////////////////////////////
@@ -158,6 +160,12 @@ void CloudIoTCoreMqtt::startMQTT() {
   this->mqttClient->begin(useLts ? CLOUD_IOT_CORE_MQTT_HOST_LTS : CLOUD_IOT_CORE_MQTT_HOST,
     CLOUD_IOT_CORE_MQTT_PORT, *netClient);
   this->mqttClient->onMessage(messageReceived);
+}
+
+void CloudIoTCoreMqtt::startMQTTAdvanced() {
+  this->mqttClient->begin(useLts ? CLOUD_IOT_CORE_MQTT_HOST_LTS : CLOUD_IOT_CORE_MQTT_HOST,
+    CLOUD_IOT_CORE_MQTT_PORT, *netClient);
+  this->mqttClient->onMessageAdvanced(messageReceivedAdvanced);
 }
 
 bool CloudIoTCoreMqtt::publishTelemetry(String data) {

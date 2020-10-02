@@ -32,9 +32,9 @@
 // !!REPLACEME!!
 // The MQTT callback function for commands and configuration updates
 // Place your message handler code here.
-void messageReceived(String &topic, String &payload)
+void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length)
 {
-  Serial.println("incoming: " + topic + " - " + payload);
+  Serial.printf("incoming: %s - %s\n", topic, bytes);
 }
 ///////////////////////////////
 
@@ -181,5 +181,5 @@ void setupCloudIoT()
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, &device);
   mqtt->setUseLts(true);
-  mqtt->startMQTT(); // Opens connection
+  mqtt->startMQTTAdvanced(); // Opens connection using advanced callback
 }
