@@ -137,6 +137,30 @@ In future versions of this library, the MQTT domain and certificates will be cha
 * Primary cert - [https://pki.goog/gtsltsr/gtsltsr.crt](https://pki.goog/gtsltsr/gtsltsr.crt)
 * Backup cert - [https://pki.goog/gsr4/GSR4.crt](https://pki.goog/gsr4/GSR4.crt)
 
+The following examples show how to regenerate the certificates:
+
+### Create Registry keys
+```
+openssl genpkey -algorithm RSA -out ca_private_registry.pem -pkeyopt rsa_keygen_bits:2048
+sudo openssl req -x509 -new -nodes -key ca_private_registry.pem -sha256 -out ca_cert_registry.pem -subj "/CN=unused"
+gcloud iot registries credentials create --path=ca_cert_registry.pem  --project=secret  --registry=secret --region=us-central1
+```
+
+
+### Create Elipitic device keys
+```
+openssl ecparam -genkey -name prime256v1 -noout -out ec_private_device1.pem
+sudo openssl req -new -sha256 -key ec_private_device1.pem -out ec_cert_device1.csr -subj "/CN=unused-device"
+sudo openssl x509 -req -in ec_cert_device1.csr -CA ca_cert_registry.pem -CAkey ca_private_registry.pem -CAcreateserial -sha256 -out ec_cert_device1.pem
+gcloud iot devices create device1 --region=us-central1  --registry=secret  --public-key path=ec_cert_device1.pem,type=es256-x509-pem
+```
+
+### Print info to copy to code
+```
+openssl ec -in ec_private_device1.pem -noout -text
+echo "Copy private part of above to esp8266 code"
+```
+
 ## For more information
 
 * [Access Google Cloud IoT Core from Arduino](https://medium.com/@gguuss/accessing-cloud-iot-core-from-arduino-838c2138cf2b)
