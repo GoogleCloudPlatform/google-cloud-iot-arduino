@@ -181,7 +181,5 @@ void setupCloudIoT()
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, &netClient, &device);
   mqtt->setUseLts(true);
-
-  //mqtt->startMQTTAdvanced(); // Opens connection using advanced callback
-  mqtt->startMQTT(); // Opens connection
+  mqtt->startMQTTAdvanced(); // Opens connection using advanced callback
 }

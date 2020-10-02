@@ -17,6 +17,7 @@
 // Forward global callback declarations
 String getJwt();
 void messageReceived(String &topic, String &payload);
+// callback for startMQTTAdvanced
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length);
 
 
