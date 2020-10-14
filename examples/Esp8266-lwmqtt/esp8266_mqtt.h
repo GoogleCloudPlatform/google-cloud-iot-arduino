@@ -34,7 +34,7 @@
 // Place your message handler code here.
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length)
 {
-  Serial.printf("incoming: %s - %s\n", topic, bytes);
+  Serial.printf("incoming: %s - %s\n", topic, length > 0 ? bytes : "[empty]");
 }
 ///////////////////////////////
 
