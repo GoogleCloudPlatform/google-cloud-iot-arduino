@@ -29,12 +29,17 @@
 #include <CloudIoTCoreMqtt.h>
 #include "ciotc_config.h" // Wifi configuration here
 
+
 // !!REPLACEME!!
 // The MQTT callback function for commands and configuration updates
 // Place your message handler code here.
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length)
 {
-  Serial.printf("incoming: %s - %s\n", topic, bytes);
+  if (length > 0){
+    Serial.printf("incoming: %s - %s\n", topic, bytes);
+  } else {
+    Serial.printf("0\n"); // Success but no message
+  }
 }
 ///////////////////////////////
 
