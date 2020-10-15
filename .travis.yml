@@ -18,7 +18,7 @@ addons:
       - clang-format-5.0
 env:
   global:
-#    - ARDUINO_IDE_VERSION="1.8.10"
+     - ARDUINO_IDE_VERSION="1.8.13"
      - PRETTYNAME="Google Cloud IoT Arduino Library"
 # Optional, will default to "$TRAVIS_BUILD_DIR/Doxyfile"
 #    - DOXYFILE: $TRAVIS_BUILD_DIR/Doxyfile
