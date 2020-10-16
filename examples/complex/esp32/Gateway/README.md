@@ -45,3 +45,5 @@ After you pull the message from the PubSub topic, you should then see the temper
 ## Troubleshooting
 If the MQTT connection is resetting when you're attaching the delegate devices,
 make sure that your delegate devices are bound to the gateway and that the gateway is configured to use association-only in the [Cloud Console](https://console.cloud.google.com/iot?pli=1).
+
+Note that if you are attaching more than 10 delegate devices to the gateway, you should increase the timeout in `ciotc_config.h`.
