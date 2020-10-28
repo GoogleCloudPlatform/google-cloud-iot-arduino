@@ -49,7 +49,7 @@ class CloudIoTCoreMqtt {
     bool publishTelemetry(String subtopic, String data);
     bool publishTelemetry(String subtopic, String data, int qos);
     bool publishTelemetry(String subtopic, const char* data, int length);
-    bool publishState(String &data);
+    bool publishState(const String &data);
     bool publishState(const char* data);
     bool publishState(const char* data, int length);
 

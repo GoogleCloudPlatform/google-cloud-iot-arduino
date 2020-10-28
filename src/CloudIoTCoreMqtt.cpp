@@ -193,7 +193,7 @@ bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int l
 }
 
 // Helper that just sends default sensor
-bool CloudIoTCoreMqtt::publishState(String &data) {
+bool CloudIoTCoreMqtt::publishState(const String &data) {
   return this->mqttClient->publish(device->getStateTopic(), data);
 }
 
