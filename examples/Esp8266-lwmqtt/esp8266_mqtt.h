@@ -153,7 +153,7 @@ static void setupWifi()
 ///////////////////////////////
 // Orchestrates various methods from preceeding code.
 ///////////////////////////////
-bool publishTelemetry(String data)
+bool publishTelemetry(const String &data)
 {
   return mqtt->publishTelemetry(data);
 }
@@ -161,16 +161,6 @@ bool publishTelemetry(String data)
 bool publishTelemetry(const char *data, int length)
 {
   return mqtt->publishTelemetry(data, length);
-}
-
-bool publishTelemetry(String subfolder, String data)
-{
-  return mqtt->publishTelemetry(subfolder, data);
-}
-
-bool publishTelemetry(String subfolder, const char *data, int length)
-{
-  return mqtt->publishTelemetry(subfolder, data, length);
 }
 
 // TODO: fix globals
