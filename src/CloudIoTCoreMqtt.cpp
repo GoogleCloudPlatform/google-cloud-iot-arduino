@@ -168,11 +168,11 @@ void CloudIoTCoreMqtt::startMQTTAdvanced() {
   this->mqttClient->onMessageAdvanced(messageReceivedAdvanced);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(String data) {
+bool CloudIoTCoreMqtt::publishTelemetry(const String &data) {
   return this->mqttClient->publish(device->getEventsTopic(), data);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(String data, int qos) {
+bool CloudIoTCoreMqtt::publishTelemetry(const String &data, int qos) {
   return this->mqttClient->publish(device->getEventsTopic(), data, false, qos);
 }
 
@@ -180,15 +180,15 @@ bool CloudIoTCoreMqtt::publishTelemetry(const char* data, int length) {
   return this->mqttClient->publish(device->getEventsTopic().c_str(), data, length);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data) {
+bool CloudIoTCoreMqtt::publishTelemetry(const String &subtopic, const String &data) {
   return this->mqttClient->publish(device->getEventsTopic() + subtopic, data);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, String data, int qos) {
+bool CloudIoTCoreMqtt::publishTelemetry(const String &subtopic, const String &data, int qos) {
   return this->mqttClient->publish(device->getEventsTopic() + subtopic, data, false, qos);
 }
 
-bool CloudIoTCoreMqtt::publishTelemetry(String subtopic, const char* data, int length) {
+bool CloudIoTCoreMqtt::publishTelemetry(const String &subtopic, const char* data, int length) {
   return this->mqttClient->publish(String(device->getEventsTopic() + subtopic).c_str(), data, length);
 }
 
