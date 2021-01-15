@@ -14,7 +14,7 @@ SLA/SLO, and should not be used in production.**
 
 Currently, we support the following hardware targets:
 
-* Genuino MKR1000 and WiFi101
+* Genuino MKR1000 and WiFi1010
 * Espressif ESP32
 * Espressif ESP8266
 
