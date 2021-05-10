@@ -21,7 +21,8 @@ CloudIoTCoreDevice::CloudIoTCoreDevice() {}
 CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
                                        const char *location,
                                        const char *registry_id,
-                                       const char *device_id) {
+                                       const char *device_id)
+{
   setProjectId(project_id);
   setLocation(location);
   setRegistryId(registry_id);
@@ -32,7 +33,8 @@ CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
                                        const char *location,
                                        const char *registry_id,
                                        const char *device_id,
-                                       const char *private_key) {
+                                       const char *private_key)
+{
   setProjectId(project_id);
   setLocation(location);
   setRegistryId(registry_id);
@@ -40,110 +42,135 @@ CloudIoTCoreDevice::CloudIoTCoreDevice(const char *project_id,
   setPrivateKey(private_key);
 }
 
-unsigned long CloudIoTCoreDevice::getExpMillis() {
+unsigned long CloudIoTCoreDevice::getExpMillis()
+{
   return exp_millis;
 }
 
-int CloudIoTCoreDevice::getJwtExpSecs() {
+int CloudIoTCoreDevice::getJwtExpSecs()
+{
   return jwt_exp_secs;
 }
 
-String CloudIoTCoreDevice::createJWT(long long int current_time) {
+String CloudIoTCoreDevice::createJWT(long long int current_time)
+{
   exp_millis = millis() + (jwt_exp_secs * 1000);
   jwt = CreateJwt(project_id, current_time, priv_key, this->jwt_exp_secs);
   return jwt;
 }
 
-String CloudIoTCoreDevice::createJWT(long long int current_time, int exp_in_secs) {
+String CloudIoTCoreDevice::createJWT(long long int current_time, int exp_in_secs)
+{
   jwt_exp_secs = exp_in_secs;
   exp_millis = millis() + (jwt_exp_secs * 1000);
   jwt = CreateJwt(project_id, current_time, priv_key, exp_in_secs);
   return jwt;
 }
 
-String CloudIoTCoreDevice::getJWT() {
+String CloudIoTCoreDevice::getJWT()
+{
   return jwt;
 }
 
-String CloudIoTCoreDevice::getBasePath() {
+String CloudIoTCoreDevice::getBasePath()
+{
   return String("/v1/projects/") + project_id + "/locations/" + location +
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
-String CloudIoTCoreDevice::getClientId(){
+String CloudIoTCoreDevice::getClientId()
+{
   return String("projects/") + project_id + "/locations/" + location +
          "/registries/" + registry_id + "/devices/" + device_id;
 }
 
-String CloudIoTCoreDevice::getConfigTopic(){
+String CloudIoTCoreDevice::getConfigTopic()
+{
   return String("/devices/") + device_id + "/config";
 }
 
-String CloudIoTCoreDevice::getCommandsTopic(){
+String CloudIoTCoreDevice::getCommandsTopic()
+{
   return String("/devices/") + device_id + "/commands/#";
 }
 
-String CloudIoTCoreDevice::getDeviceId(){
+String CloudIoTCoreDevice::getDeviceId()
+{
   return String(device_id);
 }
 
-String CloudIoTCoreDevice::getEventsTopic(){
+String CloudIoTCoreDevice::getEventsTopic()
+{
   return String("/devices/") + device_id + "/events";
 }
 
-String CloudIoTCoreDevice::getStateTopic(){
+String CloudIoTCoreDevice::getStateTopic()
+{
   return String("/devices/") + device_id + "/state";
 }
 
-String CloudIoTCoreDevice::getConfigPath(int version) {
+String CloudIoTCoreDevice::getConfigPath(int version)
+{
   return this->getBasePath() + "/config?local_version=" + version;
 }
 
-String CloudIoTCoreDevice::getLastConfigPath() {
+String CloudIoTCoreDevice::getLastConfigPath()
+{
   return this->getConfigPath(0);
 }
 
-String CloudIoTCoreDevice::getSendTelemetryPath() {
+String CloudIoTCoreDevice::getSendTelemetryPath()
+{
   return this->getBasePath() + ":publishEvent";
 }
 
-String CloudIoTCoreDevice::getSetStatePath() {
+String CloudIoTCoreDevice::getSetStatePath()
+{
   return this->getBasePath() + ":setState";
 }
 
-void CloudIoTCoreDevice::setJwtExpSecs(int exp_in_secs) {
+void CloudIoTCoreDevice::setJwtExpSecs(int exp_in_secs)
+{
   this->jwt_exp_secs = exp_in_secs;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setProjectId(const char *project_id)
+{
   this->project_id = project_id;
   return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setLocation(const char *location) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setLocation(const char *location)
+{
   this->location = location;
   return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setRegistryId(const char *registry_id) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setRegistryId(const char *registry_id)
+{
   this->registry_id = registry_id;
   return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setDeviceId(const char *device_id)
+{
   this->device_id = device_id;
   return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
-  if ( strlen(private_key) != (95) ) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key)
+{
+  if (strlen(private_key) != (95))
+  {
     Serial.println("Warning: expected private key to be 95, was: " +
-        String(strlen(private_key)));
+                   String(strlen(private_key)));
   }
   priv_key[8] = 0;
-  for (int i = 7; i >= 0; i--) {
+  for (int i = 7; i >= 0; i--)
+  {
     priv_key[i] = 0;
-    for (int byte_num = 0; byte_num < 4; byte_num++) {
+    for (int byte_num = 0; byte_num < 4; byte_num++)
+    {
       priv_key[i] = (priv_key[i] << 8) + strtoul(private_key, NULL, 16);
       private_key += 3;
     }
@@ -151,10 +178,13 @@ CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const char *private_key) {
   return *this;
 }
 
-CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const unsigned char *private_key) {
+CloudIoTCoreDevice &CloudIoTCoreDevice::setPrivateKey(const unsigned char *private_key)
+{
   priv_key[8] = 0;
-  for (int i = 7; i >= 0; i--) {
-    for (int byte_num = 0; byte_num < 4; byte_num++) {
+  for (int i = 7; i >= 0; i--)
+  {
+    for (int byte_num = 0; byte_num < 4; byte_num++)
+    {
       priv_key[i] = (priv_key[i] << 8) + *private_key;
       ++private_key;
     }

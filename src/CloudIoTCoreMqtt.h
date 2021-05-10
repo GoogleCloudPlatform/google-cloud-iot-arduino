@@ -19,46 +19,52 @@
 #include "CloudIoTCoreDevice.h"
 #include <Client.h>
 #include <MQTTClient.h>
+#include <WiFiClientSecure.h>
 
-class CloudIoTCoreMqtt {
-  private:
-    int __backoff__ = 1000; // current backoff, milliseconds
-    static const int __factor__ = 2.5f;
-    static const int __minbackoff__ = 1000; // minimum backoff, ms
-    static const int __max_backoff__ = 60000; // maximum backoff, ms
-    static const int __jitter__ = 500; // max random jitter, ms
-    boolean logConnect = true;
-    boolean useLts = false;
+class CloudIoTCoreMqtt
+{
+private:
+  int __backoff__ = 1000; // current backoff, milliseconds
+  static const int __factor__ = 2.5f;
+  static const int __minbackoff__ = 1000;   // minimum backoff, ms
+  static const int __max_backoff__ = 60000; // maximum backoff, ms
+  static const int __jitter__ = 500;        // max random jitter, ms
+  boolean logConnect = true;
+  boolean useLts = false;
 
-    MQTTClient *mqttClient;
-    Client *netClient;
-    CloudIoTCoreDevice *device;
+  MQTTClient *mqttClient;
+  WiFiClientSecure *netClient;
+  CloudIoTCoreDevice *device;
 
-  public:
-    CloudIoTCoreMqtt(MQTTClient *mqttClient, Client *netClient, CloudIoTCoreDevice *device);
+public:
+  CloudIoTCoreMqtt(MQTTClient *mqttClient, WiFiClientSecure *netClient, CloudIoTCoreDevice *device);
 
-    boolean loop();
-    void mqttConnect(bool skip = false);
-    void mqttConnectAsync(bool skip = false);
-    void startMQTT();
-    void startMQTTAdvanced();
+  boolean loop();
+  void mqttConnect(bool skip = false);
+  void mqttConnectAsync(bool skip = false);
+  void startMQTT();
+  void startMQTTAdvanced();
 
-    bool publishTelemetry(const String &data);
-    bool publishTelemetry(const String &data, int qos);
-    bool publishTelemetry(const char* data, int length);
-    bool publishTelemetry(const String &subtopic, const String &data);
-    bool publishTelemetry(const String &subtopic, const String &data, int qos);
-    bool publishTelemetry(const String &subtopic, const char* data, int length);
-    bool publishState(const String &data);
-    bool publishState(const char* data);
-    bool publishState(const char* data, int length);
+  bool publishTelemetry(const String &data);
+  bool publishTelemetry(const String &data, int qos);
+  bool publishTelemetry(const char *data, int length);
+  bool publishTelemetry(const String &subtopic, const String &data);
+  bool publishTelemetry(const String &subtopic, const String &data, int qos);
+  bool publishTelemetry(const String &subtopic, const char *data, int length);
+  bool publishState(const String &data);
+  bool publishState(const char *data);
+  bool publishState(const char *data, int length);
 
-    void logConfiguration(bool showJWT);
-    void logError();
-    void logReturnCode();
+  void logConfiguration(bool showJWT);
+  void logError();
+  void logReturnCode();
 
-    void onConnect();
-    void setLogConnect(boolean enabled);
-    void setUseLts(boolean enabled);
+  void onConnect();
+  void setLogConnect(boolean enabled);
+  void setUseLts(boolean enabled);
+
+  //implemented by Exe
+  String getDeviceId();
+  String getClientId();
 };
 #endif // __CLOUDIOTCORE_MQTT_H__
