@@ -196,7 +196,7 @@ void CloudIoTCoreMqtt::startMQTTAdvanced()
 
 bool CloudIoTCoreMqtt::publishTelemetry(const String &data)
 {
-  return this->mqttClient->publish(device->getEventsTopic(), data);
+  return this->mqttClient->publish(device->getStateTopic(), data);
 }
 
 bool CloudIoTCoreMqtt::publishTelemetry(const String &data, int qos)
