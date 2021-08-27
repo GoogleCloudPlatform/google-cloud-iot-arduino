@@ -35,10 +35,10 @@
 // Place your message handler code here.
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length)
 {
-  Serial.printf("Incoming Topic:%s", topic);
+  Serial.printf("Incoming Topic: %s", topic);
   if (length > 0)// On message
   {
-    Serial.printf("\n\r   Data:%s", bytes);
+    Serial.printf("\n\r   Data: %s", bytes);
   }
   Serial.println();
 }
