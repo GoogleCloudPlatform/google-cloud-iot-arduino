@@ -35,11 +35,12 @@
 // Place your message handler code here.
 void messageReceivedAdvanced(MQTTClient *client, char topic[], char bytes[], int length)
 {
-  if (length > 0){
-    Serial.printf("incoming: %s - %s\n", topic, bytes);
-  } else {
-    Serial.printf("0\n"); // Success but no message
+  Serial.printf("Incoming Topic: %s", topic);
+  if (length > 0)// On message
+  {
+    Serial.printf("\n\r   Data: %s", bytes);
   }
+  Serial.println();
 }
 ///////////////////////////////
 
@@ -136,7 +137,7 @@ static void setupWifi()
 {
   WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
-  Serial.println("Connecting to WiFi");
+  Serial.println("\n\r\n\rConnecting to WiFi");
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(100);
@@ -155,6 +156,8 @@ static void setupWifi()
 ///////////////////////////////
 bool publishTelemetry(const String &data)
 {
+  Serial.print("Outcoming: ");
+  Serial.println(data);
   return mqtt->publishTelemetry(data);
 }
 
