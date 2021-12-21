@@ -32,7 +32,7 @@ void messageReceived(String &topic, String &payload){
 ///////////////////////////////
 
 // Initialize WiFi and MQTT for this board
-Client *netClient;
+WiFiClientSecure *netClient;
 CloudIoTCoreDevice *device;
 CloudIoTCoreMqtt *mqtt;
 MQTTClient *mqttClient;
@@ -110,6 +110,7 @@ void setupCloudIoT(){
 
   setupWifi();
   netClient = new WiFiClientSecure();
+  netClient->setCACert(root_cert);
   mqttClient = new MQTTClient(512);
   mqttClient->setOptions(180, true, 1000); // keepAlive, cleanSession, timeout
   mqtt = new CloudIoTCoreMqtt(mqttClient, netClient, device);
