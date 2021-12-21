@@ -76,7 +76,7 @@ void CloudIoTCoreMqtt::mqttConnect(bool skip) {
     } else {
       Serial.println(mqttClient->connected() ? "connected" : "not connected");
       if (!mqttClient->connected()) {
-        Serial.println("Settings incorrect or missing a cyper for SSL");
+        Serial.println("Settings incorrect or missing a cypher for SSL");
         mqttClient->disconnect();
         logConfiguration(false);
         skip = false;
@@ -134,7 +134,7 @@ void CloudIoTCoreMqtt::mqttConnectAsync(bool skip) {
   } else {
     Serial.println(mqttClient->connected() ? "connected" : "not connected");
     if (!mqttClient->connected()) {
-      Serial.println("No internet or Settings incorrect or missing a cyper for SSL");
+      Serial.println("No internet or Settings incorrect or missing a cypher for SSL");
       mqttClient->disconnect();
       logConfiguration(false);
       skip = false;
